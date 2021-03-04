@@ -19,11 +19,12 @@ function pauseGame() {
 }
 function moveByKey(event, released) {
 	var key = event.key;
+        if (key === 'x' && !released) stage.player.deployItem();
 	var moveMap = {
 		'a': new Pair(-3, 0),
 		's': new Pair(0, 3),
 		'd': new Pair(3, 0),
-		'w': new Pair(0, -3)
+		'w': new Pair(0, -3),
 	};
 	if (released) {
 		keyIndex = lastKey.findIndex((value) => value === key);
@@ -33,7 +34,6 @@ function moveByKey(event, released) {
 			const oldV = moveMap[key];
 			const negated = new Pair(-oldV.x, -oldV.y);
 			p.velocity = p.velocity.add(negated)
-			console.log(`${key} released | new V: ${p.velocity} | old: ${oldV}`);
 		}
 
 		return;

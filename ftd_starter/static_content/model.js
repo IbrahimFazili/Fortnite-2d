@@ -131,6 +131,10 @@ class Pair {
 	add(other) {
 		return new Pair(this.x + other.x, this.y + other.y);
 	}
+
+	copy() {
+		return new Pair(this.x, this.y);
+	}
 }
 
 class GameObject {
@@ -140,11 +144,12 @@ class GameObject {
 	 * @param health float
 	 * @param color RGB string
 	 */
-	constructor(game, position, health, color = undefined) {
+	constructor(game, position, health, color = undefined, collison = true) {
 		this.game = game;
 		this.position = position;
 		this.health = health;
 		this.color = color !== undefined ? color : `rgb(${randint(255)}, ${randint(255)}, ${randint(255)})`;
+		this.isCollidable = collison;
 	}
 
 	toString() {
@@ -212,8 +217,19 @@ class StaticObjects extends GameObject {
 	/**
 	 *  StaticObjects are those that don't move in the game
 	 */
+	constructor(game, position, health, color = undefined, collison = true) {
+		super(game, position, health, color, collison);
+	}
+}
+
+class Wall extends StaticObjects {
 	constructor(game, position, health, color = undefined) {
-		super(game, position, health, color);
+		super(game, position, health, color, true);
+	}
+
+	draw(context) {
+		context.fillStyle = this.color;
+		context.fillRect(this.position.x, this.position.y, 10, 100);
 	}
 }
 
@@ -222,6 +238,10 @@ class Player extends DynamicObjects {
 	constructor(game, position, health, color, radius){
 		super(game, position, health, color)
 		this.radius = radius
+	}
+
+	deployItem() {
+		this.game.addActor(new Wall(this.game, this.position.copy(), 50, 'rgb(200, 1, 1)'));
 	}
 
 	draw(context) {
