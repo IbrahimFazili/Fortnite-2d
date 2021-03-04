@@ -1,13 +1,22 @@
 {
-  "name": "ftd",
+  "name": "ftd_starter",
   "version": "1.0.0",
   "description": "",
-  "main": "ftd.js",
+  "main": "authorization.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IbrahimFazili/Fortnite-2d.git"
+  },
+  "author": "Lakshya Gupta, Ibrahim Fazili",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IbrahimFazili/Fortnite-2d/issues"
+  },
+  "homepage": "https://github.com/IbrahimFazili/Fortnite-2d#readme",
   "dependencies": {
     "express": "^4.17.1",
     "pg": "^8.5.1"
