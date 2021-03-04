@@ -67,9 +67,19 @@ class Stage {
 		}
 	}
 
+	setGameWindowSize(ctx) {
+		ctx.canvas.width = window.innerWidth;
+		ctx.canvas.height = window.innerHeight;
+		this.width = ctx.canvas.width;
+		this.height = ctx.canvas.height;
+	}
+
 	draw(){
 		var context = this.canvas.getContext('2d');
+		this.setGameWindowSize(context);
 		context.clearRect(0, 0, this.width, this.height);
+		context.fillStyle = "rgba(1, 143, 6, 1)";
+		context.fillRect(0, 0, this.width, this.height);
 		for(var i=0;i<this.actors.length;i++){
 			this.actors[i].draw(context);
 		}

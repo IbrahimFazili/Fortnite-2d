@@ -9,7 +9,7 @@ function setupGame(){
 	document.addEventListener('keydown', moveByKey);
 }
 function startGame(){
-	interval=setInterval(function(){ stage.step(); stage.draw(); },100);
+	interval=setInterval(function(){ stage.step(); stage.draw(); },16.66);
 }
 function pauseGame(){
 	clearInterval(interval);
