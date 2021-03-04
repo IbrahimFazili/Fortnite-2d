@@ -9,8 +9,8 @@ class Stage {
 		this.player=null; // a special actor, the player
 	
 		// the logical width and height of the stage
-		this.width=canvas.width;
-		this.height=canvas.height;
+		this.width=window.innerWidth;
+		this.height=window.innerHeight;
 
 		// Add the player to the center of the stage
 		var velocity = new Pair(0,0);
@@ -18,24 +18,6 @@ class Stage {
 		var colour= 'rgba(0,0,0,1)';
 		var position = new Pair(Math.floor(this.width/2), Math.floor(this.height/2));
 		this.addPlayer(new Player(this, position, velocity, colour, radius));
-	
-		// Add in some Balls
-		var total=100;
-		while(total>0){
-			var x=Math.floor((Math.random()*this.width)); 
-			var y=Math.floor((Math.random()*this.height)); 
-			if(this.getActor(x,y)===null){
-				var velocity = new Pair(rand(20), rand(20));
-				var red=randint(255), green=randint(255), blue=randint(255);
-				var radius = randint(20);
-				var alpha = Math.random();
-				var colour= 'rgba('+red+','+green+','+blue+','+alpha+')';
-				var position = new Pair(x,y);
-				var b = new Ball(this, position, velocity, colour, radius);
-				this.addActor(b);
-				total--;
-			}
-		}
 	}
 
 	addPlayer(player){
