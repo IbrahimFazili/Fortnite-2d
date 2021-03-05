@@ -128,12 +128,32 @@ class Pair {
 		this.y = this.y / magnitude;
 	}
 
+	norm() {
+		return Math.sqrt(this.x * this.x + this.y * this.y);
+	}
+
+	dot(other) {
+		return (this.x * other.x) + (this.y * other.y);
+	}
+
 	add(other) {
 		return new Pair(this.x + other.x, this.y + other.y);
 	}
 
+	sub(other) {
+		return new Pair(this.x - other.x, this.y - other.y);
+	}
+
 	copy() {
 		return new Pair(this.x, this.y);
+	}
+}
+
+class Ray {
+	constructor(origin, direction) {
+		this.origin = origin;
+		this.direction = direction;
+		this.direction.normalize();
 	}
 }
 
@@ -187,6 +207,7 @@ class DynamicObjects extends GameObject {
 	 * Called on every game tick (every time the game state updates)
 	 */
 	step() {
+
 		this.position.x = this.position.x + this.velocity.x;
 		this.position.y = this.position.y + this.velocity.y;
 
@@ -223,13 +244,31 @@ class StaticObjects extends GameObject {
 }
 
 class Wall extends StaticObjects {
-	constructor(game, position, health, color = undefined) {
+	constructor(game, position, health, color = undefined, mousePos) {
 		super(game, position, health, color, true);
+		this.w = 10;
+		this.h = 100;
+		this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
+		this.angle = this.computeWallDirection(mousePos);
+	}
+
+	computeWallDirection(mouse) {
+		// mousePos - this.position
+		const dir = mouse.sub(this.center);
+		dir.normalize();
+		
+		const posX = new Pair(1, 0);
+		const theta = Math.acos(posX.dot(dir) / (posX.norm() * dir.norm()));
+		return mouse.y < this.position.y ? -theta : theta;
 	}
 
 	draw(context) {
+		context.save();
 		context.fillStyle = this.color;
-		context.fillRect(this.position.x, this.position.y, 10, 100);
+		context.translate(this.center.x, this.center.y);
+		context.rotate(this.angle);
+		context.fillRect(-(this.w / 2), -(this.h / 2), this.w, this.h);
+		context.restore();
 	}
 }
 
@@ -240,8 +279,15 @@ class Player extends DynamicObjects {
 		this.radius = radius
 	}
 
-	deployItem() {
-		this.game.addActor(new Wall(this.game, this.position.copy(), 50, 'rgb(200, 1, 1)'));
+	deployItem(mousePos) {
+		var mouse = new Pair(mousePos.x, mousePos.y);
+		
+		const dir = mouse.sub(this.position);
+		dir.normalize();
+
+		const newPos = new Pair(this.position.x + (50 * dir.x), this.position.y - 50 + (50 * dir.y));
+		console.log(`old: ${this.position} | new ${newPos}`);
+		this.game.addActor(new Wall(this.game, newPos, 50, 'rgb(200, 1, 1)', mouse));
 	}
 
 	draw(context) {

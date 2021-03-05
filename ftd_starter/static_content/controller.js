@@ -3,15 +3,20 @@ var view = null;
 var interval = null;
 var credentials = { "username": "", "password": "" };
 var lastKey = [];
+var mousePos = null;
+const FRAMES_PER_SECOND = 60;
 function setupGame() {
 	stage = new Stage(document.getElementById('stage'));
 
 	// https://javascript.info/keyboard-events
 	document.addEventListener('keydown', () => moveByKey(event, false));
 	document.addEventListener('keyup', () => moveByKey(event, true))
+	stage.canvas.addEventListener('mousemove', function(evt) {
+		mousePos = getMousePos(stage.canvas, evt);
+	});
 }
 function startGame() {
-	interval = setInterval(function () { stage.step(); stage.draw(); }, 16.66);
+	interval = setInterval(function () { stage.step(); stage.draw(); }, 1000 / FRAMES_PER_SECOND);
 }
 function pauseGame() {
 	clearInterval(interval);
@@ -19,7 +24,7 @@ function pauseGame() {
 }
 function moveByKey(event, released) {
 	var key = event.key;
-        if (key === 'x' && !released) stage.player.deployItem();
+    if (key === 'x' && !released) stage.player.deployItem(mousePos);
 	var moveMap = {
 		'a': new Pair(-3, 0),
 		's': new Pair(0, 3),
@@ -47,6 +52,14 @@ function moveByKey(event, released) {
 			p.velocity = p.velocity.add(moveMap[key])
 		}
 	}
+}
+
+function getMousePos(canvas, evt) {
+	var rect = canvas.getBoundingClientRect();
+	return {
+	  x: evt.clientX - rect.left,
+	  y: evt.clientY - rect.top
+	};
 }
 
 function login() {
