@@ -1,6 +1,23 @@
 function randint(n) { return Math.round(Math.random() * n); }
 function rand(n) { return Math.random() * n; }
 
+function getOrientation(theta) {
+	if (theta <= Math.PI / 4 && theta > -Math.PI / 4) return new Pair(1, 0);
+	if (theta <= 3 * Math.PI / 4 && theta > Math.PI / 4) return new Pair(0, 1);
+	if (theta <= 5 * Math.PI / 4 && theta > 3 * Math.PI / 4) return new Pair(-1, 0);
+	return new Pair(0, -1);
+}
+
+function getMouseAngle(mouse, position) {
+	const dir = mouse.sub(position);
+	dir.normalize();
+	
+	// const posX = new Pair(1, 0);
+	// const det = dir.y;
+	// const theta = Math.acos(posX.dot(dir) / (posX.norm() * dir.norm()));
+	return Math.atan2(dir.y, dir.x);
+}
+
 class Stage {
 	constructor(canvas) {
 		this.canvas = canvas;
@@ -119,7 +136,7 @@ class Pair {
 	}
 
 	toString() {
-		return "(" + this.x + "," + this.y + ")";
+		return "(" + this.x.toFixed(3) + "," + this.y.toFixed(3) + ")";
 	}
 
 	normalize() {
@@ -173,7 +190,7 @@ class GameObject {
 	}
 
 	toString() {
-		return `Pos: ${this.position.toString()} | Health: ${this.health}`;
+		return `Pos: ${this.position.toString()} | Health: ${this.health} | Collidable: ${this.isCollidable}`;
 	}
 	
 	step() {
@@ -244,31 +261,16 @@ class StaticObjects extends GameObject {
 }
 
 class Wall extends StaticObjects {
-	constructor(game, position, health, color = undefined, mousePos) {
+	constructor(game, position, health, color = undefined, orientation) {
 		super(game, position, health, color, true);
-		this.w = 10;
-		this.h = 100;
+		this.w = orientation.y === 0 ? 10 : 100;
+		this.h = orientation.y === 0 ? 100 : 10;
 		this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
-		this.angle = this.computeWallDirection(mousePos);
-	}
-
-	computeWallDirection(mouse) {
-		// mousePos - this.position
-		const dir = mouse.sub(this.center);
-		dir.normalize();
-		
-		const posX = new Pair(1, 0);
-		const theta = Math.acos(posX.dot(dir) / (posX.norm() * dir.norm()));
-		return mouse.y < this.position.y ? -theta : theta;
 	}
 
 	draw(context) {
-		context.save();
 		context.fillStyle = this.color;
-		context.translate(this.center.x, this.center.y);
-		context.rotate(this.angle);
-		context.fillRect(-(this.w / 2), -(this.h / 2), this.w, this.h);
-		context.restore();
+		context.fillRect(this.position.x, this.position.y, this.w, this.h);
 	}
 }
 
@@ -285,17 +287,15 @@ class Player extends DynamicObjects {
 		const dir = mouse.sub(this.position);
 		dir.normalize();
 
-		const newPos = new Pair(this.position.x + (50 * dir.x), this.position.y - 50 + (50 * dir.y));
-		console.log(`old: ${this.position} | new ${newPos}`);
-		this.game.addActor(new Wall(this.game, newPos, 50, 'rgb(200, 1, 1)', mouse));
+		const orientation = getOrientation(getMouseAngle(mouse, this.position));
+		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
+			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
+		this.game.addActor(new Wall(this.game, newPos, 50, 'rgb(200, 1, 1)', orientation));
 	}
 
 	draw(context) {
 		context.fillStyle = this.color;
 		context.fillRect(this.position.x, this.position.y, this.radius, this.radius);
-		// context.beginPath(); 
-		// context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false); 
-		// context.stroke();   
 	}
 }
 
