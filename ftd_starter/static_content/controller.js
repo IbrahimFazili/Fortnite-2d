@@ -1,3 +1,6 @@
+import { Stage } from './models/Game';
+import { Pair } from './models/utils';
+
 var stage = null;
 var view = null;
 var interval = null;
@@ -23,13 +26,13 @@ function startGame() {
 		stage.draw();
 		// debug info
 		if (DEBUG_MODE) {
-			var mPos = new Pair(mousePos.x, mousePos.y);
+			var mPos = mousePos !== null ? new Pair(mousePos.x, mousePos.y) : new Pair(NaN, NaN);
 			const dir = mPos.sub(stage.player.position);
 			dir.normalize();
 
 			debugDiv.empty();
 			debugDiv.append(`<span>${stage.player.toString()}</span><br>`)
-			debugDiv.append(`<span>Mouse: (${mousePos.x}, ${mousePos.y})</span><br>`);
+			debugDiv.append(`<span>Mouse: (${mPos.x}, ${mPos.y})</span><br>`);
 			debugDiv.append(`<span>Direction: ${dir.toString()}</span>`);
 		}
 	}, 1000 / FRAMES_PER_SECOND);
@@ -48,7 +51,7 @@ function moveByKey(event, released) {
 		'w': new Pair(0, -3),
 	};
 	if (released) {
-		keyIndex = lastKey.findIndex((value) => value === key);
+		const keyIndex = lastKey.findIndex((value) => value === key);
 		if (keyIndex !== -1) {
 			lastKey.splice(keyIndex, 1);
 			const p = stage.player;
@@ -61,7 +64,7 @@ function moveByKey(event, released) {
 	}
 
 	if (key in moveMap) {
-		keyIndex = lastKey.findIndex((value) => value === key);
+		const keyIndex = lastKey.findIndex((value) => value === key);
 		if (keyIndex === -1) {
 			lastKey.push(key);
 			const p = stage.player;

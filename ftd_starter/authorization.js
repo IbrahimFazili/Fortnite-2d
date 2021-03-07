@@ -11,7 +11,12 @@ app.get('/api/test', function (req, res) {
 	res.status(200); 
 	res.json({"message":"got here"}); 
 });
-app.use('/',express.static('static_content')); 
+app.use('/',express.static('static_content'));
+
+// server helper modules needed for the main game model
+app.get('/models/:model', (req, res) => {
+        res.status(200).sendFile(`${__dirname}/static_content/models/${req.params.model}.js`);
+});
 
 /**
  * middleware function used to intercept non authorized requests
