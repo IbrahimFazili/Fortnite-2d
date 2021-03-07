@@ -1,4 +1,4 @@
-import { Pair } from './utils';
+import { clamp, Pair } from './utils';
 import { Player } from './CustomGameObjects';
 
 export class Stage {
@@ -9,12 +9,13 @@ export class Stage {
 		this.player = null; // a special actor, the player
 
 		// logical width and height of the world (map)
-		this.worldwidth = 5000
-		this.worldheight = 5000
+		this.worldWidth = 2000;
+		this.worldHeight = 2000;
 
 		// the logical width and height of the stage (viewport/window)
 		this.width = window.innerWidth;
 		this.height = window.innerHeight;
+        this.ptrOffset = new Pair(0, 0);
 
 		// Add the player to the center of the stage
 		var health = 100.0;
@@ -62,16 +63,25 @@ export class Stage {
 	draw() {
 		var context = this.canvas.getContext('2d');
 		this.setGameWindowSize(context);
-		let cols = this.width / 10;
-		let rows = this.height / 10;
+		let cols = this.worldWidth / 10;
+		let rows = this.worldHeight / 10;
 		let squareSize = 50;
 		context.clearRect(0, 0, this.width, this.height);
+
+        context.save();
+
+        const camX = clamp(this.player.position.x - (this.width / 2), 0, this.worldWidth - this.width);
+        const camY = clamp(this.player.position.y - (this.height / 2), 0, this.worldHeight - this.height);
+        this.ptrOffset = new Pair(camX, camY);
+        context.translate(-camX, -camY);
 
 		this.drawCheckeredBoard(context, squareSize, rows, cols)
 
 		for (var i = 0; i < this.actors.length; i++) {
 			this.actors[i].draw(context);
 		}
+
+        context.restore();
 
 	}
 

@@ -18,10 +18,12 @@ function setupGame() {
 	document.addEventListener('keyup', () => moveByKey(event, true))
 	stage.canvas.addEventListener('mousemove', function (evt) {
 		mousePos = getMousePos(stage.canvas, evt);
+		mousePos.x += stage.ptrOffset.x;
+		mousePos.y += stage.ptrOffset.y;
 	});
 }
 function startGame() {
-	interval = setInterval(function () { 
+	interval = setInterval(function () {
 		stage.step();
 		stage.draw();
 		// debug info

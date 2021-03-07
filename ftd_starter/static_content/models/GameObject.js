@@ -54,19 +54,21 @@ export class DynamicObjects extends GameObject {
 		this.position.x = this.position.x + this.velocity.x;
 		this.position.y = this.position.y + this.velocity.y;
 
-		// bounce off the walls
+		// stop at the walls
 		if (this.position.x < 0) {
 			this.position.x = 0;
 		}
-		if (this.position.x > this.game.width - 20) {
-			this.position.x = this.game.width - 20;
+		if (this.position.x > this.game.worldWidth - 20) {
+			this.position.x = this.game.worldWidth - 20;
 		}
 		if (this.position.y < 0) {
 			this.position.y = 0;
 		}
-		if (this.position.y > this.game.height - 20) {
-			this.position.y = this.game.height - 20;
+		if (this.position.y > this.game.worldHeight - 20) {
+			this.position.y = this.game.worldHeight - 20;
 		}
+
+		// console.log(`pos: ${this.position.toString()} | max: ${this.game.worldHeight - 20}`);
 	}
 
 	moveTo(position) {
