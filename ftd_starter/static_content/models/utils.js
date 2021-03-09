@@ -1,9 +1,9 @@
 export function randint(n) { return Math.round(Math.random() * n); }
 export function rand(n) { return Math.random() * n; }
 
-export function clamp(value, min, max){
-	if(value < min) return min;
-	else if(value > max) return max;
+export function clamp(value, min, max) {
+	if (value < min) return min;
+	else if (value > max) return max;
 	return value;
 }
 
@@ -17,11 +17,15 @@ export function getOrientation(theta) {
 export function getMouseAngle(mouse, position) {
 	const dir = mouse.sub(position);
 	dir.normalize();
-	
+
 	// const posX = new Pair(1, 0);
 	// const det = dir.y;
 	// const theta = Math.acos(posX.dot(dir) / (posX.norm() * dir.norm()));
 	return Math.atan2(dir.y, dir.x);
+}
+
+function isBetween(smaller, bigger, x) {
+	return x >= smaller && x <= bigger;
 }
 
 export class Pair {
@@ -58,12 +62,142 @@ export class Pair {
 	copy() {
 		return new Pair(this.x, this.y);
 	}
+
+	squared() {
+		return new Pair(this.x ** 2, this.y ** 2);
+	}
+
+	multiply(value) {
+		return new Pair(this.x * value, this.y * value);
+	}
 }
 
-export class Ray {
-	constructor(origin, direction) {
-		this.origin = origin;
-		this.direction = direction;
-		this.direction.normalize();
+// export class Ray {
+
+// 	/**
+// 	 * @param origin Pair
+// 	 * @param direction Pair
+// 	 * @param max_t Int
+// 	*/
+// 	constructor(origin, direction, max_t) {
+// 		this.origin = origin;
+// 		this.direction = direction;
+// 		this.max_t = max_t;
+// 		this.hit_t = Infinity;
+// 	}
+// }
+
+class BoundingVolume {
+	/**
+	 * Intersect the given ray with this bounding box. Return true if it intersects
+	 * @param ray The ray being shot
+	 * @returns True if successful intersection, false otherwise
+	 */
+	intersect(other) { }
+}
+
+export class AABB extends BoundingVolume {
+	/**
+	 * @param topLeft top left of the rectangle Pair
+	 * @param bottomRight bottom right point of the rectangle Pair
+	 */
+	constructor(topLeft, bottomRight) {
+		super();
+		this.topLeft = topLeft;
+		this.bottomRight = bottomRight;
 	}
+
+	intersectAABB(other) {
+		if (this.topLeft.x > other.bottomRight.x || other.topLeft.x > this.bottomRight.x) {
+			return false;
+		}
+		else if (this.topLeft.y < other.bottomRight.y || other.topLeft.y < this.bottomRight.y) {
+			return false;
+		}
+		return true;
+	}
+
+	intersectCorners(edge1, edge2, other) {
+		let d = edge2.sub(edge1);
+		let f = edge1.sub(other.center);
+
+		let a = d.dot(d);
+		let b = f.dot(d) * 2;
+		let c = f.dot(f) - other.radius ** 2;
+
+		let discriminant = b ** 2 - 4 * a * c;
+		if (discriminant < 0) {
+			return false;
+		}
+
+		discriminant = Math.sqrt(discriminant);
+		let t1 = (-b - discriminant) / (2 * a);
+		let t2 = (-b + discriminant) / (2 * a);
+
+		// t1 is closer
+		if (t1 >= 0 && t1 <= 1) {
+			return true;
+		}
+
+		if (t2 >= 0 && t2 <= 1) {
+			return true;
+		}
+
+		return false;
+	}
+
+
+	interesctAABC(other) {
+
+		// check if the circle is in rectange
+		if (this.topLeft.x <= other.center.x && other.center.x <= this.bottomRight.x &&
+			this.topLeft.y <= other.center.y && other.center.y <= this.bottomRight.y) {
+			return true;
+		}
+
+		// now check if the circle intersect with any point of rectangle
+		let topRight = new Pair(this.bottomRight.x, this.topLeft.y);
+		let bottomLeft = new Pair(this.topLeft.x, this.bottomRight.y);
+
+		return this.intersectCorners(this.topLeft, topRight, other) || this.intersectCorners(this.topLeft, bottomLeft, other) ||
+			this.intersectCorners(bottomLeft, this.bottomRight, other) || this.intersectCorners(this.bottomRight, topRight, other)
+	}
+
+	intersect(other) {
+		if (other instanceof AABB) {
+			// do rect-rect intersection
+			return this.intersectAABB(other);
+		} else {
+			// do rect-circle intersection
+			return this.interesctAABC(other);
+		}
+	}
+}
+
+export class AABC extends BoundingVolume {
+
+	/**
+	 * @param center is a Pair
+	 * @param radius is a Float
+	*/
+	constructor(center, radius) {
+		super();
+		this.center = center;
+		this.radius = radius;
+	}
+
+	intersectAABC(other) {
+		return this.center.sub(other.center).norm() <= this.radius + other.radius;
+	}
+
+	intersect(other) {
+		if (other instanceof AABB) {
+			// do rect-circle intersection
+			return other.interesctAABC(this);
+		} else {
+			// do circle-circle intersection
+			return this.intersectAABC(other);
+		}
+	}
+
 }

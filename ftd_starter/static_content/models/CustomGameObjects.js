@@ -1,13 +1,17 @@
 import { DynamicObjects, StaticObjects } from './GameObject';
-import { Pair, getOrientation, getMouseAngle } from './utils';
+import { Pair, getOrientation, getMouseAngle, AABB, AABC } from './utils';
 
 export class Player extends DynamicObjects {
 
 	constructor(game, position, health, color, radius){
 		super(game, position, health, color);
 		// keeping it rectangle for now. need to change it to circle
-		this.size = radius;
+		this.radius = radius;
+		this.center = this.position;
+		this.boundingVolume = new AABC(this.center, this.radius);
 	}
+
+	setCenter() {this.center = this.position;}
 
 	deployItem(mousePos) {
 		var mouse = new Pair(mousePos.x, mousePos.y);
@@ -23,7 +27,9 @@ export class Player extends DynamicObjects {
 
 	draw(context) {
 		context.fillStyle = this.color;
-		context.fillRect(this.position.x, this.position.y, this.size, this.size);
+		// context.fillRect(this.position.x, this.position.y, this.size, this.size);
+		context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+		context.fill();
 	}
 }
 
@@ -33,6 +39,7 @@ export class Wall extends StaticObjects {
 		this.w = orientation.y === 0 ? 10 : 100;
 		this.h = orientation.y === 0 ? 100 : 10;
 		this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
+		this.boundingVolume = new AABB(this.position, this.position.add(new Pair(this.w, this.h)));
 	}
 
 	draw(context) {

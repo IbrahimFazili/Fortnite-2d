@@ -17,6 +17,8 @@ export class Stage {
 		this.height = window.innerHeight;
         this.ptrOffset = new Pair(0, 0);
 
+		this.idCounter = 0;
+
 		// Add the player to the center of the stage
 		var health = 100.0;
 		var colour = 'rgba(0,0,0,1)';

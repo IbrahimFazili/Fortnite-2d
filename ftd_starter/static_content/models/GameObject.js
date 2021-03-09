@@ -9,10 +9,12 @@ class GameObject {
 	 */
 	constructor(game, position, health, color = undefined, collison = true) {
 		this.game = game;
+		this.id = this.game.idCounter++;
 		this.position = position;
 		this.health = health;
 		this.color = color !== undefined ? color : `rgb(${randint(255)}, ${randint(255)}, ${randint(255)})`;
 		this.isCollidable = collison;
+		this.boundingVolume = null;
 	}
 
 	toString() {
@@ -23,12 +25,21 @@ class GameObject {
 		return;
 	}
 
+	intersects() {
+		for (let i = 0; i < this.game.actors.length; i++) {
+			const object = this.game.actors[i];
+			if (object.id === this.id) continue;
+			if (object.boundingVolume.intersect(this.boundingVolume)) return true;
+		}
+
+		return false;
+	}
+
 	intPosition() {
 		x = Math.round(this.position.x);
 		y = Math.round(this.position.y);
 		return new Pair(x, y);
 	}
-
 }
 
 export class DynamicObjects extends GameObject {
@@ -46,13 +57,24 @@ export class DynamicObjects extends GameObject {
 		return `${super.toString()} | v ${this.velocity.toString()}`;
 	}
 
+	setCenter() {}
+
 	/**
 	 * Called on every game tick (every time the game state updates)
 	 */
 	step() {
 
+		const oldPos = this.position.copy();
 		this.position.x = this.position.x + this.velocity.x;
 		this.position.y = this.position.y + this.velocity.y;
+		this.setCenter();
+		if (this.intersects()) {
+			this.position.x = oldPos.x;
+			this.position.y = oldPos.y;
+			this.setCenter();
+			return;
+		}
+		
 
 		// stop at the walls
 		if (this.position.x < 0) {
