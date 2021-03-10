@@ -1,4 +1,4 @@
-import { clamp, Pair } from './utils';
+import { clamp, Pair, randint } from './utils';
 import { Player } from './CustomGameObjects';
 
 export class Stage {
@@ -11,11 +11,13 @@ export class Stage {
 		// logical width and height of the world (map)
 		this.worldWidth = 2000;
 		this.worldHeight = 2000;
+		this.map = null;
 
 		// the logical width and height of the stage (viewport/window)
 		this.width = window.innerWidth;
 		this.height = window.innerHeight;
         this.ptrOffset = new Pair(0, 0);
+		this.ptrDirection = new Pair(1, 0);
 
 		this.idCounter = 0;
 
@@ -23,7 +25,7 @@ export class Stage {
 		var health = 100.0;
 		var colour = 'rgba(0,0,0,1)';
 		var position = new Pair(Math.floor(this.width / 2), Math.floor(this.height / 2));
-		this.addPlayer(new Player(this, position, health, colour, 20));
+		this.addPlayer(new Player(this, position, health, colour));
 	}
 
 	addPlayer(player) {
@@ -87,15 +89,27 @@ export class Stage {
 
 	}
 
-	drawCheckeredBoard(ctx, squareSize, rows, cols) {
-		let whiteSquareColor = "#ffe6cc"
-		let blackSquareColor = "#cc6600"
-	
+	generateMap(squareSize, rows, cols) {
+		this.map = new Array(rows);
+		for (let index = 0; index < this.map.length; index++) {
+			this.map[index] = new Array(cols);
+		}
+
 		for (let j = 0; j < rows; j++)
 			for (let i = 0; i < cols; i++) {
-				if ((i % 2 == 0 && j % 2 == 0) || (i % 2 != 0 && j % 2 != 0)) 
-					ctx.fillStyle = whiteSquareColor
-				else ctx.fillStyle = blackSquareColor
+				let color = [0, 143, 5];
+				color[1] += randint(40) - 20;
+				// if ((i % 2 == 0 && j % 2 == 0) || (i % 2 != 0 && j % 2 != 0)) 
+				this.map[i][j] = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+			}
+	}
+
+	drawCheckeredBoard(ctx, squareSize, rows, cols) {
+	
+		if (!this.map) this.generateMap(squareSize, rows, cols);
+		for (let j = 0; j < rows; j++)
+			for (let i = 0; i < cols; i++) {
+				ctx.fillStyle = this.map[j][i];
 				ctx.fillRect(i * squareSize, j * squareSize, squareSize, squareSize)
 			}
 	}
@@ -123,7 +137,7 @@ export class Stage {
 // static objects
 
 	// resources
-		// trees
+		// wood
 		// bricks
 		// metal
 

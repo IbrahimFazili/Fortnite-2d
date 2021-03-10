@@ -15,11 +15,25 @@ function setupGame() {
 
 	// https://javascript.info/keyboard-events
 	document.addEventListener('keydown', () => moveByKey(event, false));
-	document.addEventListener('keyup', () => moveByKey(event, true))
+	document.addEventListener('keyup', () => moveByKey(event, true));
+	document.addEventListener('click', (event) => {
+		stage.player.fire();
+	});
+	document.addEventListener('mousedown', (event) => {
+		interval = stage.player.fire(true);
+	});
+
+	document.addEventListener('mouseup', (event) => {
+		interval !== null && clearInterval(interval);
+	});
+
 	stage.canvas.addEventListener('mousemove', function (evt) {
 		mousePos = getMousePos(stage.canvas, evt);
 		mousePos.x += stage.ptrOffset.x;
 		mousePos.y += stage.ptrOffset.y;
+		const dir = (new Pair(mousePos.x, mousePos.y)).sub(stage.player.position);
+		dir.normalize();
+		stage.ptrDirection = dir;
 	});
 }
 function startGame() {
@@ -35,7 +49,8 @@ function startGame() {
 			debugDiv.empty();
 			debugDiv.append(`<span>${stage.player.toString()}</span><br>`)
 			debugDiv.append(`<span>Mouse: (${mPos.x}, ${mPos.y})</span><br>`);
-			debugDiv.append(`<span>Direction: ${dir.toString()}</span>`);
+			debugDiv.append(`<span>Direction: ${stage.ptrDirection.toString()}</span><br>`);
+			debugDiv.append(`<span>Object count: ${stage.actors.length}</span>`);
 		}
 	}, 1000 / FRAMES_PER_SECOND);
 }
@@ -45,7 +60,7 @@ function pauseGame() {
 }
 function moveByKey(event, released) {
 	var key = event.key;
-	if (key === 'x' && !released) stage.player.deployItem(mousePos);
+	if (key === 'x' && !released) stage.player.deployItem();
 	var moveMap = {
 		'a': new Pair(-3, 0),
 		's': new Pair(0, 3),

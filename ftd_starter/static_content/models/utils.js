@@ -14,10 +14,7 @@ export function getOrientation(theta) {
 	return new Pair(0, -1);
 }
 
-export function getMouseAngle(mouse, position) {
-	const dir = mouse.sub(position);
-	dir.normalize();
-
+export function getMouseAngle(dir) {
 	// const posX = new Pair(1, 0);
 	// const det = dir.y;
 	// const theta = Math.acos(posX.dot(dir) / (posX.norm() * dir.norm()));
@@ -200,4 +197,32 @@ export class AABC extends BoundingVolume {
 		}
 	}
 
+}
+
+export class Inventory {
+	constructor(maxWeaponSlots, maxResourceCount, maxAmmoCount) {
+		this.maxWeaponSlots = maxWeaponSlots;
+		this.maxResourceCount = maxResourceCount;
+		this.maxAmmoCount = maxAmmoCount;
+		this.equippedWeapon = 0;
+
+		this.weapons = [];
+		this.wood = 0;
+		this.brick = 0;
+		this.metal = 0;
+		this.ammo = 0;
+	}
+
+	/**
+	 * add weapon to the inventory if there's space
+	 * @returns {boolean}
+	 */
+	addWeapon(weapon) {
+		if (this.weapons.length < this.maxWeaponSlots) {
+			this.weapons.push(weapon);
+			return true;
+		}
+
+		return false;
+	}
 }
