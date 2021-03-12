@@ -1,5 +1,5 @@
 import { Stage } from './models/Game';
-import { Pair } from './models/utils';
+import { Pair, LOG_QUEUE } from './models/utils';
 
 var stage = null;
 var view = null;
@@ -10,6 +10,17 @@ var mousePos = null;
 var debugDiv = null;
 var DEBUG_MODE = true;
 const FRAMES_PER_SECOND = 60;
+
+function showLogs() {
+	const curr = Date.now();
+	// need to fix this
+	// LOG_QUEUE = LOG_QUEUE.filter((log) => (curr - log.timestamp < 1000 * 5));
+
+	LOG_QUEUE.forEach(log => {
+		debugDiv.append(`<span>[LOG] ${log.text}</span><br>`);
+	});
+}
+
 function setupGame() {
 	stage = new Stage(document.getElementById('stage'));
 
@@ -50,7 +61,10 @@ function startGame() {
 			debugDiv.append(`<span>${stage.player.toString()}</span><br>`)
 			debugDiv.append(`<span>Mouse: (${mPos.x}, ${mPos.y})</span><br>`);
 			debugDiv.append(`<span>Direction: ${stage.ptrDirection.toString()}</span><br>`);
-			debugDiv.append(`<span>Object count: ${stage.actors.length}</span>`);
+			debugDiv.append(`<span>Object count: ${stage.actors.length}</span><br>`);
+			debugDiv.append(`<span>Gun: ${stage.player.inventory.weapons[0]}</span><br>`);
+
+			showLogs();
 		}
 	}, 1000 / FRAMES_PER_SECOND);
 }
@@ -61,6 +75,8 @@ function pauseGame() {
 function moveByKey(event, released) {
 	var key = event.key;
 	if (key === 'x' && !released) stage.player.deployItem();
+	if (key === 'f' && !released) stage.player.pickupItem();
+	if (key === 'r' && !released) stage.player.reload();
 	var moveMap = {
 		'a': new Pair(-3, 0),
 		's': new Pair(0, 3),

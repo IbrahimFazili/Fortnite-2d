@@ -1,5 +1,6 @@
 import { clamp, Pair, randint } from './utils';
 import { Player } from './CustomGameObjects';
+import { Gun } from './Weapons';
 
 export class Stage {
 	constructor(canvas) {
@@ -26,6 +27,8 @@ export class Stage {
 		var colour = 'rgba(0,0,0,1)';
 		var position = new Pair(Math.floor(this.width / 2), Math.floor(this.height / 2));
 		this.addPlayer(new Player(this, position, health, colour));
+		this.addActor(Gun.generateSMG(this, (new Pair(25, 25)).add(this.player.position)));
+		this.addActor(Gun.generateAR(this, (new Pair(-25, -25)).add(this.player.position)))
 	}
 
 	addPlayer(player) {
@@ -82,8 +85,12 @@ export class Stage {
 		this.drawCheckeredBoard(context, squareSize, rows, cols)
 
 		for (var i = 0; i < this.actors.length; i++) {
+			if (this.actors[i] instanceof Player) continue;
 			this.actors[i].draw(context);
 		}
+
+		// draw player at the end to make sure it's drawn on top of everything else
+		this.player.draw(context);
 
         context.restore();
 

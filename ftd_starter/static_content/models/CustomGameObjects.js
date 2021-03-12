@@ -1,7 +1,7 @@
 import { DynamicObjects, StaticObjects } from './GameObject';
 import { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory } from './utils';
 import { Stage } from './Game';
-import { Gun } from './Weapons';
+import { Weapon } from './Weapons';
 
 export class Player extends DynamicObjects {
 	/**
@@ -12,13 +12,14 @@ export class Player extends DynamicObjects {
 	 * @param radius {Number}
 	 */
 	constructor(game, position, health, color){
-		super(game, position, health, color, "Player 1");
+		super(game, position, health, color, false, "Player 1");
 		// keeping it rectangle for now. need to change it to circle
 		this.radius = Player.PL;
 		this.center = this.position;
 		this.boundingVolume = new AABC(this.center, Player.PLAYER_SIZE);
 		this.inventory = new Inventory(3, 100, 360);
-		this.inventory.addWeapon(new Gun(this.game, this.position, 'rgb(0, 0, 0)', 7, 180, 30, 500, 500, undefined, 'AR'));
+		// this.inventory.addWeapon(Gun.generateAR(this.game, this.position));
+		this.displayLabel = true;
 	}
 
 	setCenter() {this.center = this.position;}
@@ -31,15 +32,45 @@ export class Player extends DynamicObjects {
 	}
 
 	fire(hold=false) {
+		if (this.inventory.weapons.length === 0) return;
 		const weapon = this.inventory.weapons[this.inventory.equippedWeapon];
 		if (hold) {
 			return setInterval(() => weapon.fire(), Math.round((1000 * 60) / weapon.fireRate));
 		} else weapon.fire();
 	}
 
-	draw(context) {
-		context.beginPath();
+	reload(){
+		if (this.inventory.weapons.length === 0) return;
+		const weapon = this.inventory.weapons[this.inventory.equippedWeapon];
+		weapon.reload();
+	}
 
+	pickupItem() {
+		let minIndex = -1;
+		let minDist = Infinity;
+		for (let index = 0; index < this.game.actors.length; index++) {
+			const item = this.game.actors[index];
+			if (!(item instanceof Weapon)) continue;
+			
+			const dist = item.center.sub(this.position).norm();
+			if (dist < minDist && dist < 50) {
+				minDist = dist;
+				minIndex = index;
+			}
+		}
+
+		if (minIndex === -1) return;
+
+		const weapon = this.game.actors[minIndex];
+		weapon.position = this.position;
+		this.inventory.addWeapon(weapon);
+		this.game.removeActor(weapon);
+	}
+
+
+	draw(context) {
+		super.draw(context);
+		context.beginPath();
 		context.fillStyle = this.color;
 		// context.fillRect(this.position.x, this.position.y, this.size, this.size);
 		context.arc(this.position.x, this.position.y, Player.PLAYER_SIZE, 0, 2 * Math.PI);
@@ -59,6 +90,7 @@ export class Wall extends StaticObjects {
 	}
 
 	draw(context) {
+		super.draw(context);
 		context.fillStyle = this.color;
 		context.fillRect(this.position.x, this.position.y, this.w, this.h);
 	}

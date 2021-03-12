@@ -1,5 +1,5 @@
-import { randint, Pair } from './utils';
-import { Stage } from './Game';
+import { randint, Pair, clamp } from './utils';
+// import { Stage } from './Game';
 
 class GameObject {
 
@@ -14,18 +14,26 @@ class GameObject {
 		this.id = this.game.idCounter++;
 		this.position = position;
 		this.health = health;
+		this.maxHealth = health;
 		this.color = color !== undefined ? color : `rgb(${randint(255)}, ${randint(255)}, ${randint(255)})`;
 		this.isCollidable = collison;
 		this.boundingVolume = null;
 		this.label = name;
+		this.displayLabel = false;
 	}
 
 	toString() {
 		return `Pos: ${this.position.toString()} | Health: ${this.health} | Collidable: ${this.isCollidable}`;
 	}
+
+	updateHealth(h) {
+		this.health = clamp(this.health + h, 0, this.maxHealth);
+	}
 	
 	step() {
-		return;
+		if (this.health === 0) {
+			this.game.removeActor(this);
+		}
 	}
 
 	intersects() {
@@ -39,6 +47,20 @@ class GameObject {
 		}
 
 		return null;
+	}
+
+	drawLabel(context){
+		// context.globalAlpha = 0.1;
+		// context.fillStyle = "rgba(0, 0, 0)";
+		// context.fillRect(this.position.x - 50, this.position.y - 50, 100, 20);
+		// context.globalAlpha = 1.0;
+		context.fillStyle = "white";
+		context.font='200 12px sans-serif';
+		context.fillText(this.label, this.position.x - 20, this.position.y - 35);
+	}
+
+	draw(context) {
+		if (this.displayLabel) this.drawLabel(context);
 	}
 
 	intPosition() {
@@ -72,6 +94,7 @@ export class DynamicObjects extends GameObject {
 	 */
 	step(destroyOnCollision=false, onCollision=null) {
 
+		super.step();
 		const oldPos = this.position.copy();
 		this.position.x = this.position.x + this.velocity.x;
 		this.position.y = this.position.y + this.velocity.y;
