@@ -11,7 +11,7 @@ export class Stage {
 		this.enemies = [];
 		this.player = null; // a special actor, the player
 
-		this.squareSize = 50;
+		this.squareSize = 10;
 
 		// logical width and height of the world (map)
 		this.worldWidth = 2000;
