@@ -1,23 +1,32 @@
 import { clamp, Pair, randint } from './utils';
-import { Player } from './CustomGameObjects';
+import { Player, AI } from './CustomGameObjects';
 import { Gun } from './Weapons';
+import { Map } from './Map';
 
 export class Stage {
 	constructor(canvas) {
 		this.canvas = canvas;
 
 		this.actors = []; // all actors on this stage (monsters, player, boxes, ...)
+		this.enemies = [];
 		this.player = null; // a special actor, the player
+
+		this.squareSize = 50;
 
 		// logical width and height of the world (map)
 		this.worldWidth = 2000;
 		this.worldHeight = 2000;
 		this.map = null;
 
+		this.cols = this.worldWidth / 10;
+		this.rows = this.worldHeight / 10;
+
+		this.mapObj = new Map(this, this.rows, this.cols, this.squareSize);
+
 		// the logical width and height of the stage (viewport/window)
 		this.width = window.innerWidth;
 		this.height = window.innerHeight;
-        this.ptrOffset = new Pair(0, 0);
+		this.ptrOffset = new Pair(0, 0);
 		this.ptrDirection = new Pair(1, 0);
 
 		this.idCounter = 0;
@@ -25,8 +34,11 @@ export class Stage {
 		// Add the player to the center of the stage
 		var health = 100.0;
 		var colour = 'rgba(0,0,0,1)';
+		var enemyColor = 'rgba(220, 40, 100, 1)';
 		var position = new Pair(Math.floor(this.width / 2), Math.floor(this.height / 2));
+		var enemyPosition = new Pair(Math.floor(this.width / 2) + 100, Math.floor(this.height / 2) + 100);
 		this.addPlayer(new Player(this, position, health, colour));
+		this.addActor(new AI(this, enemyPosition, health, enemyColor));
 		this.addActor(Gun.generateSMG(this, (new Pair(25, 25)).add(this.player.position)));
 		this.addActor(Gun.generateAR(this, (new Pair(-25, -25)).add(this.player.position)))
 	}
@@ -70,19 +82,20 @@ export class Stage {
 	draw() {
 		var context = this.canvas.getContext('2d');
 		this.setGameWindowSize(context);
-		let cols = this.worldWidth / 10;
-		let rows = this.worldHeight / 10;
-		let squareSize = 50;
+
+		this.cols = this.worldWidth / 10;
+		this.rows = this.worldHeight / 10;
+
 		context.clearRect(0, 0, this.width, this.height);
 
-        context.save();
+		context.save();
 
-        const camX = clamp(this.player.position.x - (this.width / 2), 0, this.worldWidth - this.width);
-        const camY = clamp(this.player.position.y - (this.height / 2), 0, this.worldHeight - this.height);
-        this.ptrOffset = new Pair(camX, camY);
-        context.translate(-camX, -camY);
+		const camX = clamp(this.player.position.x - (this.width / 2), 0, this.worldWidth - this.width);
+		const camY = clamp(this.player.position.y - (this.height / 2), 0, this.worldHeight - this.height);
+		this.ptrOffset = new Pair(camX, camY);
+		context.translate(-camX, -camY);
 
-		this.drawCheckeredBoard(context, squareSize, rows, cols)
+		this.drawCheckeredBoard(context, this.squareSize, this.rows, this.cols)
 
 		for (var i = 0; i < this.actors.length; i++) {
 			if (this.actors[i] instanceof Player) continue;
@@ -92,8 +105,14 @@ export class Stage {
 		// draw player at the end to make sure it's drawn on top of everything else
 		this.player.draw(context);
 
-        context.restore();
+		// clear and update the grid of objects
 
+		this.mapObj.clearGrid();
+		this.mapObj.updateGrid();
+		this.mapObj.findPlayer();
+
+		context.restore();
+		
 	}
 
 	generateMap(squareSize, rows, cols) {
@@ -112,13 +131,13 @@ export class Stage {
 	}
 
 	drawCheckeredBoard(ctx, squareSize, rows, cols) {
-	
 		if (!this.map) this.generateMap(squareSize, rows, cols);
-		for (let j = 0; j < rows; j++)
+		for (let j = 0; j < rows; j++) {
 			for (let i = 0; i < cols; i++) {
 				ctx.fillStyle = this.map[j][i];
 				ctx.fillRect(i * squareSize, j * squareSize, squareSize, squareSize)
 			}
+		}
 	}
 
 	// return the first actor at coordinates (x,y) return null if there is no such actor
