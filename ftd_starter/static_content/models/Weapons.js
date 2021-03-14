@@ -46,9 +46,9 @@ export class Bullet extends DynamicObjects {
         return `p: ${this.position.toString()}`;
     }
 
-    step() {
-        super.step(true, this._onCollision.bind(this));
-        this.distanceTravelled += this.velocity.norm();
+    step(delta) {
+        super.step(delta, true, this._onCollision.bind(this));
+        this.distanceTravelled += (this.velocity.norm() * (delta / 1000));
         // @todo decrease damage after halfpoint
         if (this.distanceTravelled > this.maxRange){
             this.game.removeActor(this);
@@ -78,7 +78,7 @@ export class Gun extends Weapon {
         this.currentAmmo = this.clipSize;
         this.image = image ? new Image(this.w, this.h) : undefined;
         if (image) this.image.src = image;
-        this.velocity = 15;
+        this.velocity = 1000;
         this.reloading = false;
         this.reloadTime = reloadTime;
         // burst or auto?
@@ -88,8 +88,8 @@ export class Gun extends Weapon {
         return `${super.toString()} | Ammo: ${this.currentAmmo} ${this.reloading ? '(reloading)' : ''}`;
     }
     
-    step() {
-        super.step();
+    step(delta) {
+        super.step(delta);
     }
 
     fire() {
@@ -120,11 +120,11 @@ export class Gun extends Weapon {
     }
 
     static generateAR(game, position) {
-        return new Gun(game, position, 'rgb(0, 0, 0)', 9, 20, 220, 1000, 1500, '../assets/AR.png', 'AR');
+        return new Gun(game, position, 'rgb(0, 0, 0)', 9, 20, 220, 1500, 1500, '../assets/AR.png', 'AR');
     }
 
     static generateSMG(game, position) {
-        return new Gun(game, position, 'rgb(0, 0, 0)', 6, 35, 420, 600, 1000, '../assets/SMG.png', 'SMG');
+        return new Gun(game, position, 'rgb(0, 0, 0)', 6, 35, 420, 1100, 1000, '../assets/SMG.png', 'SMG');
     }
 
     draw(context) {

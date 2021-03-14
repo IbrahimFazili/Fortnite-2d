@@ -45,6 +45,9 @@ export class Player extends DynamicObjects {
 		weapon.reload();
 	}
 
+	/**
+	 * Try to pickup the nearest item we can find within a certain range
+	 */
 	pickupItem() {
 		let minIndex = -1;
 		let minDist = Infinity;

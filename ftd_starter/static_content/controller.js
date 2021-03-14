@@ -9,17 +9,18 @@ var lastKey = [];
 var mousePos = null;
 var debugDiv = null;
 var DEBUG_MODE = true;
+var lastRenderTime = 0;
 const FRAMES_PER_SECOND = 60;
 
-function showLogs() {
-	const curr = Date.now();
-	// need to fix this
-	// LOG_QUEUE = LOG_QUEUE.filter((log) => (curr - log.timestamp < 1000 * 5));
+// function showLogs() {
+// 	const curr = Date.now();
+// 	// need to fix this
+// 	// LOG_QUEUE = LOG_QUEUE.filter((log) => (curr - log.timestamp < 1000 * 5));
 
-	LOG_QUEUE.forEach(log => {
-		debugDiv.append(`<span>[LOG] ${log.text}</span><br>`);
-	});
-}
+// 	LOG_QUEUE.forEach(log => {
+// 		debugDiv.append(`<span>[LOG] ${log.text}</span><br>`);
+// 	});
+// }
 
 function setupGame() {
 	stage = new Stage(document.getElementById('stage'));
@@ -47,26 +48,31 @@ function setupGame() {
 		stage.ptrDirection = dir;
 	});
 }
+
+function showDebugInfo() {
+	if (!DEBUG_MODE) return;
+	var mPos = mousePos !== null ? new Pair(mousePos.x, mousePos.y) : new Pair(NaN, NaN);
+	const dir = mPos.sub(stage.player.position);
+	dir.normalize();
+
+	debugDiv.empty();
+	debugDiv.append(`<span>${stage.player.toString()}</span><br>`)
+	debugDiv.append(`<span>Mouse: (${mPos.x}, ${mPos.y})</span><br>`);
+	debugDiv.append(`<span>Direction: ${stage.ptrDirection.toString()}</span><br>`);
+	debugDiv.append(`<span>Object count: ${stage.actors.length}</span><br>`);
+	debugDiv.append(`<span>Gun: ${stage.player.inventory.weapons[0]}</span><br>`);
+}
+
+function gameLoop(t) {
+	requestAnimationFrame(gameLoop);
+	let delta = t - lastRenderTime;
+	lastRenderTime = t;
+	stage.step(delta);
+	stage.draw();
+	showDebugInfo();
+}
 function startGame() {
-	interval = setInterval(function () {
-		stage.step();
-		stage.draw();
-		// debug info
-		if (DEBUG_MODE) {
-			var mPos = mousePos !== null ? new Pair(mousePos.x, mousePos.y) : new Pair(NaN, NaN);
-			const dir = mPos.sub(stage.player.position);
-			dir.normalize();
-
-			debugDiv.empty();
-			debugDiv.append(`<span>${stage.player.toString()}</span><br>`)
-			debugDiv.append(`<span>Mouse: (${mPos.x}, ${mPos.y})</span><br>`);
-			debugDiv.append(`<span>Direction: ${stage.ptrDirection.toString()}</span><br>`);
-			debugDiv.append(`<span>Object count: ${stage.actors.length}</span><br>`);
-			debugDiv.append(`<span>Gun: ${stage.player.inventory.weapons[0]}</span><br>`);
-
-			showLogs();
-		}
-	}, 1000 / FRAMES_PER_SECOND);
+	requestAnimationFrame(gameLoop);
 }
 function pauseGame() {
 	clearInterval(interval);
@@ -78,10 +84,10 @@ function moveByKey(event, released) {
 	if (key === 'f' && !released) stage.player.pickupItem();
 	if (key === 'r' && !released) stage.player.reload();
 	var moveMap = {
-		'a': new Pair(-3, 0),
-		's': new Pair(0, 3),
-		'd': new Pair(3, 0),
-		'w': new Pair(0, -3),
+		'a': new Pair(-100, 0),
+		's': new Pair(0, 100),
+		'd': new Pair(100, 0),
+		'w': new Pair(0, -100),
 	};
 	if (released) {
 		const keyIndex = lastKey.findIndex((value) => value === key);
