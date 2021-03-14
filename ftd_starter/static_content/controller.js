@@ -166,8 +166,14 @@ function test() {
 $(function () {
 	// Setup all events here and display the appropriate UI
 	$("#loginSubmit").on('click', function () { login(); });
-	$("#ui_login").show();
+	$(".login").on('click', function () {
+		$("#ui_login").show();
+		$("#ui_play").hide();
+		$("#ui_register").hide();
+	});
+	$("#ui_login").hide();
 	$("#ui_play").hide();
+	$("#ui_register").show();
 	debugDiv = $("#debug");
 });
 

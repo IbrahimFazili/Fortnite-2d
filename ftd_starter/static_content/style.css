@@ -1,0 +1,369 @@
+body {
+	margin: 0;
+	padding: 0;
+	background-color: #F24141;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+@-webkit-keyframes fadeIn {
+	0% {opacity: 0;}
+	100% {opacity: 1;}
+}
+ 
+@keyframes fadeIn {
+	0% {opacity: 0;}
+	100% {opacity: 1;}
+}
+
+main {
+	-webkit-animation-duration: 1s;
+	animation-duration: 1s;
+	-webkit-animation-fill-mode:forwards;
+	animation-fill-mode: forwards;
+	-webkit-animation-name: fadeIn;
+	animation-name: fadeIn;
+}
+
+footer {
+	background-color: #261D20;
+	display: block;
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	color: white;
+	text-transform: uppercase;
+	letter-spacing: 0.12cm;
+	padding-bottom: 4px;
+}
+
+#game-btn, #login-btn {
+	border: 1px solid #261D20;
+	background-color: transparent;
+	color: #261D20;
+	padding: 5px;
+	height: 2.5em;
+	text-transform: uppercase;
+	font-size: 1em;
+}
+
+#login-btn:hover {
+	background-color: #261D20;
+	color: #F24141;
+}
+
+#input {
+	background-color: transparent;
+	border: 1px solid white;
+	color: white;
+	padding: 5px;
+	height: 2em;
+	outline: none;
+}
+
+#register-left {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	background-color: #49BFB3;
+	text-transform: uppercase;
+	letter-spacing: 0.12cm;
+	padding: 2em;
+}
+
+#register-left > span {
+	font-size: 4em;
+	font-weight: 300;
+}
+
+#register-right {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	align-items: center;
+	background-color: #F24141;
+	text-transform: uppercase;
+	letter-spacing: 0.12cm;
+	padding: 20px;
+	-webkit-box-shadow: -6px 0px 25px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: -6px 0px 25px 0px rgba(0,0,0,0.75);
+	box-shadow: -6px 0px 25px 0px rgba(0,0,0,0.75);
+}
+
+#register-right > form > div {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+}
+
+#register-right > form > div > div {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#submit, #login {
+	height: 3.5em !important;
+	border-radius: 50px;
+	border: 1px solid white !important;
+	padding: 0px !important;
+	width: 40% !important;
+	align-items: center;
+	font-weight: 100;
+	font-size: 1em;
+	color: white;
+	background-color: black;
+}
+
+.login {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-decoration: none;
+	width: 10em !important;
+}
+
+#login-container {
+	display: grid;
+	grid-template-columns: 1.4fr 1fr;
+	grid-template-rows: 1fr;
+	height: 100%;
+}
+
+#login-right {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	align-items: center;
+	padding: 20px;
+	font-size: 2em;
+	text-transform: uppercase;
+	letter-spacing: 0.15cm;
+	margin: 0;
+	background-color: #49BFB3;
+}
+
+#login-left {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	align-items: center;
+	padding: 20px;
+	font-size: 1em;
+	text-transform: uppercase;
+	letter-spacing: 0.1cm;
+	-webkit-box-shadow: 5px -1px 15px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: 5px -1px 15px 0px rgba(0,0,0,0.75);
+	box-shadow: 5px -1px 15px 0px rgba(0,0,0,0.75);
+	z-index: 1;
+}
+
+/* #login-left > form >  */
+
+#submit:hover, #login:hover {
+	background-color: white;
+	color: black;
+}
+
+footer {
+	text-align: center;
+	margin-top: 15px;
+}
+
+#nav-list > li {
+	display: flex;
+	flex-direction: column;
+}
+
+#nav-list {
+	display: grid;
+	gap: 5px;
+	grid-template-columns: repeat(6, 1fr);
+	list-style-type: none;
+	padding: 5px;
+	/* border: 1px solid black; */
+}
+
+.nav-item {
+	display: block;
+	background-color: transparent;
+	color: #261D20;
+	border: #261D20 2px solid;
+	text-decoration: none;
+	text-transform: uppercase;
+	letter-spacing: 0.06cm;
+	text-align: center;
+	font-size: large;
+	padding: 3px;
+	height: 100%;
+}
+
+.nav-item:hover {
+	color: #F24141;
+	background-color: #261D20;
+	border: 1px solid #261D20;
+}
+
+#nav1, #nav2, #nav3, #nav4, #nav5, #nav6 {
+	grid-column: 1/6;
+	grid-row: 1/6;
+}
+
+/* RPS CSS */
+
+#rps-main {
+	display: flex;
+	justify-content: space-between;
+}
+
+#rps-main > div {
+	width: 10em;
+}
+
+#rps-main > input {
+	align-self: center;
+}
+
+/* Frog game css */
+
+#game-div {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.greenFrog, .yellowFrog, .empty {
+	height: 75px;
+}
+
+#form-restart {
+	display: flex;
+	align-items: center;
+	/* margin-left: 20px; */
+}
+
+.frog-game-area {
+	align-items: center;
+	justify-content: center;
+}
+
+/* Stats page CSS */
+
+#stats-by-game-container {
+	/* border: 2px red solid; */
+	display: flex;
+	justify-content: stretch;
+	flex-wrap: wrap;
+	height: 100%;
+	text-transform: uppercase;
+	letter-spacing: 0.12cm;
+	-webkit-box-shadow: 6px 0px 22px -1px rgba(105,105,105,1);
+	-moz-box-shadow: 6px 0px 22px -1px rgba(105,105,105,1);
+	box-shadow: 6px 0px 22px -1px rgba(105,105,105,1);
+}
+
+#stats-game {
+	/* border: 2px blue solid; */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 10px;
+	text-align: center;
+	flex-grow: 1;
+}
+
+#stats-game > h2, .stats > h1 {
+	/* border: 2px palevioletred solid; */
+	font-size: 2.5em;
+	letter-spacing: 0.25cm;
+}
+
+.stats {
+	text-transform: uppercase;
+	text-align: center;
+	letter-spacing: 0.12cm;
+	padding: 0px 10px 0px 10px;
+}
+
+.leaderboard {
+	text-align: start;
+	padding: 0 1em 0 1em;
+}
+
+.stat1 {
+	background-color: #49BFB3;
+}
+
+.stat2 {
+	background-color: #28a598;
+}
+
+.stat3 {
+	background-color: #247c73;
+}
+
+#stats-game > div {
+	/* border: 2px rgb(12, 173, 53) solid; */
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	align-items: center;
+}
+
+/* Media Queries for mobile & desktop variants */
+@media only screen and (max-width: 600px) {
+	#nav-list {
+	  grid-template-rows: auto;
+	  grid-template-columns: 1fr;
+	}
+
+	#game-div {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	#login {
+		margin-top: 25px;
+	}
+
+	#submit, #login {
+		height: 50px !important;
+		width: 250px !important;
+	}
+	
+	#register-right > form > div {
+		grid-template-columns: 1fr;
+	}
+
+	#login-container {
+		grid-template-columns: 1fr;
+		grid-template-rows: 1fr 4fr;
+	}
+
+	#login-right {
+		grid-row: 1;
+	}
+
+	#login-left {
+		grid-row: 2;
+	}
+
+	.stats {
+		padding-bottom: 3em;
+	}
+}
+
+@media only screen and (min-width: 1000px) {
+	main {
+		display: grid;
+		grid-template-rows: 1fr;
+		grid-template-columns: 3fr 1fr;
+	}
+
+	.unav {
+		grid-column: 1;
+	}
+}
