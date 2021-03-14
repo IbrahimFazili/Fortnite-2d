@@ -81,6 +81,7 @@ export class Gun extends Weapon {
         this.velocity = 1000;
         this.reloading = false;
         this.reloadTime = reloadTime;
+        this.reloadSound = new Audio('../assets/ar-reload.mp3');
         // burst or auto?
     }
 
@@ -109,6 +110,7 @@ export class Gun extends Weapon {
 
     reload() {
         this.reloading = true;
+        this.reloadSound.play();
         // @todo depends how much is in reserves
         setTimeout(() => {
             if (this.currentAmmo < this.clipSize) {

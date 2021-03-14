@@ -17,7 +17,7 @@
 			display: false;
 		}
 
-		#ui_register {
+		#landing {
 			position: absolute;
 			width: 100%;
 			height: 100%;
@@ -63,17 +63,8 @@
 			padding: 0;
 		}
 
-		.multi-select-container {
-			display: flex;
-			flex-direction: column;
-			text-align: left;
-		}
-
-		.multi-select-inner-div {
-			display: inline;
-		}
-
-		#btn {
+		.btn,
+		button {
 			border: 1px solid #261D20;
 			background-color: transparent;
 			color: #261D20;
@@ -85,7 +76,8 @@
 			text-decoration: none;
 		}
 
-		#btn:hover {
+		.btn:hover,
+		button:hover {
 			background-color: #261D20;
 			color: #F24141;
 		}
@@ -94,49 +86,69 @@
 </head>
 
 <body>
-	<div id="ui_login">
-		<div>
-			<input type="text" id="username" placeholder="User Name" />
-			<input type="password" id="password" placeholder="Password" />
-			<input type="submit" id="loginSubmit" value="Login">
-		</div>
-	</div>
 	<div id="ui_play">
 		<div id="debug">Debug info goes here</div>
 		<canvas id="stage" width="400" height="400" style="display: block; margin: 0%; padding: 0%;"> </canvas>
 	</div>
 
-	<div id="ui_register">
+	<div id="landing">
 		<main>
 			<section id="register-left">
-				<span>Register</span>
+				<span id="left-text">Register</span>
 			</section>
 			<section id="register-right">
-				<form action="index.php" method="POST">
+				<div id="ui_register">
 					<div>
 						<div>
 							<span>Username</span><br>
-							<input id="input" type="text" name="user" value="" required autofocus />
+							<input id="user" class="input" type="text" name="user" autocomplete="off" required
+								autofocus />
 						</div>
 						<br><br>
 
 						<div>
 							<span>Password</span><br>
-							<input id="input" type="password" name="password" autocomplete="FALSE" required />
+							<input id="pass" class="input" type="password" name="password" autocomplete="off"
+								required />
 						</div>
 						<br><br>
 
 						<div>
 							<span>Confirm Password</span><br>
-							<input id="input" type="password" name="confirm_password" autocomplete="FALSE" required />
+							<input id="confirm-pass" class="input" type="password" name="confirm_password"
+								autocomplete="off" required />
 						</div>
+
 					</div>
 
 					<br><br><br><br>
 
-					<input id="btn" type="submit" name="submit" value="Register" id="submit" />
-				</form>
-				<br><span id="btn" class="login">Login</span>
+					<input id="register" class="btn" type="submit" name="submit" value="Register" id="submit" />
+					<br><br>
+					<button id="login">Login</button>
+				</div>
+
+				<div id="ui_login">
+					<div>
+						<div>
+							<div>
+								<span>Username</span><br><br>
+								<input id="username" class="input" type="text" name="user" value="" required
+									autofocus />
+							</div>
+							<br><br>
+							<div>
+								<span>Password</span><br><br>
+								<input id="password" class="input" type="password" name="password" required />
+							</div>
+							<br><br>
+						</div>
+
+						<br><br><br><br>
+
+						<input id="loginSubmit" class="btn" type="submit" name="submit" value="LOGIN" id="submit" />
+					</div>
+				</div>
 
 			</section>
 		</main>

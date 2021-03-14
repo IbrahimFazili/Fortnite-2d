@@ -120,6 +120,36 @@ function getMousePos(canvas, evt) {
 	};
 }
 
+function register() {
+	const formData = {
+		'username': $("#user").val(),
+		'password': $("#pass").val(),
+		'confirmPassword': $("#confirm-pass").val()
+	};
+
+	if (formData.password !== formData.confirmPassword) {
+		alert("Passwords don't match!");
+		return;
+	}
+
+	$.ajax({
+		method: "POST",
+		url: "/api/register",
+		data: JSON.stringify(formData),
+		processData: false,
+		contentType: "application/json; charset=utf-8",
+		dataType: "json"
+	}).done(function (data, text_status, jqXHR) {
+		console.log(jqXHR.status + " " + text_status + JSON.stringify(data));
+
+		$("#ui_login").show();
+		$("#ui_register").hide();
+
+	}).fail(function (err) {
+		console.log("fail " + err.status + " " + JSON.stringify(err.responseJSON));
+	});
+}
+
 function login() {
 	credentials = {
 		"username": $("#username").val(),
@@ -137,7 +167,7 @@ function login() {
 	}).done(function (data, text_status, jqXHR) {
 		console.log(jqXHR.status + " " + text_status + JSON.stringify(data));
 
-		$("#ui_login").hide();
+		$("#landing").hide();
 		$("#ui_play").show();
 
 		setupGame();
@@ -166,14 +196,18 @@ function test() {
 $(function () {
 	// Setup all events here and display the appropriate UI
 	$("#loginSubmit").on('click', function () { login(); });
-	$(".login").on('click', function () {
+	$("#register").on('click', () => register());
+	$("#login").on('click', function () {
+		$("#landing").show();
 		$("#ui_login").show();
 		$("#ui_play").hide();
 		$("#ui_register").hide();
 	});
-	$("#ui_login").hide();
+	$("#landing").show();
+	$("#ui_login").show();
+	$("#left-text").text("LOGIN");
 	$("#ui_play").hide();
-	$("#ui_register").show();
+	$("#ui_register").hide();
 	debugDiv = $("#debug");
 });
 
