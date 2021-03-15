@@ -199,6 +199,30 @@ export class AABC extends BoundingVolume {
 
 }
 
+export class Line {
+	constructor(start, end) {
+		this.start = start;
+		this.end = end;
+	}
+
+	intersectLine(line) {
+		let b = this.end.sub(this.start);
+		let d = line.end.sub(line.start);
+
+		let bDotDPerp = (b.x * d.y) - (b.y * d.x);
+		if (bDotDPerp === 0) return null;
+
+		let c = line.start.sub(this.start);
+		let t = ((c.x * d.y) - (c.y * d.x)) / bDotDPerp;
+		if (t < 0 || t > 1) return false;
+
+		let u = ((c.x * b.y) - (c.y * b.x)) / bDotDPerp;
+		if (u < 0 || u > 1) return false;
+
+		return this.start.add(b.multiply(t));
+	}
+}
+
 export class Inventory {
 	constructor(maxWeaponSlots, maxResourceCount, maxAmmoCount) {
 		this.maxWeaponSlots = maxWeaponSlots;

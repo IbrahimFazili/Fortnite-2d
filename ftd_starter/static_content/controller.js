@@ -63,12 +63,32 @@ function showDebugInfo() {
 	debugDiv.append(`<span>Gun: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon]}</span><br>`);
 }
 
+function renderUI() {
+	$("#weapons").empty();
+	let rem = stage.player.inventory.maxWeaponSlots;
+	stage.player.inventory.weapons.forEach((e, i) => {
+		const img = e.label === 'AR' ? './assets/AR.png' : './assets/SMG.png';
+		const selected = i === stage.player.inventory.equippedWeapon;
+		$("#weapons").append(`<img
+		src="${img}"
+		class="weapon-img ${selected ? 'weapon-selected' : ''}"
+		/>`);
+		rem--;
+	});
+
+	const noWeapons = rem === stage.player.inventory.maxWeaponSlots;
+	for (; rem > 0; rem--) {
+		$("#weapons").append(`<div class="weapon-img" />`);
+	}
+}
+
 function gameLoop(t) {
 	requestAnimationFrame(gameLoop);
 	let delta = t - lastRenderTime;
 	lastRenderTime = t;
 	stage.step(delta);
 	stage.draw();
+	renderUI();
 	showDebugInfo();
 }
 function startGame() {
@@ -203,7 +223,16 @@ $(function () {
 		$("#ui_login").show();
 		$("#ui_play").hide();
 		$("#ui_register").hide();
+		$("#left-text").text("LOGIN");
 	});
+	$("#register-nav").on('click', function () {
+		$("#landing").show();
+		$("#ui_login").hide();
+		$("#ui_play").hide();
+		$("#ui_register").show();
+		$("#left-text").text("REGISTER");
+	});
+
 	$("#landing").show();
 	$("#ui_login").show();
 	$("#left-text").text("LOGIN");
