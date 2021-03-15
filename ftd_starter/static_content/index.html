@@ -81,6 +81,27 @@
 			background-color: #261D20;
 			color: #F24141;
 		}
+
+		#weapons {
+			position: absolute;
+			display: flex;
+			/* justify-content: space-evenly; */
+			bottom: 5px;
+			left: 5px;
+			width: 35%;
+			pointer-events: none;
+		}
+
+		.weapon-img {
+			position: relative;
+			height: 3.5em;
+			width: 6.5em;
+			border: #261D20 2px solid;
+		}
+
+		.weapon-selected {
+			border: #F24141 2px solid !important;
+		}
 	</style>
 	<title>f0rt9it32d</title>
 </head>
@@ -88,6 +109,7 @@
 <body>
 	<div id="ui_play">
 		<div id="debug">Debug info goes here</div>
+		<div id="weapons"></div>
 		<canvas id="stage" width="400" height="400" style="display: block; margin: 0%; padding: 0%;"> </canvas>
 	</div>
 
@@ -146,7 +168,9 @@
 
 						<br><br><br><br>
 
-						<input id="loginSubmit" class="btn" type="submit" name="submit" value="LOGIN" id="submit" />
+						<input id="loginSubmit" class="btn" type="submit" name="submit" value="LOGIN" />
+						<br>
+						<input id="register-nav" class="btn" type="submit" name="submit" value="REGISTER" />
 					</div>
 				</div>
 

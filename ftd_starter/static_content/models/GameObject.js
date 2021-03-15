@@ -61,6 +61,13 @@ class GameObject {
 
 	draw(context) {
 		if (this.displayLabel) this.drawLabel(context);
+		if (this.maxHealth < Infinity) {
+			context.strokeStyle = "white";
+			context.strokeRect(this.position.x - 24, this.position.y - 30, 52, 7);
+
+			context.fillStyle = "red";
+			context.fillRect(this.position.x - 23, this.position.y - 28, 50 * (this.health / this.maxHealth), 5);
+		}
 	}
 
 	intPosition() {

@@ -78,7 +78,7 @@ export class Gun extends Weapon {
         this.currentAmmo = this.clipSize;
         this.image = image ? new Image(this.w, this.h) : undefined;
         if (image) this.image.src = image;
-        this.velocity = 1000;
+        this.velocity = 500;
         this.reloading = false;
         this.reloadTime = reloadTime;
         this.reloadSound = new Audio('../assets/ar-reload.mp3');
@@ -107,6 +107,7 @@ export class Gun extends Weapon {
     }
 
     reload() {
+        if (this.reloading) return;
         this.reloading = true;
         this.reloadSound.play();
         // @todo depends how much is in reserves

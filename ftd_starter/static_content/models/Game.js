@@ -38,8 +38,8 @@ export class Stage {
 		var enemyPosition = new Pair(Math.floor(this.width / 2) + 100, Math.floor(this.height / 2) + 100);
 		this.addPlayer(new Player(this, position, health, colour));
 		this.addActor(new AI(this, enemyPosition, health, enemyColor));
-		this.addActor(Gun.generateSMG(this, (new Pair(25, 25)).add(this.player.position)));
-		this.addActor(Gun.generateAR(this, (new Pair(-25, -25)).add(this.player.position)))
+		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
+		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position)))
 	}
 
 	addPlayer(player) {
