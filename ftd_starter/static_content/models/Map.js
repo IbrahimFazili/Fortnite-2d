@@ -1,4 +1,5 @@
 import { Wall } from './CustomGameObjects';
+import { Pair } from './utils';
 
 export class Map {
     constructor(game, rows, cols, squaresize) {
@@ -11,6 +12,9 @@ export class Map {
         this.grid = null;
     }
 
+    /**
+    * clears the grid to be reused
+    */
     clearGrid() {
         this.grid = new Array(this.rows);
         for (var i = 0; i < this.cols; i++) {
@@ -18,6 +22,9 @@ export class Map {
         }
     }
 
+    /**
+     * loops through all actors and players to mark points on grid as Occupied
+    */
     updateGrid() {
         // build 2d grid that updates in real time if a block is 'Empty', 'Occupied', or 'Player'
         for (var i = 0; i < this.game.actors.length; i++) {
@@ -47,6 +54,9 @@ export class Map {
 
     // Pathfinding source: http://gregtrowbridge.com/a-basic-pathfinding-algorithm/
 
+    /**
+     * computes the shortest distance to the player given starting points
+    */
     shortestPath(startCoordinates) {
         var distanceFromTop = Math.floor(startCoordinates.y / this.squaresize);
         var distanceFromLeft = Math.floor(startCoordinates.x / this.squaresize);
@@ -104,6 +114,9 @@ export class Map {
         return false;
     }
 
+    /**
+     * check in a particular direction
+    */
     exploreInDirection(currentLocation, direction) {
         var newPath = currentLocation.path.slice();
         newPath.push(direction);
@@ -141,6 +154,9 @@ export class Map {
         return newLocation;
     }
 
+    /**
+     * check if a particular position is Empty, Occupied or Visited
+    */
     locationStatus(location) {
         var gridSize = this.grid.length;
         var dft = location.distanceFromTop;
@@ -163,6 +179,39 @@ export class Map {
         }
     };
 
+    /**
+     * converts a list of directions to a list of Pair vectors
+    */
+    convertToVectors(directions){
+        var vectors = [];
+
+        for (var i = 0; i < directions.length; i++){
+
+            switch (directions[i]) {
+                case 'North':
+                    vectors.push(new Pair(0, -1))
+                    break;
+                
+                case 'East':
+                    vectors.push(new Pair(1, 0));
+                    break;
+                
+                case 'South':
+                    vectors.push(new Pair(0, 1));
+                    break;
+
+                case 'West':
+                    vectors.push(new Pair(-1, 0));
+                    break;
+            }
+        }
+
+        return vectors;
+    }
+
+    /**
+     * the main function for path finding
+    */
     findPlayer() {
         var enemy = null;
         for (var i = 0; i < this.game.actors.length; i++) {
@@ -171,6 +220,9 @@ export class Map {
             }
         }
 
-        console.log(this.shortestPath(enemy.position));
+        var direction = this.shortestPath(enemy.position);
+        var vectors = this.convertToVectors(direction);
+
+        return vectors;
     }
 }

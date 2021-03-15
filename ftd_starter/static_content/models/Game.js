@@ -8,7 +8,6 @@ export class Stage {
 		this.canvas = canvas;
 
 		this.actors = []; // all actors on this stage (monsters, player, boxes, ...)
-		this.enemies = [];
 		this.player = null; // a special actor, the player
 
 		this.squareSize = 10;
