@@ -14,7 +14,7 @@ export class Player extends DynamicObjects {
 	constructor(game, position, health, color) {
 		super(game, position, health, color, false, "Player 1");
 		// keeping it rectangle for now. need to change it to circle
-		this.radius = Player.PL;
+		this.radius = Player.PLAYER_SIZE;
 		this.center = this.position;
 		this.boundingVolume = new AABC(this.center, Player.PLAYER_SIZE);
 		this.inventory = new Inventory(3, 100, 360);
@@ -88,7 +88,7 @@ export class Player extends DynamicObjects {
 
 Player.PLAYER_SIZE = 20;
 
-export class AI extends DynamicObjects {
+export class AI extends Player {
 	/**
 	 * @param game {Stage}
 	 * @param position {Pair}
@@ -97,28 +97,22 @@ export class AI extends DynamicObjects {
 	 * @param radius {Number}
 	 */
 	constructor(game, position, health, color) {
-		super(game, position, health, color, false, "Enemy");
-		// keeping it rectangle for now. need to change it to circle
-		this.radius = Player.PLAYER_SIZE;
-		this.center = this.position;
-		this.boundingVolume = new AABC(this.center, Player.PLAYER_SIZE);
-		this.inventory = new Inventory(3, 100, 360);
+		super(game, position, health, color);
+		this.label = "Stupid AI";
 		// this.inventory.addWeapon(Gun.generateAR(this.game, this.position));
-		this.displayLabel = true;
 		this.followPath = false;
-		this.queue = [];
 		this.timeSinceLastPath = 0;
 	}
 
 
 	step(delta) {
 		this.timeSinceLastPath += delta;
-		if (this.timeSinceLastPath >= 250) {
+		if (this.timeSinceLastPath >= 0) {
 			if (this.followPath) {
 				const path = this.game.internal_map_grid.findPlayer(this);
 				if (path.length > 0) {
 					const randVelocity = new Pair(randint(60) - 30, randint(60) - 30);
-					this.velocity = path[0].multiply(60).add(randVelocity);
+					this.velocity = path[0].multiply(120).add(randVelocity);
 				}
 				else this.velocity = new Pair(0, 0);
 			}
@@ -128,14 +122,14 @@ export class AI extends DynamicObjects {
 		super.step(delta);
 	}
 
-	draw(context) {
-		super.draw(context);
-		context.beginPath();
-		context.fillStyle = this.color;
-		// context.fillRect(this.position.x, this.position.y, this.size, this.size);
-		context.arc(this.position.x, this.position.y, Player.PLAYER_SIZE, 0, 2 * Math.PI);
-		context.fill();
-	}
+	// draw(context) {
+	// 	super.draw(context);
+	// 	context.beginPath();
+	// 	context.fillStyle = this.color;
+	// 	// context.fillRect(this.position.x, this.position.y, this.size, this.size);
+	// 	context.arc(this.position.x, this.position.y, Player.PLAYER_SIZE, 0, 2 * Math.PI);
+	// 	context.fill();
+	// }
 }
 
 export class Wall extends StaticObjects {

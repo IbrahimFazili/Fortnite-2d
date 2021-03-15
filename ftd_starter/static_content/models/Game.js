@@ -119,7 +119,9 @@ export class Stage {
 		}
 
 		// draw player at the end to make sure it's drawn on top of everything else
-		this.player.draw(context);
+		this.actors.forEach(act => {
+			if (act instanceof Player) act.draw(context);
+		});
 
 		context.restore();
 		
