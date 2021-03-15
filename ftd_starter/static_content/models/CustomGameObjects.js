@@ -88,6 +88,41 @@ export class Player extends DynamicObjects {
 
 Player.PLAYER_SIZE = 20;
 
+export class AI extends DynamicObjects {
+	/**
+	 * @param game {Stage}
+	 * @param position {Pair}
+	 * @param health {Number}
+	 * @param color {string}
+	 * @param radius {Number}
+	 */
+	constructor(game, position, health, color) {
+		super(game, position, health, color, false, "Enemy");
+		// keeping it rectangle for now. need to change it to circle
+		this.radius = Player.PL;
+		this.center = this.position;
+		this.boundingVolume = new AABC(this.center, Player.PLAYER_SIZE);
+		this.inventory = new Inventory(3, 100, 360);
+		// this.inventory.addWeapon(Gun.generateAR(this.game, this.position));
+		this.displayLabel = true;
+
+		this.queue = [];
+	}
+
+	findPlayer(){
+	}
+
+	draw(context) {
+		super.draw(context);
+		this.findPlayer();
+		context.beginPath();
+		context.fillStyle = this.color;
+		// context.fillRect(this.position.x, this.position.y, this.size, this.size);
+		context.arc(this.position.x, this.position.y, Player.PLAYER_SIZE, 0, 2 * Math.PI);
+		context.fill();
+	}
+}
+
 export class Wall extends StaticObjects {
 	constructor(game, position, health, color = undefined, orientation) {
 		super(game, position, health, color, true, "Wall");

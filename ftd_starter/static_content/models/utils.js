@@ -69,21 +69,6 @@ export class Pair {
 	}
 }
 
-// export class Ray {
-
-// 	/**
-// 	 * @param origin Pair
-// 	 * @param direction Pair
-// 	 * @param max_t Int
-// 	*/
-// 	constructor(origin, direction, max_t) {
-// 		this.origin = origin;
-// 		this.direction = direction;
-// 		this.max_t = max_t;
-// 		this.hit_t = Infinity;
-// 	}
-// }
-
 class BoundingVolume {
 	/**
 	 * Intersect the given ray with this bounding box. Return true if it intersects
