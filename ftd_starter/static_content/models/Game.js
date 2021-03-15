@@ -10,15 +10,15 @@ export class Stage {
 		this.actors = []; // all actors on this stage (monsters, player, boxes, ...)
 		this.player = null; // a special actor, the player
 
-		this.squareSize = 10;
+		this.squareSize = 20;
 
 		// logical width and height of the world (map)
 		this.worldWidth = 2000;
 		this.worldHeight = 2000;
 		this.map = null;
 
-		this.cols = this.worldWidth / 10;
-		this.rows = this.worldHeight / 10;
+		this.cols = this.worldWidth / this.squareSize;
+		this.rows = this.worldHeight / this.squareSize;
 
 		this.internal_map_grid = new Map(this, this.rows, this.cols, this.squareSize);
 
@@ -36,12 +36,13 @@ export class Stage {
 		var enemyColor = 'rgba(220, 40, 100, 1)';
 		var position = new Pair(Math.floor(this.width / 2), Math.floor(this.height / 2));
 		this.addPlayer(new Player(this, position, health, colour));
-		for (let index = 0; index < 15; index++) {
+		for (let index = 0; index < 5; index++) {
 			var enemyPosition = new Pair(randint(500), randint(500));
 			this.addActor(new AI(this, enemyPosition, health, enemyColor));
 		}
 		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
-		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position)))
+		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
+		this.accumTime = 0;
 	}
 
 	addPlayer(player) {
@@ -78,6 +79,14 @@ export class Stage {
 			this.actors[i].step(delta);
 		}
 
+		// this.accumTime += delta;
+		// if (this.accumTime >= 3000) {
+		// 	var enemyPosition = new Pair(randint(this.worldWidth), randint(this.worldHeight));
+		// 	const enemy = new AI(this, enemyPosition, 100.0, `rgba(220, 40, 100, 1)`);
+		// 	enemy.followPath = true;
+		// 	this.addActor(enemy);
+		// 	this.accumTime = 0;
+		// }
 		this.internal_map_grid.clearGrid();
 		this.internal_map_grid.updateGrid();
 	}
@@ -92,9 +101,6 @@ export class Stage {
 	draw() {
 		var context = this.canvas.getContext('2d');
 		this.setGameWindowSize(context);
-
-		this.cols = this.worldWidth / 10;
-		this.rows = this.worldHeight / 10;
 
 		context.clearRect(0, 0, this.width, this.height);
 

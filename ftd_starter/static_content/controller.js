@@ -57,10 +57,10 @@ function showDebugInfo() {
 
 	debugDiv.empty();
 	debugDiv.append(`<span>${stage.player.toString()}</span><br>`)
-	debugDiv.append(`<span>Mouse: (${mPos.x}, ${mPos.y})</span><br>`);
+	debugDiv.append(`<span>Mouse: (${mPos.x.toFixed(2)}, ${mPos.y.toFixed(2)})</span><br>`);
 	debugDiv.append(`<span>Direction: ${stage.ptrDirection.toString()}</span><br>`);
 	debugDiv.append(`<span>Object count: ${stage.actors.length}</span><br>`);
-	debugDiv.append(`<span>Gun: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon]}</span><br>`);
+	// debugDiv.append(`<span>Gun: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon]}</span><br>`);
 	delta > 0 && debugDiv.append(`<span>FPS: ${Math.round(1000 / delta)} (${delta.toFixed(2)} ms)</span><br>`);
 }
 

@@ -38,7 +38,6 @@ export class Bullet extends DynamicObjects {
     }
 
     _onCollision(object) {
-        console.log(`collison with ${object}`);
         object.updateHealth(-this.damage);
     }
 
@@ -78,7 +77,7 @@ export class Gun extends Weapon {
         this.currentAmmo = this.clipSize;
         this.image = image ? new Image(this.w, this.h) : undefined;
         if (image) this.image.src = image;
-        this.velocity = 500;
+        this.velocity = 750;
         this.reloading = false;
         this.reloadTime = reloadTime;
         this.reloadSound = new Audio('../assets/ar-reload.mp3');
@@ -121,11 +120,11 @@ export class Gun extends Weapon {
     }
 
     static generateAR(game, position) {
-        return new Gun(game, position, 'rgb(0, 0, 0)', 9, 20, 220, 1500, 1500, '../assets/AR.png', 'AR');
+        return new Gun(game, position, 'rgb(0, 0, 0)', 11, 25, 280, 1500, 1500, '../assets/AR.png', 'AR');
     }
 
     static generateSMG(game, position) {
-        return new Gun(game, position, 'rgb(0, 0, 0)', 6, 35, 420, 1100, 1000, '../assets/SMG.png', 'SMG');
+        return new Gun(game, position, 'rgb(0, 0, 0)', 6, 32, 420, 1100, 1000, '../assets/SMG.png', 'SMG');
     }
 
     draw(context) {
