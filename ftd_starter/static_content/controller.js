@@ -60,7 +60,7 @@ function showDebugInfo() {
 	debugDiv.append(`<span>Mouse: (${mPos.x}, ${mPos.y})</span><br>`);
 	debugDiv.append(`<span>Direction: ${stage.ptrDirection.toString()}</span><br>`);
 	debugDiv.append(`<span>Object count: ${stage.actors.length}</span><br>`);
-	debugDiv.append(`<span>Gun: ${stage.player.inventory.weapons[0]}</span><br>`);
+	debugDiv.append(`<span>Gun: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon]}</span><br>`);
 }
 
 function gameLoop(t) {
@@ -83,6 +83,7 @@ function moveByKey(event, released) {
 	if (key === 'x' && !released) stage.player.deployItem();
 	if (key === 'f' && !released) stage.player.pickupItem();
 	if (key === 'r' && !released) stage.player.reload();
+	if (Number(key) && !released) stage.player.switchWeapon(Number(key) - 1);
 	var moveMap = {
 		'a': new Pair(-100, 0),
 		's': new Pair(0, 100),

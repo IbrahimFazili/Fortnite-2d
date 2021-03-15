@@ -11,7 +11,7 @@ export class Player extends DynamicObjects {
 	 * @param color {string}
 	 * @param radius {Number}
 	 */
-	constructor(game, position, health, color){
+	constructor(game, position, health, color) {
 		super(game, position, health, color, false, "Player 1");
 		// keeping it rectangle for now. need to change it to circle
 		this.radius = Player.PL;
@@ -22,7 +22,7 @@ export class Player extends DynamicObjects {
 		this.displayLabel = true;
 	}
 
-	setCenter() {this.center = this.position;}
+	setCenter() { this.center = this.position; }
 
 	deployItem() {
 		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
@@ -31,7 +31,7 @@ export class Player extends DynamicObjects {
 		this.game.addActor(new Wall(this.game, newPos, 50, 'rgb(200, 1, 1)', orientation));
 	}
 
-	fire(hold=false) {
+	fire(hold = false) {
 		if (this.inventory.weapons.length === 0) return;
 		const weapon = this.inventory.weapons[this.inventory.equippedWeapon];
 		if (hold) {
@@ -39,7 +39,7 @@ export class Player extends DynamicObjects {
 		} else weapon.fire();
 	}
 
-	reload(){
+	reload() {
 		if (this.inventory.weapons.length === 0) return;
 		const weapon = this.inventory.weapons[this.inventory.equippedWeapon];
 		weapon.reload();
@@ -54,7 +54,7 @@ export class Player extends DynamicObjects {
 		for (let index = 0; index < this.game.actors.length; index++) {
 			const item = this.game.actors[index];
 			if (!(item instanceof Weapon)) continue;
-			
+
 			const dist = item.center.sub(this.position).norm();
 			if (dist < minDist && dist < 50) {
 				minDist = dist;
@@ -66,10 +66,15 @@ export class Player extends DynamicObjects {
 
 		const weapon = this.game.actors[minIndex];
 		weapon.position = this.position;
-		this.inventory.addWeapon(weapon);
+		const dropped = this.inventory.addWeapon(weapon);
+		if (dropped) {
+			dropped.position = dropped.position.copy();
+			this.game.addActor(dropped)
+		};
 		this.game.removeActor(weapon);
 	}
 
+	switchWeapon(i) { this.inventory.switchWeapon(i); }
 
 	draw(context) {
 		super.draw(context);
@@ -89,7 +94,7 @@ export class Wall extends StaticObjects {
 		this.w = orientation.y === 0 ? 10 : 100;
 		this.h = orientation.y === 0 ? 100 : 10;
 		this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
-		this.boundingVolume = new AABB(this.position, this.position.add(new Pair(this.w, this.h))); 
+		this.boundingVolume = new AABB(this.position, this.position.add(new Pair(this.w, this.h)));
 	}
 
 	draw(context) {
@@ -100,7 +105,7 @@ export class Wall extends StaticObjects {
 }
 
 export class Resources extends StaticObjects {
-	constructor(game, position, health, color, name){
+	constructor(game, position, health, color, name) {
 		super(game, position, health, color, true, name);
 		this.w = 75;
 		this.h = 75;

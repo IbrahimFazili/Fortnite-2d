@@ -86,7 +86,7 @@ export class Gun extends Weapon {
     }
 
     toString() {
-        return `${super.toString()} | Ammo: ${this.currentAmmo} ${this.reloading ? '(reloading)' : ''}`;
+        return `${super.toString()} | Name: ${this.label} | Ammo: ${this.currentAmmo} ${this.reloading ? '(reloading)' : ''}`;
     }
     
     step(delta) {
@@ -101,8 +101,6 @@ export class Gun extends Weapon {
             let bullet = new Bullet(this.game, newPos.copy(), this.damage, this.maxRange);
             bullet.velocity = bullet.dir.multiply(this.velocity);
             this.game.addActor(bullet);
-
-            log('fired');
 
             this.currentAmmo === 0 && this.reload();
         }
