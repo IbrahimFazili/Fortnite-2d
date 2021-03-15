@@ -30,7 +30,7 @@ class GameObject {
 		this.health = clamp(this.health + h, 0, this.maxHealth);
 	}
 	
-	step() {
+	step(delta) {
 		if (this.health === 0) {
 			this.game.removeActor(this);
 		}
@@ -92,12 +92,13 @@ export class DynamicObjects extends GameObject {
 	 * @param destroyOnCollision {boolean} Optional argument which if set to true, destroys the obj on collision
 	 * @param onCollision {function} Optinal callback which is called with the collided object on collision
 	 */
-	step(destroyOnCollision=false, onCollision=null) {
+	step(delta, destroyOnCollision=false, onCollision=null) {
 
 		super.step();
 		const oldPos = this.position.copy();
-		this.position.x = this.position.x + this.velocity.x;
-		this.position.y = this.position.y + this.velocity.y;
+		// s = ut
+		this.position.x = this.position.x + (this.velocity.x * (delta / 1000));
+		this.position.y = this.position.y + (this.velocity.y * (delta / 1000));
 		this.setCenter();
 		const collision = this.intersects();
 		if (collision) {

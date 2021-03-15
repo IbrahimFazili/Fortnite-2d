@@ -11,6 +11,7 @@ app.get('/api/test', function (req, res) {
 	res.status(200); 
 	res.json({"message":"got here"}); 
 });
+
 app.use('/',express.static('static_content'));
 
 // server helper modules needed for the main game model

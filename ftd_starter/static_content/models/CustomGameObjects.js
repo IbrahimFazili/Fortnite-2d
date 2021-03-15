@@ -45,6 +45,9 @@ export class Player extends DynamicObjects {
 		weapon.reload();
 	}
 
+	/**
+	 * Try to pickup the nearest item we can find within a certain range
+	 */
 	pickupItem() {
 		let minIndex = -1;
 		let minDist = Infinity;
@@ -63,10 +66,15 @@ export class Player extends DynamicObjects {
 
 		const weapon = this.game.actors[minIndex];
 		weapon.position = this.position;
-		this.inventory.addWeapon(weapon);
+		const dropped = this.inventory.addWeapon(weapon);
+		if (dropped) {
+			dropped.position = dropped.position.copy();
+			this.game.addActor(dropped)
+		};
 		this.game.removeActor(weapon);
 	}
 
+	switchWeapon(i) { this.inventory.switchWeapon(i); }
 
 	draw(context) {
 		super.draw(context);

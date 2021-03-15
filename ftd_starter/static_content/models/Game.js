@@ -65,9 +65,9 @@ export class Stage {
 
 	// Take one step in the animation of the game.  Do this by asking each of the actors to take a single step. 
 	// NOTE: Careful if an actor died, this may break!
-	step() {
+	step(delta) {
 		for (var i = 0; i < this.actors.length; i++) {
-			this.actors[i].step();
+			this.actors[i].step(delta);
 		}
 	}
 

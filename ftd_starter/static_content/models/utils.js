@@ -199,16 +199,24 @@ export class Inventory {
 	}
 
 	/**
-	 * add weapon to the inventory if there's space
-	 * @returns {boolean}
+	 * add weapon to the inventory if there's space, otherwise drop
+	 * the equipped weapon
+	 * 
 	 */
 	addWeapon(weapon) {
 		if (this.weapons.length < this.maxWeaponSlots) {
 			this.weapons.push(weapon);
-			return true;
+			return null;
 		}
 
-		return false;
+		const oldWeapon = this.weapons[this.equippedWeapon];
+		this.weapons[this.equippedWeapon] = weapon;
+		return oldWeapon;
+	}
+
+	switchWeapon(i) {
+		if (i > this.weapons.length - 1) return;
+		this.equippedWeapon = i;
 	}
 }
 
