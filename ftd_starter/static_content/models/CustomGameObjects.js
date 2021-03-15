@@ -99,22 +99,28 @@ export class AI extends DynamicObjects {
 	constructor(game, position, health, color) {
 		super(game, position, health, color, false, "Enemy");
 		// keeping it rectangle for now. need to change it to circle
-		this.radius = Player.PL;
+		this.radius = Player.PLAYER_SIZE;
 		this.center = this.position;
 		this.boundingVolume = new AABC(this.center, Player.PLAYER_SIZE);
 		this.inventory = new Inventory(3, 100, 360);
 		// this.inventory.addWeapon(Gun.generateAR(this.game, this.position));
 		this.displayLabel = true;
-
+		this.followPath = false;
 		this.queue = [];
 	}
 
-	findPlayer(){
+
+	step(delta) {
+		if (this.followPath) {
+			const path = this.game.internal_map_grid.findPlayer(this);
+			if (!path) console.log(path);
+			else this.velocity = path[0].multiply(100);
+		}
+		super.step(delta);
 	}
 
 	draw(context) {
 		super.draw(context);
-		this.findPlayer();
 		context.beginPath();
 		context.fillStyle = this.color;
 		// context.fillRect(this.position.x, this.position.y, this.size, this.size);

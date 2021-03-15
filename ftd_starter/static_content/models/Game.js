@@ -20,7 +20,7 @@ export class Stage {
 		this.cols = this.worldWidth / 10;
 		this.rows = this.worldHeight / 10;
 
-		this.mapObj = new Map(this, this.rows, this.cols, this.squareSize);
+		this.internal_map_grid = new Map(this, this.rows, this.cols, this.squareSize);
 
 		// the logical width and height of the stage (viewport/window)
 		this.width = window.innerWidth;
@@ -35,9 +35,11 @@ export class Stage {
 		var colour = 'rgba(0,0,0,1)';
 		var enemyColor = 'rgba(220, 40, 100, 1)';
 		var position = new Pair(Math.floor(this.width / 2), Math.floor(this.height / 2));
-		var enemyPosition = new Pair(Math.floor(this.width / 2) + 100, Math.floor(this.height / 2) + 100);
 		this.addPlayer(new Player(this, position, health, colour));
-		this.addActor(new AI(this, enemyPosition, health, enemyColor));
+		for (let index = 0; index < 2; index++) {
+			var enemyPosition = new Pair(randint(500), randint(500));
+			this.addActor(new AI(this, enemyPosition, health, enemyColor));
+		}
 		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
 		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position)))
 	}
@@ -63,12 +65,21 @@ export class Stage {
 		}
 	}
 
+	trigger() {
+		this.actors.forEach(actor => {
+			if (actor instanceof AI) actor.followPath = true;
+		});
+	}
+
 	// Take one step in the animation of the game.  Do this by asking each of the actors to take a single step. 
 	// NOTE: Careful if an actor died, this may break!
 	step(delta) {
 		for (var i = 0; i < this.actors.length; i++) {
 			this.actors[i].step(delta);
 		}
+
+		this.internal_map_grid.clearGrid();
+		this.internal_map_grid.updateGrid();
 	}
 
 	setGameWindowSize(ctx) {
@@ -103,12 +114,6 @@ export class Stage {
 
 		// draw player at the end to make sure it's drawn on top of everything else
 		this.player.draw(context);
-
-		// clear and update the grid of objects
-
-		this.mapObj.clearGrid();
-		this.mapObj.updateGrid();
-		this.mapObj.findPlayer();
 
 		context.restore();
 		

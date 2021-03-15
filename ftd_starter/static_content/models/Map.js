@@ -212,15 +212,8 @@ export class Map {
     /**
      * the main function for path finding
     */
-    findPlayer() {
-        var enemy = null;
-        for (var i = 0; i < this.game.actors.length; i++) {
-            if (this.game.actors[i].label === 'Enemy') {
-                enemy = this.game.actors[i];
-            }
-        }
-
-        var direction = this.shortestPath(enemy.position);
+    findPlayer(source) {
+        var direction = this.shortestPath(source.position);
         var vectors = this.convertToVectors(direction);
 
         return vectors;
