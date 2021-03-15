@@ -10,7 +10,7 @@ var mousePos = null;
 var debugDiv = null;
 var DEBUG_MODE = true;
 var lastRenderTime = 0;
-const FRAMES_PER_SECOND = 60;
+var delta = 0;
 
 // function showLogs() {
 // 	const curr = Date.now();
@@ -61,6 +61,7 @@ function showDebugInfo() {
 	debugDiv.append(`<span>Direction: ${stage.ptrDirection.toString()}</span><br>`);
 	debugDiv.append(`<span>Object count: ${stage.actors.length}</span><br>`);
 	debugDiv.append(`<span>Gun: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon]}</span><br>`);
+	delta > 0 && debugDiv.append(`<span>FPS: ${Math.round(1000 / delta)} (${delta.toFixed(2)} ms)</span><br>`);
 }
 
 function renderUI() {
@@ -84,7 +85,7 @@ function renderUI() {
 
 function gameLoop(t) {
 	requestAnimationFrame(gameLoop);
-	let delta = t - lastRenderTime;
+	delta = t - lastRenderTime;
 	lastRenderTime = t;
 	stage.step(delta);
 	stage.draw();

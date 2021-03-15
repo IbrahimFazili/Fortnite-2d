@@ -4,9 +4,9 @@ import { Pair } from './utils';
 export class Map {
     constructor(game, rows, cols, squaresize) {
         this.game = game;
-        this.rows = rows;
-        this.cols = cols;
-        this.squaresize = squaresize;
+        this.rows = rows / 4;
+        this.cols = cols / 4;
+        this.squaresize = squaresize * 4;
 
         //initialize grid
         this.grid = null;
@@ -36,8 +36,8 @@ export class Map {
                 var width = (this.game.actors[i].w / this.squaresize);
                 var height = (this.game.actors[i].h / this.squaresize);
                 // width 100 height 10
-                for (var w = 0; w < width; w++) {
-                    for (var h = 0; h < height; h++) {
+                for (var w = -1; w < width + 1; w++) {
+                    for (var h = -1; h < height + 1; h++) {
                         this.grid[x + w][y + h] = 'Occupied';
                     }
                 }
@@ -48,19 +48,36 @@ export class Map {
         // fix this
         var px = Math.floor(this.game.player.position.x / this.squaresize);
         var py = Math.floor(this.game.player.position.y / this.squaresize);
+        for (let i = -1; i < 2; i++) {
+            for (let j = -1; j < 2; j++) {
+                this.grid[px + i][py + j] = 'Player';
+            }
+            
+        }
         this.grid[px][py] = 'Player';
 
     }
 
     // Pathfinding source: http://gregtrowbridge.com/a-basic-pathfinding-algorithm/
 
+    copy_grid() {
+        let copy = new Array(this.rows);
+        for (let index = 0; index < copy.length; index++) copy[index] = new Array(this.cols);
+
+        for (let i = 0; i < copy.length; i++) {
+            for (let j = 0; j < copy[i].length; j++) {
+                copy[i][j] = this.grid[i][j];
+            }
+        }
+
+        return copy;
+    }
     /**
      * computes the shortest distance to the player given starting points
     */
     shortestPath(startCoordinates) {
         var distanceFromTop = Math.floor(startCoordinates.y / this.squaresize);
         var distanceFromLeft = Math.floor(startCoordinates.x / this.squaresize);
-
 
         var location = {
             distanceFromTop: distanceFromTop,
@@ -69,45 +86,18 @@ export class Map {
             status: 'Start'
         };
 
+        const dirs = ['North', 'South', 'East', 'West'];
+
         var queue = [location];
+        let grid = this.copy_grid();
 
         while (queue.length > 0) {
             var currentLocation = queue.shift();
 
-            //Explore North
-            var newLocation = this.exploreInDirection(currentLocation, 'North');
-            if (newLocation.status === 'Player') {
-                return newLocation.path;
-            }
-            else if (newLocation.status === 'Valid') {
-                queue.push(newLocation);
-            }
-
-            //Explore East
-            var newLocation = this.exploreInDirection(currentLocation, 'East');
-            if (newLocation.status === 'Player') {
-                return newLocation.path;
-            }
-            else if (newLocation.status === 'Valid') {
-                queue.push(newLocation);
-            }
-
-            //Explore South
-            var newLocation = this.exploreInDirection(currentLocation, 'South');
-            if (newLocation.status === 'Player') {
-                return newLocation.path;
-            }
-            else if (newLocation.status === 'Valid') {
-                queue.push(newLocation);
-            }
-
-            //Explore West
-            var newLocation = this.exploreInDirection(currentLocation, 'West');
-            if (newLocation.status === 'Player') {
-                return newLocation.path;
-            }
-            else if (newLocation.status === 'Valid') {
-                queue.push(newLocation);
+            for (let i = 0; i < dirs.length; i++) {
+                let newLocation = this.exploreInDirection(currentLocation, dirs[i], grid);
+                if (newLocation.status === 'Player') return newLocation.path;
+                else if (newLocation.status === 'Valid') queue.push(newLocation);
             }
         }
 
@@ -117,25 +107,21 @@ export class Map {
     /**
      * check in a particular direction
     */
-    exploreInDirection(currentLocation, direction) {
+    exploreInDirection(currentLocation, direction, grid) {
         var newPath = currentLocation.path.slice();
         newPath.push(direction);
 
         var dfl = currentLocation.distanceFromLeft;
         var dft = currentLocation.distanceFromTop;
 
-        if (direction === 'North') {
-            dft -= 1;
-        }
-        else if (direction === 'East') {
-            dfl += 1;
-        }
-        else if (direction === 'South') {
-            dft += 1;
-        }
-        else if (direction === 'West') {
-            dfl -= 1;
-        }
+        const dirMap = {
+            'North': () => dft -= 1,
+            'East': () => dfl += 1,
+            'South': () => dft += 1,
+            'West': () => dfl -= 1
+        };
+
+        dirMap[direction]();
 
 
         var newLocation = {
@@ -145,10 +131,10 @@ export class Map {
             status: 'Unknown'
         };
 
-        newLocation.status = this.locationStatus(newLocation);
+        newLocation.status = this.locationStatus(newLocation, grid);
 
         if (newLocation.status === "Valid") {
-            this.grid[newLocation.distanceFromLeft][newLocation.distanceFromTop] = 'Valid';
+            grid[newLocation.distanceFromLeft][newLocation.distanceFromTop] = 'Valid';
         }
 
         return newLocation;
@@ -157,8 +143,8 @@ export class Map {
     /**
      * check if a particular position is Empty, Occupied or Visited
     */
-    locationStatus(location) {
-        var gridSize = this.grid.length;
+    locationStatus(location, grid) {
+        var gridSize = grid.length;
         var dft = location.distanceFromTop;
         var dfl = location.distanceFromLeft;
 
@@ -168,10 +154,10 @@ export class Map {
             location.distanceFromTop >= gridSize) {
             return 'Invalid';
         }
-        else if (this.grid[dfl][dft] === 'Player') {
+        else if (grid[dfl][dft] === 'Player') {
             return 'Player';
         }
-        else if (this.grid[dfl][dft] !== 'Empty') {
+        else if (grid[dfl][dft] !== 'Empty') {
             return 'Blocked';
         }
         else {

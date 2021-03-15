@@ -1,5 +1,5 @@
 import { DynamicObjects, StaticObjects } from './GameObject';
-import { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory } from './utils';
+import { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint } from './utils';
 import { Stage } from './Game';
 import { Weapon } from './Weapons';
 
@@ -107,15 +107,24 @@ export class AI extends DynamicObjects {
 		this.displayLabel = true;
 		this.followPath = false;
 		this.queue = [];
+		this.timeSinceLastPath = 0;
 	}
 
 
 	step(delta) {
-		if (this.followPath) {
-			const path = this.game.internal_map_grid.findPlayer(this);
-			if (!path) console.log(path);
-			else this.velocity = path[0].multiply(100);
+		this.timeSinceLastPath += delta;
+		if (this.timeSinceLastPath >= 250) {
+			if (this.followPath) {
+				const path = this.game.internal_map_grid.findPlayer(this);
+				if (path.length > 0) {
+					const randVelocity = new Pair(randint(60) - 30, randint(60) - 30);
+					this.velocity = path[0].multiply(60).add(randVelocity);
+				}
+				else this.velocity = new Pair(0, 0);
+			}
+			this.timeSinceLastPath = 0;
 		}
+		
 		super.step(delta);
 	}
 

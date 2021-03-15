@@ -36,7 +36,7 @@ export class Stage {
 		var enemyColor = 'rgba(220, 40, 100, 1)';
 		var position = new Pair(Math.floor(this.width / 2), Math.floor(this.height / 2));
 		this.addPlayer(new Player(this, position, health, colour));
-		for (let index = 0; index < 2; index++) {
+		for (let index = 0; index < 15; index++) {
 			var enemyPosition = new Pair(randint(500), randint(500));
 			this.addActor(new AI(this, enemyPosition, health, enemyColor));
 		}
