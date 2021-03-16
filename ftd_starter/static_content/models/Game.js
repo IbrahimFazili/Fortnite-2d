@@ -2,7 +2,7 @@ import { clamp, Pair, randint } from './utils';
 import { Player, AI } from './CustomGameObjects';
 import { Gun } from './Weapons';
 import { Map } from './Map';
-import { Resources } from './Resources';
+import { Resource } from './Resources';
 
 export class Stage {
 	constructor(canvas, restartGame) {
@@ -44,7 +44,7 @@ export class Stage {
 		}
 		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
 		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
-		this.addActor(Resources.generateRock(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
+		this.addActor(Resource.generateRock(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
 		this.accumTime = 0;
 	}
 

@@ -1,6 +1,6 @@
 import { StaticObjects, DynamicObjects } from './GameObject';
 import { Player } from './CustomGameObjects';
-import { Pair, AABB, AABC, getMouseAngle, log } from './utils';
+import { Pair, AABB, AABC } from './utils';
 
 const GUN_IMG_SIZE_MAP = {
     'AR': new Pair(75, 45),

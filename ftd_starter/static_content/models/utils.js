@@ -243,8 +243,3 @@ export class Inventory {
 		this.equippedWeapon = i;
 	}
 }
-
-export var LOG_QUEUE = [];
-export let log = (msg) => {
-	LOG_QUEUE.push({ text: msg, timestamp: Date.now() });
-}

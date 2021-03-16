@@ -4,10 +4,10 @@ import { randint, Pair, clamp } from './utils';
 class GameObject {
 
 	/**
-	 * @param game {Stage}
-	 * @param position {Pair}
-	 * @param health {Number}
-	 * @param color {string} RGB string
+	 * @param {Stage} game
+	 * @param {Pair} position
+	 * @param {Number} health
+	 * @param {string} color RGB string
 	 */
 	constructor(game, position, health, color = undefined, collison = true, name = "") {
 		this.game = game;
@@ -26,6 +26,9 @@ class GameObject {
 		return `Pos: ${this.position.toString()} | Health: ${this.health} | Collidable: ${this.isCollidable}`;
 	}
 
+	/**
+	 * Callback to execute on destruction of this object from the game world
+	 */
 	onDestroy() {}
 
 	updateHealth(h) {
@@ -94,15 +97,18 @@ export class DynamicObjects extends GameObject {
 		return `${super.toString()} | v ${this.velocity.toString()}`;
 	}
 
+	/**
+	 * Update the object's center position based on its current position
+	 */
 	setCenter() {}
 
 	/**
 	 * Called on every game tick (every time the game state updates)
-	 * @param destroyOnCollision {boolean} Optional argument which if set to true, destroys the obj on collision
-	 * @param onCollision {function} Optinal callback which is called with the collided object on collision
+	 * @param {Number} delta time (in ms) since the last call to step
+	 * @param {boolean} destroyOnCollision Optional argument which if set to true, destroys the obj on collision
+	 * @param {CallableFunction} onCollision Optinal callback which is called with the collided object on collision
 	 */
 	step(delta, destroyOnCollision=false, onCollision=null) {
-
 		super.step();
 		const oldPos = this.position.copy();
 		// s = ut

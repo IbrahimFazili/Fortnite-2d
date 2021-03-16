@@ -2,6 +2,7 @@ import { DynamicObjects, StaticObjects } from './GameObject';
 import { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint } from './utils';
 import { Stage } from './Game';
 import { Gun, Weapon } from './Weapons';
+import { Resource } from './Resources';
 
 export class Player extends DynamicObjects {
 	/**
@@ -35,6 +36,14 @@ export class Player extends DynamicObjects {
 		this.game.addActor(new Wall(this.game, newPos, 50, 'rgb(200, 1, 1)', orientation));
 	}
 
+	/**
+	 * Fire the weapon in hand
+	 * @param {boolean} hold wheter to tap fire or auto fire (hold trigger -> hold = true)
+	 * @param {Pair} dir unit direction vector along which to fire in
+	 * @param {boolean} reloadSound whether to play the reload sound or not
+	 * @returns {NodeJS.Timeout} return value of the setInterval call used to simulate auto fire
+	 * at weapon's rate of fire
+	 */
 	fire(hold = false, dir = null, reloadSound = true) {
 		if (this.inventory.weapons.length === 0) return;
 		const weapon = this.inventory.weapons[this.inventory.equippedWeapon];
@@ -44,10 +53,24 @@ export class Player extends DynamicObjects {
 		} else weapon.fire(dir ? dir : this.game.ptrDirection, reloadSound);
 	}
 
+	/**
+	 * reload the equipped weapon
+	 * @param {boolean} playSound whether to play the reload sound or not (default true)
+	 */
 	reload(playSound = true) {
 		if (this.inventory.weapons.length === 0) return;
 		const weapon = this.inventory.weapons[this.inventory.equippedWeapon];
 		weapon.reload(playSound);
+	}
+
+	pickupWeapon(weapon) {
+		weapon.position = this.position;
+		const dropped = this.inventory.addWeapon(weapon);
+		if (dropped) {
+			dropped.position = dropped.position.copy();
+			this.game.addActor(dropped)
+		};
+		this.game.removeActor(weapon);
 	}
 
 	/**
@@ -58,7 +81,7 @@ export class Player extends DynamicObjects {
 		let minDist = Infinity;
 		for (let index = 0; index < this.game.actors.length; index++) {
 			const item = this.game.actors[index];
-			if (!(item instanceof Weapon)) continue;
+			if (!(item instanceof Weapon) || !(item instanceof Resource)) continue;
 
 			const dist = item.center.sub(this.position).norm();
 			if (dist < minDist && dist < 50) {
@@ -69,14 +92,9 @@ export class Player extends DynamicObjects {
 
 		if (minIndex === -1) return;
 
-		const weapon = this.game.actors[minIndex];
-		weapon.position = this.position;
-		const dropped = this.inventory.addWeapon(weapon);
-		if (dropped) {
-			dropped.position = dropped.position.copy();
-			this.game.addActor(dropped)
-		};
-		this.game.removeActor(weapon);
+		const item = this.game.actors[minIndex];
+		if (item instanceof Weapon) this.pickupWeapon(item);
+		else this.inventory.brick += item.harvest();
 	}
 
 	switchWeapon(i) { this.inventory.switchWeapon(i); }

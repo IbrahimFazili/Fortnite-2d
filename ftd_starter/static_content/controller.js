@@ -1,5 +1,5 @@
 import { Stage } from './models/Game';
-import { Pair, LOG_QUEUE } from './models/utils';
+import { Pair } from './models/utils';
 
 var stage = null;
 var view = null;
@@ -11,16 +11,6 @@ var debugDiv = null;
 var DEBUG_MODE = true;
 var lastRenderTime = 0;
 var delta = 0;
-
-// function showLogs() {
-// 	const curr = Date.now();
-// 	// need to fix this
-// 	// LOG_QUEUE = LOG_QUEUE.filter((log) => (curr - log.timestamp < 1000 * 5));
-
-// 	LOG_QUEUE.forEach(log => {
-// 		debugDiv.append(`<span>[LOG] ${log.text}</span><br>`);
-// 	});
-// }
 
 function restartGame() {
 	stage = new Stage(document.getElementById('stage'), restartGame);
