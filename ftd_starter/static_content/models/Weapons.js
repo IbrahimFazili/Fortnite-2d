@@ -26,12 +26,12 @@ export class Weapon extends StaticObjects{
 }
 
 export class Bullet extends DynamicObjects {
-    constructor(game, position, damage, maxRange) {
+    constructor(game, position, damage, maxRange, dir) {
         super(game, position, Infinity, 'rgb(255, 255, 255)');
         this.damage = damage;
         this.radius = 2.5;
         this.maxRange = maxRange;
-        this.dir = this.game.ptrDirection.copy();
+        this.dir = dir.copy();
         this.boundingVolume = new AABC(this.position, this.radius);
         this.distanceTravelled = 0;
         // this
@@ -69,7 +69,7 @@ export class Bullet extends DynamicObjects {
  * */ 
 export class Gun extends Weapon {
     constructor(game, position, color, damage, clipSize, fireRate, maxRange,
-        reloadTime, image=undefined, fireSound=null, reloadSound=null, name="Gun"){
+        reloadTime, image=undefined, reloadSound=null, name="Gun"){
         super(game, position, Infinity, color, name);
         this.damage = damage;
         this.fireRate = fireRate;
@@ -82,7 +82,8 @@ export class Gun extends Weapon {
         this.reloading = false;
         this.reloadTime = reloadTime;
         this.reloadSound = reloadSound;
-        this.fireSound = fireSound;
+
+        if (this.reloadSound) this.reloadSound.volume = 0.5;
         // burst or auto?
     }
 
@@ -94,23 +95,22 @@ export class Gun extends Weapon {
         super.step(delta);
     }
 
-    fire() {
+    fire(dir, playReloadSound) {
         if (this.reloading) return;
         if (this.currentAmmo > 0){
             this.currentAmmo -= 1;
-            const newPos = this.position.add(this.game.ptrDirection.multiply(Player.PLAYER_SIZE + 0.1));
-            let bullet = new Bullet(this.game, newPos.copy(), this.damage, this.maxRange);
+            const newPos = this.position.add(dir.multiply(Player.PLAYER_SIZE + 0.1));
+            let bullet = new Bullet(this.game, newPos.copy(), this.damage, this.maxRange, dir);
             bullet.velocity = bullet.dir.multiply(this.velocity);
             this.game.addActor(bullet);
-            this.fireSound && this.fireSound.cloneNode(true).play();
-            this.currentAmmo === 0 && this.reload();
+            this.currentAmmo === 0 && this.reload(playReloadSound);
         }
     }
 
-    reload() {
-        if (this.reloading) return;
+    reload(sound) {
+        if (this.reloading || this.currentAmmo === this.clipSize) return;
         this.reloading = true;
-        this.reloadSound && this.reloadSound.play();
+        sound && this.reloadSound && this.reloadSound.play();
         // @todo depends how much is in reserves
         setTimeout(() => {
             if (this.currentAmmo < this.clipSize) {
@@ -123,11 +123,11 @@ export class Gun extends Weapon {
 
     static generateAR(game, position) {
         return new Gun(game, position, 'rgb(0, 0, 0)', 11, 25, 280, 1500, 1500, '../assets/AR.png',
-        new Audio('../assets/ar-fire.mp3'), new Audio('../assets/ar-reload.mp3'), 'AR');
+        new Audio('../assets/ar-reload.mp3'), 'AR');
     }
 
     static generateSMG(game, position) {
-        return new Gun(game, position, 'rgb(0, 0, 0)', 6, 32, 420, 1100, 1000, '../assets/SMG.png', 'SMG');
+        return new Gun(game, position, 'rgb(0, 0, 0)', 6, 32, 420, 1100, 1000, '../assets/SMG.png', null, 'SMG');
     }
 
     draw(context) {
@@ -148,7 +148,7 @@ export class Axe extends Weapon{
         this.damage = 10;
     }
 
-    step(){
+    step() {
         
     }
 }

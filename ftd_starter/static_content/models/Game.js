@@ -4,8 +4,9 @@ import { Gun } from './Weapons';
 import { Map } from './Map';
 
 export class Stage {
-	constructor(canvas) {
+	constructor(canvas, restartGame) {
 		this.canvas = canvas;
+		this.restartCallback = restartGame;
 
 		this.actors = []; // all actors on this stage (monsters, player, boxes, ...)
 		this.player = null; // a special actor, the player
@@ -45,6 +46,10 @@ export class Stage {
 		this.accumTime = 0;
 	}
 
+	resetGame() {
+		this.restartCallback();
+	}
+
 	addPlayer(player) {
 		this.addActor(player);
 		this.player = player;
@@ -62,7 +67,8 @@ export class Stage {
 	removeActor(actor) {
 		var index = this.actors.indexOf(actor);
 		if (index != -1) {
-			this.actors.splice(index, 1);
+			const destroyed = this.actors.splice(index, 1)[0];
+			destroyed.onDestroy();
 		}
 	}
 

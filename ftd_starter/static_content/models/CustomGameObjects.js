@@ -1,7 +1,7 @@
 import { DynamicObjects, StaticObjects } from './GameObject';
 import { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint } from './utils';
 import { Stage } from './Game';
-import { Weapon } from './Weapons';
+import { Gun, Weapon } from './Weapons';
 
 export class Player extends DynamicObjects {
 	/**
@@ -24,6 +24,10 @@ export class Player extends DynamicObjects {
 
 	setCenter() { this.center = this.position; }
 
+	onDestroy() {
+		this.game.resetGame();
+	}
+
 	deployItem() {
 		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
 		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
@@ -31,18 +35,19 @@ export class Player extends DynamicObjects {
 		this.game.addActor(new Wall(this.game, newPos, 50, 'rgb(200, 1, 1)', orientation));
 	}
 
-	fire(hold = false) {
+	fire(hold = false, dir = null, reloadSound = true) {
 		if (this.inventory.weapons.length === 0) return;
 		const weapon = this.inventory.weapons[this.inventory.equippedWeapon];
 		if (hold) {
-			return setInterval(() => weapon.fire(), Math.round((1000 * 60) / weapon.fireRate));
-		} else weapon.fire();
+			return setInterval(() => weapon.fire(dir ? dir : this.game.ptrDirection, reloadSound),
+				Math.round((1000 * 60) / weapon.fireRate));
+		} else weapon.fire(dir ? dir : this.game.ptrDirection, reloadSound);
 	}
 
-	reload() {
+	reload(playSound = true) {
 		if (this.inventory.weapons.length === 0) return;
 		const weapon = this.inventory.weapons[this.inventory.equippedWeapon];
-		weapon.reload();
+		weapon.reload(playSound);
 	}
 
 	/**
@@ -102,23 +107,36 @@ export class AI extends Player {
 		// this.inventory.addWeapon(Gun.generateAR(this.game, this.position));
 		this.followPath = false;
 		this.timeSinceLastPath = 0;
+		this.inventory.addWeapon(Gun.generateAR(this.game, this.position));
 	}
 
+	onDestroy() {}
 
 	step(delta) {
 		this.timeSinceLastPath += delta;
-		if (this.timeSinceLastPath >= 0) {
-			if (this.followPath) {
-				const path = this.game.internal_map_grid.findPlayer(this);
-				if (path.length > 0) {
-					const randVelocity = new Pair(randint(60) - 30, randint(60) - 30);
-					this.velocity = path[0].multiply(120).add(randVelocity);
-				}
-				else this.velocity = new Pair(0, 0);
+		// if (this.timeSinceLastPath >= 0) {
+		if (this.followPath) {
+			const path = this.game.internal_map_grid.findPlayer(this);
+			if (path.length > 0) {
+				const randVelocity = new Pair(randint(60) - 30, randint(60) - 30);
+				this.velocity = path[0].multiply(120).add(randVelocity);
 			}
-			this.timeSinceLastPath = 0;
+			else this.velocity = new Pair(0, 0);
 		}
-		
+		// this.timeSinceLastPath = 0;
+		// }
+
+		if (this.game.player) {
+			let playerDir = this.game.player.position.sub(this.position);
+			const dist = playerDir.norm();
+			if (dist <= 400 && this.timeSinceLastPath >= 500) {
+				playerDir.normalize();
+				super.fire(false, playerDir, false);
+				this.timeSinceLastPath = 0;
+			} else super.reload(false);
+		}
+
+
 		super.step(delta);
 	}
 

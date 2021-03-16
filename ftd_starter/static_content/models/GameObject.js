@@ -26,6 +26,8 @@ class GameObject {
 		return `Pos: ${this.position.toString()} | Health: ${this.health} | Collidable: ${this.isCollidable}`;
 	}
 
+	onDestroy() {}
+
 	updateHealth(h) {
 		this.health = clamp(this.health + h, 0, this.maxHealth);
 	}

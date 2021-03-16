@@ -22,8 +22,12 @@ var delta = 0;
 // 	});
 // }
 
+function restartGame() {
+	stage = new Stage(document.getElementById('stage'), restartGame);
+}
+
 function setupGame() {
-	stage = new Stage(document.getElementById('stage'));
+	stage = new Stage(document.getElementById('stage'), restartGame);
 
 	// https://javascript.info/keyboard-events
 	document.addEventListener('keydown', () => moveByKey(event, false));
