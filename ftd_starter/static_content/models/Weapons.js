@@ -68,7 +68,8 @@ export class Bullet extends DynamicObjects {
  * For Gun varieties we have Pistols, SMG, AR
  * */ 
 export class Gun extends Weapon {
-    constructor(game, position, color, damage, clipSize, fireRate, maxRange, reloadTime, image=undefined, name="Gun"){
+    constructor(game, position, color, damage, clipSize, fireRate, maxRange,
+        reloadTime, image=undefined, fireSound=null, reloadSound=null, name="Gun"){
         super(game, position, Infinity, color, name);
         this.damage = damage;
         this.fireRate = fireRate;
@@ -80,7 +81,8 @@ export class Gun extends Weapon {
         this.velocity = 750;
         this.reloading = false;
         this.reloadTime = reloadTime;
-        this.reloadSound = new Audio('../assets/ar-reload.mp3');
+        this.reloadSound = reloadSound;
+        this.fireSound = fireSound;
         // burst or auto?
     }
 
@@ -100,7 +102,7 @@ export class Gun extends Weapon {
             let bullet = new Bullet(this.game, newPos.copy(), this.damage, this.maxRange);
             bullet.velocity = bullet.dir.multiply(this.velocity);
             this.game.addActor(bullet);
-
+            this.fireSound && this.fireSound.cloneNode(true).play();
             this.currentAmmo === 0 && this.reload();
         }
     }
@@ -108,7 +110,7 @@ export class Gun extends Weapon {
     reload() {
         if (this.reloading) return;
         this.reloading = true;
-        this.reloadSound.play();
+        this.reloadSound && this.reloadSound.play();
         // @todo depends how much is in reserves
         setTimeout(() => {
             if (this.currentAmmo < this.clipSize) {
@@ -120,7 +122,8 @@ export class Gun extends Weapon {
     }
 
     static generateAR(game, position) {
-        return new Gun(game, position, 'rgb(0, 0, 0)', 11, 25, 280, 1500, 1500, '../assets/AR.png', 'AR');
+        return new Gun(game, position, 'rgb(0, 0, 0)', 11, 25, 280, 1500, 1500, '../assets/AR.png',
+        new Audio('../assets/ar-fire.mp3'), new Audio('../assets/ar-reload.mp3'), 'AR');
     }
 
     static generateSMG(game, position) {
