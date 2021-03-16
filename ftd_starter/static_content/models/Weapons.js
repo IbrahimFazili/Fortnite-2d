@@ -127,7 +127,8 @@ export class Gun extends Weapon {
     }
 
     static generateSMG(game, position) {
-        return new Gun(game, position, 'rgb(0, 0, 0)', 6, 32, 420, 1100, 1000, '../assets/SMG.png', 'SMG');
+        return new Gun(game, position, 'rgb(0, 0, 0)', 6, 32, 420, 1100, 1000, '../assets/SMG.png', 
+        new Audio('../assets/smg-reload.mp3') ,'SMG');
     }
 
     draw(context) {
