@@ -3,8 +3,9 @@ import {AABB, Pair} from './utils';
 
 const RESOURCE_IMG_SIZE = {
     'Rock': new Pair(75, 45),
-    'Ammo': new Pair(55, 35),
+    'Iron': new Pair(55, 35),
 };
+
 
 export class Resources extends StaticObjects{
     constructor(game, position, health, color, image=null, name=""){
@@ -27,8 +28,21 @@ export class Resources extends StaticObjects{
         }
     }
 
+    generateRandomHealth(){
+        var i = Math.floor(Math.random() * 4);
+        return health_val[i];
+    }
+
     static generateRock(game, position){
-        return new Resources(game, position, 100, 'rgb(0,0,0)', '../assets/rock.png', 'Rock');
+        const health_val = [10, 20, 30, 40];
+        const helth = health_val[Math.floor(Math.random() * 4)];
+        return new Resources(game, position, helth, 'rgb(0,0,0)', '../assets/rock.png', 'Rock');
+    }
+
+    static generateIron(game, position){
+        const health_val = [10, 20, 30, 40];
+        const helth = health_val[Math.floor(Math.random() * 4)];
+        return new Resources(game, position, helth, 'rgb(0,0,0)', '../assets/iron.png', 'Iron');
     }
 }
 

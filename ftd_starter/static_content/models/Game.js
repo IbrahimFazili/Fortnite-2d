@@ -38,13 +38,15 @@ export class Stage {
 		var enemyColor = 'rgba(220, 40, 100, 1)';
 		var position = new Pair(Math.floor(this.width / 2), Math.floor(this.height / 2));
 		this.addPlayer(new Player(this, position, health, colour));
-		for (let index = 0; index < 5; index++) {
-			var enemyPosition = new Pair(randint(500), randint(500));
-			this.addActor(new AI(this, enemyPosition, health, enemyColor));
-		}
+		// for (let index = 0; index < 5; index++) {
+		// 	var enemyPosition = new Pair(randint(500), randint(500));
+		// 	this.addActor(new AI(this, enemyPosition, health, enemyColor));
+		// }
 		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
 		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
 		this.addActor(Resources.generateRock(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
+		this.addActor(Resources.generateIron(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
+
 		this.accumTime = 0;
 	}
 

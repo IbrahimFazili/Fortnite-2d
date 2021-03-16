@@ -109,6 +109,7 @@ function moveByKey(event, released) {
 	if (key === 'f' && !released) stage.player.pickupItem();
 	if (key === 'r' && !released) stage.player.reload();
 	if (key === 'i' && !released) stage.trigger();
+	if (key === 'c' && !released) stage.player.mine();
 	if (Number(key) && !released) stage.player.switchWeapon(Number(key) - 1);
 	var moveMap = {
 		'a': new Pair(-100, 0),

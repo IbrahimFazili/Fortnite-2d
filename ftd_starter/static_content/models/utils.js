@@ -216,9 +216,8 @@ export class Inventory {
 		this.equippedWeapon = 0;
 
 		this.weapons = [];
-		this.wood = 0;
 		this.brick = 0;
-		this.metal = 0;
+		this.iron = 0;
 		this.ammo = 0;
 	}
 
@@ -241,6 +240,18 @@ export class Inventory {
 	switchWeapon(i) {
 		if (i > this.weapons.length - 1) return;
 		this.equippedWeapon = i;
+	}
+
+	addResource(resource){
+
+		switch (resource){
+			case 'Rock':
+				this.brick += 10;
+				break;
+			
+			case 'Iron':
+				this.iron += 10;
+		}
 	}
 }
 

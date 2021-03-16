@@ -2,6 +2,7 @@ import { DynamicObjects, StaticObjects } from './GameObject';
 import { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint } from './utils';
 import { Stage } from './Game';
 import { Gun, Weapon } from './Weapons';
+import { Resources } from './Resources';
 
 export class Player extends DynamicObjects {
 	/**
@@ -61,7 +62,7 @@ export class Player extends DynamicObjects {
 			if (!(item instanceof Weapon)) continue;
 
 			const dist = item.center.sub(this.position).norm();
-			if (dist < minDist && dist < 50) {
+			if (dist < minDist && dist < 60) {
 				minDist = dist;
 				minIndex = index;
 			}
@@ -77,6 +78,29 @@ export class Player extends DynamicObjects {
 			this.game.addActor(dropped)
 		};
 		this.game.removeActor(weapon);
+	}
+
+	mine(){
+		let minIndex = -1;
+		let minDist = Infinity;
+		for (let index = 0; index < this.game.actors.length; index++){
+			const item = this.game.actors[index];
+			if (!(item instanceof Resources)) continue;
+			
+			const dist = item.center.sub(this.position).norm();
+			if (dist < minDist && dist < 60){
+				minDist = dist;
+				minIndex = index;
+			}
+		}
+
+		if (minIndex === -1) return;
+		const resource = this.game.actors[minIndex];
+
+		resource.updateHealth(-10);
+
+		// add the resource to inventory
+		this.inventory.addResource(resource.label);
 	}
 
 	switchWeapon(i) { this.inventory.switchWeapon(i); }
@@ -166,14 +190,4 @@ export class Wall extends StaticObjects {
 	}
 }
 
-export class Resources extends StaticObjects {
-	constructor(game, position, health, color, name) {
-		super(game, position, health, color, true, name);
-		this.w = 75;
-		this.h = 75;
-		this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
-		const value = [10, 20, 30];
-		this.quantity = value[randint(2)];
-	}
-}
 
