@@ -2,7 +2,7 @@ import { clamp, Pair, randint } from './utils';
 import { Player, AI } from './CustomGameObjects';
 import { Gun } from './Weapons';
 import { Map } from './Map';
-import { Resources } from './Resources';
+import { Resource } from './Resources';
 
 export class Stage {
 	constructor(canvas, restartGame) {
@@ -12,6 +12,7 @@ export class Stage {
 		this.actors = []; // all actors on this stage (monsters, player, boxes, ...)
 		this.player = null; // a special actor, the player
 
+		this.isPaused = false;
 		this.squareSize = 20;
 
 		// logical width and height of the world (map)
@@ -38,15 +39,14 @@ export class Stage {
 		var enemyColor = 'rgba(220, 40, 100, 1)';
 		var position = new Pair(Math.floor(this.width / 2), Math.floor(this.height / 2));
 		this.addPlayer(new Player(this, position, health, colour));
-		// for (let index = 0; index < 5; index++) {
-		// 	var enemyPosition = new Pair(randint(500), randint(500));
-		// 	this.addActor(new AI(this, enemyPosition, health, enemyColor));
-		// }
+		for (let index = 0; index < 5; index++) {
+			var enemyPosition = new Pair(randint(500), randint(500));
+			this.addActor(new AI(this, enemyPosition, health, enemyColor));
+		}
 		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
 		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
-		this.addActor(Resources.generateRock(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
-		this.addActor(Resources.generateIron(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
-
+		this.addActor(Resource.generateRock(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
+		this.addActor(Resource.generateARAmmo(this, (new Pair(randint(600), randint(600))).add(this.player.position)));
 		this.accumTime = 0;
 	}
 
@@ -76,6 +76,10 @@ export class Stage {
 		}
 	}
 
+	togglePause(){
+		this.isPaused = !this.isPaused;
+	}
+
 	trigger() {
 		this.actors.forEach(actor => {
 			if (actor instanceof AI) actor.followPath = true;
@@ -85,6 +89,7 @@ export class Stage {
 	// Take one step in the animation of the game.  Do this by asking each of the actors to take a single step. 
 	// NOTE: Careful if an actor died, this may break!
 	step(delta) {
+		if (this.isPaused) return;
 		for (var i = 0; i < this.actors.length; i++) {
 			this.actors[i].step(delta);
 		}

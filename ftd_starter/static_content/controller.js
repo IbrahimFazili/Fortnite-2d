@@ -1,5 +1,5 @@
 import { Stage } from './models/Game';
-import { Pair, LOG_QUEUE } from './models/utils';
+import { Pair } from './models/utils';
 
 var stage = null;
 var view = null;
@@ -11,16 +11,7 @@ var debugDiv = null;
 var DEBUG_MODE = true;
 var lastRenderTime = 0;
 var delta = 0;
-
-// function showLogs() {
-// 	const curr = Date.now();
-// 	// need to fix this
-// 	// LOG_QUEUE = LOG_QUEUE.filter((log) => (curr - log.timestamp < 1000 * 5));
-
-// 	LOG_QUEUE.forEach(log => {
-// 		debugDiv.append(`<span>[LOG] ${log.text}</span><br>`);
-// 	});
-// }
+var pauseStatus = false;
 
 function restartGame() {
 	stage = new Stage(document.getElementById('stage'), restartGame);
@@ -33,10 +24,12 @@ function setupGame() {
 	document.addEventListener('keydown', () => moveByKey(event, false));
 	document.addEventListener('keyup', () => moveByKey(event, true));
 	document.addEventListener('click', (event) => {
-		stage.player.fire();
+		if (!pauseStatus)
+			stage.player.fire();
 	});
 	document.addEventListener('mousedown', (event) => {
-		interval = stage.player.fire(true);
+		if (!pauseStatus)
+			interval = stage.player.fire(true);
 	});
 
 	document.addEventListener('mouseup', (event) => {
@@ -64,7 +57,7 @@ function showDebugInfo() {
 	debugDiv.append(`<span>Mouse: (${mPos.x.toFixed(2)}, ${mPos.y.toFixed(2)})</span><br>`);
 	debugDiv.append(`<span>Direction: ${stage.ptrDirection.toString()}</span><br>`);
 	debugDiv.append(`<span>Object count: ${stage.actors.length}</span><br>`);
-	// debugDiv.append(`<span>Gun: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon]}</span><br>`);
+	// debugDiv.append(`<span>Gun: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].currentAmmo}</span><br>`);
 	delta > 0 && debugDiv.append(`<span>FPS: ${Math.round(1000 / delta)} (${delta.toFixed(2)} ms)</span><br>`);
 }
 
@@ -100,17 +93,17 @@ function startGame() {
 	requestAnimationFrame(gameLoop);
 }
 function pauseGame() {
-	clearInterval(interval);
-	interval = null;
+	stage.togglePause();
 }
 function moveByKey(event, released) {
 	var key = event.key;
-	if (key === 'x' && !released) stage.player.deployItem();
-	if (key === 'f' && !released) stage.player.pickupItem();
-	if (key === 'r' && !released) stage.player.reload();
+	if (key === 'x' && !released && !pauseStatus) stage.player.deployItem();
+	if (key === 'f' && !released && !pauseStatus) stage.player.pickupItem();
+	if (key === 'r' && !released && !pauseStatus) stage.player.reload();
 	if (key === 'i' && !released) stage.trigger();
-	if (key === 'c' && !released) stage.player.mine();
+	if (key === 'Escape' && !released) togglePause();
 	if (Number(key) && !released) stage.player.switchWeapon(Number(key) - 1);
+	
 	var moveMap = {
 		'a': new Pair(-100, 0),
 		's': new Pair(0, 100),
@@ -130,13 +123,26 @@ function moveByKey(event, released) {
 		return;
 	}
 
-	if (key in moveMap) {
+	if (key in moveMap && !pauseStatus) {
 		const keyIndex = lastKey.findIndex((value) => value === key);
 		if (keyIndex === -1) {
 			lastKey.push(key);
 			const p = stage.player;
 			p.velocity = p.velocity.add(moveMap[key])
 		}
+	}
+}
+
+function togglePause(){
+	if (!pauseStatus){
+		pauseStatus = true;
+		pauseGame();
+		$("#overlay").show();
+	}
+	else{
+		pauseStatus = false;
+		pauseGame();
+		$("#overlay").hide();
 	}
 }
 
@@ -197,6 +203,7 @@ function login() {
 
 		$("#landing").hide();
 		$("#ui_play").show();
+		$("#overlay").hide();
 
 		setupGame();
 		startGame();

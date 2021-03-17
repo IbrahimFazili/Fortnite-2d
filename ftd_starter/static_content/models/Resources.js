@@ -1,24 +1,35 @@
 import { StaticObjects } from "./GameObject";
-import {AABB, Pair} from './utils';
+import { AABB, Pair } from './utils';
 
 const RESOURCE_IMG_SIZE = {
     'Rock': new Pair(75, 45),
     'Iron': new Pair(55, 35),
+    'AR Ammo': new Pair(60, 60,)
 };
 
-
-export class Resources extends StaticObjects{
-    constructor(game, position, health, color, image=null, name=""){
-        super(game, position, health, color, true, name);
+export class Resource extends StaticObjects {
+    constructor(game, position, health, harvestCount, image = null, name = "") {
+        super(game, position, health, 'rgb(0,0,0)', true, name);
         this.image = image ? new Image(this.w, this.h) : undefined;
         if (image) this.image.src = image;
         this.w = name in RESOURCE_IMG_SIZE ? RESOURCE_IMG_SIZE[name].x : 55;
-		this.h = name in RESOURCE_IMG_SIZE ? RESOURCE_IMG_SIZE[name].y : 35;
-		this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
-		this.boundingVolume = new AABB(this.position, this.position.add(new Pair(this.w, this.h)));
+        this.h = name in RESOURCE_IMG_SIZE ? RESOURCE_IMG_SIZE[name].y : 35;
+        this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
+        this.boundingVolume = new AABB(this.position, this.position.add(new Pair(this.w, this.h)));
+        this.harvestCount = harvestCount;
     }
 
-    draw(context){
+    /**
+     * Transfer resource to player
+     */
+    harvest() {
+        this.health -= this.harvestCount;
+        if (this.health <= 0) this.game.removeActor(this);
+
+        return this.harvestCount;
+    }
+
+    draw(context) {
         super.draw(context);
         if (this.image) {
             context.drawImage(this.image, this.position.x, this.position.y, this.w, this.h);
@@ -28,21 +39,20 @@ export class Resources extends StaticObjects{
         }
     }
 
-    generateRandomHealth(){
-        var i = Math.floor(Math.random() * 4);
-        return health_val[i];
+    static generateRock(game, position) {
+        return new Resource(game, position, 100, 10, '../assets/rock.png', 'Rock');
     }
 
-    static generateRock(game, position){
-        const health_val = [10, 20, 30, 40];
-        const helth = health_val[Math.floor(Math.random() * 4)];
-        return new Resources(game, position, helth, 'rgb(0,0,0)', '../assets/rock.png', 'Rock');
+    static generateSteel(game, position){
+        return new Resource(game, position, 100, 10, '../assets/iron.png', 'Steel');
     }
 
-    static generateIron(game, position){
-        const health_val = [10, 20, 30, 40];
-        const helth = health_val[Math.floor(Math.random() * 4)];
-        return new Resources(game, position, helth, 'rgb(0,0,0)', '../assets/iron.png', 'Iron');
+    static generateARAmmo(game, position){
+        return new Resource(game, position, 40, 10, '../assets/ar-ammo.png', 'AR Ammo');
+    }
+
+    static generateSMGAmmo(game, position){
+        return new Resource(game, position, 40, 10, '../assets/smg-ammo.png', 'SMG Ammo');
     }
 }
 

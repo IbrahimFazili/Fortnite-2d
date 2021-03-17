@@ -217,8 +217,9 @@ export class Inventory {
 
 		this.weapons = [];
 		this.brick = 0;
-		this.iron = 0;
-		this.ammo = 0;
+		this.steel = 0;
+		this.ARammo = 0;
+		this.SMGammo = 0;
 	}
 
 	/**
@@ -242,20 +243,4 @@ export class Inventory {
 		this.equippedWeapon = i;
 	}
 
-	addResource(resource){
-
-		switch (resource){
-			case 'Rock':
-				this.brick += 10;
-				break;
-			
-			case 'Iron':
-				this.iron += 10;
-		}
-	}
-}
-
-export var LOG_QUEUE = [];
-export let log = (msg) => {
-	LOG_QUEUE.push({ text: msg, timestamp: Date.now() });
 }

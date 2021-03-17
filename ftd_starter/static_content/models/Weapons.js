@@ -1,6 +1,6 @@
 import { StaticObjects, DynamicObjects } from './GameObject';
 import { Player } from './CustomGameObjects';
-import { Pair, AABB, AABC, getMouseAngle, log } from './utils';
+import { Pair, AABB, AABC, clamp } from './utils';
 
 const GUN_IMG_SIZE_MAP = {
     'AR': new Pair(75, 45),
@@ -112,6 +112,11 @@ export class Gun extends Weapon {
         this.reloading = true;
         sound && this.reloadSound && this.reloadSound.play();
         // @todo depends how much is in reserves
+        // if (this.game.inventory.ammo > 0){
+        //     var amount = this.clipSize - this.currentAmmo;
+        //     this.currentAmmo += clamp(amount, 0, this.game.inventory.ammo - amount);
+        //     this.game.inventory.ammo -= clamp(amount, 0, this.game.inventory.ammo - amount);
+        // }
         setTimeout(() => {
             if (this.currentAmmo < this.clipSize) {
                 this.currentAmmo += (this.clipSize - this.currentAmmo);
