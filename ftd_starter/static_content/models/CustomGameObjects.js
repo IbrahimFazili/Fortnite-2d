@@ -29,11 +29,24 @@ export class Player extends DynamicObjects {
 		this.game.resetGame();
 	}
 
+	// 1 Wall = 5 bricks
 	deployItem() {
+		if (this.game.player.inventory.brick < 5) return;
+		this.game.player.inventory.brick -= 5;
 		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
 		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
 			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
 		this.game.addActor(new Wall(this.game, newPos, 50, 'rgb(200, 1, 1)', orientation));
+	}
+
+	// 1 Wall = 10 steel
+	deploySteelWall(){
+		if (this.game.player.inventory.steel < 10) return;
+		this.game.player.inventory.steel -= 10;
+		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
+		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
+			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
+		this.game.addActor(new Wall(this.game, newPos, 100, 'rgb(67, 70, 75)', orientation));
 	}
 
 	/**
@@ -202,5 +215,3 @@ export class Wall extends StaticObjects {
 		context.fillRect(this.position.x, this.position.y, this.w, this.h);
 	}
 }
-
-

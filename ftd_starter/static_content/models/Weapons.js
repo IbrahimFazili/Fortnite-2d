@@ -93,6 +93,7 @@ export class Gun extends Weapon {
     
     step(delta) {
         super.step(delta);
+
     }
 
     fire(dir, playReloadSound) {
@@ -111,12 +112,23 @@ export class Gun extends Weapon {
         if (this.reloading || this.currentAmmo === this.clipSize) return;
         this.reloading = true;
         sound && this.reloadSound && this.reloadSound.play();
-        // @todo depends how much is in reserves
-        // if (this.game.inventory.ammo > 0){
-        //     var amount = this.clipSize - this.currentAmmo;
-        //     this.currentAmmo += clamp(amount, 0, this.game.inventory.ammo - amount);
-        //     this.game.inventory.ammo -= clamp(amount, 0, this.game.inventory.ammo - amount);
-        // }
+
+        if (this.label === 'AR'){
+            if (this.game.player.inventory.ARammo > 0){
+                var amount = this.clipSize - this.currentAmmo;
+                this.currentAmmo += clamp(amount, 0, this.game.player.inventory.ARammo - amount);
+                this.game.player.inventory.ARammo -= clamp(amount, 0, this.game.player.inventory.ARammo - amount);
+            }
+        }
+        else{
+            if (this.game.player.inventory.SMGammo > 0){
+                var amount = this.clipSize - this.currentAmmo;
+                this.currentAmmo += clamp(amount, 0, this.game.player.inventory.SMGammo - amount);
+                this.game.player.inventory.SMGammo -= clamp(amount, 0, this.game.player.inventory.SMGammo - amount);
+            }
+        }
+        
+
         setTimeout(() => {
             if (this.currentAmmo < this.clipSize) {
                 this.currentAmmo += (this.clipSize - this.currentAmmo);

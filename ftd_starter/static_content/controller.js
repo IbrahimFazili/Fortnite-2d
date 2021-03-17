@@ -10,7 +10,7 @@ var mousePos = null;
 var debugDiv = null;
 var DEBUG_MODE = true;
 var lastRenderTime = 0;
-var delta = 0;
+var delta = 0; 
 var pauseStatus = false;
 
 function restartGame() {
@@ -98,6 +98,7 @@ function pauseGame() {
 function moveByKey(event, released) {
 	var key = event.key;
 	if (key === 'x' && !released && !pauseStatus) stage.player.deployItem();
+	if (key === 'c' && !released && !pauseStatus) stage.player.deploySteelWall();
 	if (key === 'f' && !released && !pauseStatus) stage.player.pickupItem();
 	if (key === 'r' && !released && !pauseStatus) stage.player.reload();
 	if (key === 'i' && !released) stage.trigger();

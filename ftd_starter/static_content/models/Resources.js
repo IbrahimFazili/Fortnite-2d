@@ -9,7 +9,7 @@ const RESOURCE_IMG_SIZE = {
 
 export class Resource extends StaticObjects {
     constructor(game, position, health, harvestCount, image = null, name = "") {
-        super(game, position, health, 'rgb(0,0,0)', true, name);
+        super(game, position, health, 'rgb(0,0,0)', false, name);
         this.image = image ? new Image(this.w, this.h) : undefined;
         if (image) this.image.src = image;
         this.w = name in RESOURCE_IMG_SIZE ? RESOURCE_IMG_SIZE[name].x : 55;
@@ -40,7 +40,7 @@ export class Resource extends StaticObjects {
     }
 
     static generateRock(game, position) {
-        return new Resource(game, position, 100, 10, '../assets/rock.png', 'Rock');
+        return new Resource(game, position, 100, 10, '../assets/brick.png', 'Rock');
     }
 
     static generateSteel(game, position){

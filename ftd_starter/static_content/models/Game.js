@@ -20,6 +20,8 @@ export class Stage {
 		this.worldHeight = 2000;
 		this.map = null;
 
+		this.round = 1;
+
 		this.cols = this.worldWidth / this.squareSize;
 		this.rows = this.worldHeight / this.squareSize;
 
@@ -46,6 +48,7 @@ export class Stage {
 		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
 		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
 		this.addActor(Resource.generateRock(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
+		this.addActor(Resource.generateSteel(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
 		this.addActor(Resource.generateARAmmo(this, (new Pair(randint(600), randint(600))).add(this.player.position)));
 		this.accumTime = 0;
 	}
@@ -95,13 +98,17 @@ export class Stage {
 		}
 
 		// this.accumTime += delta;
-		// if (this.accumTime >= 3000) {
-		// 	var enemyPosition = new Pair(randint(this.worldWidth), randint(this.worldHeight));
-		// 	const enemy = new AI(this, enemyPosition, 100.0, `rgba(220, 40, 100, 1)`);
-		// 	enemy.followPath = true;
-		// 	this.addActor(enemy);
+		// if (this.accumTime >= 15000) {
+		// 	for (var index = 0; index < this.round; index++){
+		// 		var enemyPosition = new Pair(randint(this.worldWidth), randint(this.worldHeight));
+		// 		const enemy = new AI(this, enemyPosition, 100.0, `rgba(220, 40, 100, 1)`);
+		// 		enemy.followPath = true;
+		// 		this.addActor(enemy);
+		// 	}
 		// 	this.accumTime = 0;
+		// 	this.round++;
 		// }
+
 		this.internal_map_grid.clearGrid();
 		this.internal_map_grid.updateGrid();
 	}
@@ -177,25 +184,3 @@ export class Stage {
 		return null;
 	}
 } // End Class Stage
-
-
-
-
-// dynamic objects
-
-	// player
-	// AI player
-	// bullets
-
-// static objects
-
-	// resources
-		// wood
-		// bricks
-		// metal
-
-	// walls
-
-	// weapons
-		// guns
-		// ammo
