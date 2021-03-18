@@ -7,13 +7,14 @@ const GUN_IMG_SIZE_MAP = {
     'SMG': new Pair(55, 35),
 };
 
-export class Weapon extends StaticObjects{
-	constructor(game, position, health, color, name="Weapon"){
-		super(game, position, health, color, false, name);
-		this.w = name in GUN_IMG_SIZE_MAP ? GUN_IMG_SIZE_MAP[name].x : 55;
-		this.h = name in GUN_IMG_SIZE_MAP ? GUN_IMG_SIZE_MAP[name].y : 35;
-		this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
-	}
+export class Weapon extends StaticObjects {
+    constructor(game, owner, position, health, color, name = "Weapon") {
+        super(game, position, health, color, false, name);
+        this.w = name in GUN_IMG_SIZE_MAP ? GUN_IMG_SIZE_MAP[name].x : 55;
+        this.h = name in GUN_IMG_SIZE_MAP ? GUN_IMG_SIZE_MAP[name].y : 35;
+        this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
+        this.owner = owner;
+    }
 
     setCenter() {
         this.center = this.position.add((new Pair(this.w / 2, this.h / 2)));
@@ -49,7 +50,7 @@ export class Bullet extends DynamicObjects {
         super.step(delta, true, this._onCollision.bind(this));
         this.distanceTravelled += (this.velocity.norm() * (delta / 1000));
         // @todo decrease damage after halfpoint
-        if (this.distanceTravelled > this.maxRange){
+        if (this.distanceTravelled > this.maxRange) {
             this.game.removeActor(this);
             return;
         }
@@ -59,18 +60,18 @@ export class Bullet extends DynamicObjects {
         super.draw(context);
         context.beginPath();
         context.fillStyle = this.color;
-		context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-		context.fill();
+        context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+        context.fill();
     }
 }
 
 /**
  * For Gun varieties we have Pistols, SMG, AR
- * */ 
+ * */
 export class Gun extends Weapon {
-    constructor(game, position, color, damage, clipSize, fireRate, maxRange,
-        reloadTime, image=undefined, reloadSound=null, name="Gun"){
-        super(game, position, Infinity, color, name);
+    constructor(game, owner, position, color, damage, clipSize, fireRate, maxRange,
+        reloadTime, image = undefined, reloadSound = null, name = "Gun") {
+        super(game, owner, position, Infinity, color, name);
         this.damage = damage;
         this.fireRate = fireRate;
         this.clipSize = clipSize;
@@ -90,7 +91,7 @@ export class Gun extends Weapon {
     toString() {
         return `${super.toString()} | Name: ${this.label} | Ammo: ${this.currentAmmo} ${this.reloading ? '(reloading)' : ''}`;
     }
-    
+
     step(delta) {
         super.step(delta);
 
@@ -98,7 +99,7 @@ export class Gun extends Weapon {
 
     fire(dir, playReloadSound) {
         if (this.reloading) return;
-        if (this.currentAmmo > 0){
+        if (this.currentAmmo > 0) {
             this.currentAmmo -= 1;
             const newPos = this.position.add(dir.multiply(Player.PLAYER_SIZE + 0.1));
             let bullet = new Bullet(this.game, newPos.copy(), this.damage, this.maxRange, dir);
@@ -113,39 +114,43 @@ export class Gun extends Weapon {
         this.reloading = true;
         sound && this.reloadSound && this.reloadSound.play();
 
-        if (this.label === 'AR'){
-            if (this.game.player.inventory.ARammo > 0){
-                var amount = this.clipSize - this.currentAmmo;
-                this.currentAmmo += clamp(amount, 0, this.game.player.inventory.ARammo - amount);
-                this.game.player.inventory.ARammo -= clamp(amount, 0, this.game.player.inventory.ARammo - amount);
-            }
-        }
-        else{
-            if (this.game.player.inventory.SMGammo > 0){
-                var amount = this.clipSize - this.currentAmmo;
-                this.currentAmmo += clamp(amount, 0, this.game.player.inventory.SMGammo - amount);
-                this.game.player.inventory.SMGammo -= clamp(amount, 0, this.game.player.inventory.SMGammo - amount);
-            }
-        }
-        
-
         setTimeout(() => {
-            if (this.currentAmmo < this.clipSize) {
-                this.currentAmmo += (this.clipSize - this.currentAmmo);
+
+            // this.currentAmmo += clamp(amount, 0, this.game.player.inventory.SMGammo - amount);
+            // this.game.player.inventory.SMGammo -= clamp(amount, 0, this.game.player.inventory.SMGammo - amount);
+            console.log(`reserve ammo before: ${this.owner.inventory[this.label+'ammo']}`);
+            var amount = this.clipSize - this.currentAmmo;
+            this.currentAmmo += clamp(amount, 0, this.owner.inventory[this.label + 'ammo']);
+
+            var used = null;
+            if (amount < this.owner.inventory[this.label+'ammo'] && this.owner.inventory[this.label+'ammo'] - amount > 0){
+                used = amount - this.owner.inventory[this.label+'ammo'];
             }
+            else{
+                used = this.owner.inventory[this.label+'ammo'];
+            }
+            this.owner.inventory[this.label+'ammo'] -= used;
+            console.log(`reserve ammo after: ${this.owner.inventory[this.label+'ammo']}`);
+            // const upperBound = this.owner.inventory[this.label + 'ammo'] - amount;
+            // this.currentAmmo += clamp(amount, 0, upperBound);
+            // this.owner.inventory[this.label + 'ammo'] -= clamp(amount, 0, upperBound);
+            // if (this.currentAmmo < this.clipSize) {
+            //     this.currentAmmo += (this.clipSize - this.currentAmmo);
+            // }
 
             this.reloading = false;
         }, this.reloadTime);
     }
 
-    static generateAR(game, position) {
-        return new Gun(game, position, 'rgb(0, 0, 0)', 11, 25, 280, 1500, 1500, '../assets/AR.png',
-        new Audio('../assets/ar-reload.mp3'), 'AR');
+
+    static generateAR(game, position, owner) {
+        return new Gun(game, owner, position, 'rgb(0, 0, 0)', 11, 25, 280, 1500, 1500, '../assets/AR.png',
+            new Audio('../assets/ar-reload.mp3'), 'AR');
     }
 
-    static generateSMG(game, position) {
-        return new Gun(game, position, 'rgb(0, 0, 0)', 6, 32, 420, 1100, 1000, '../assets/SMG.png', 
-        new Audio('../assets/smg-reload.mp3') ,'SMG');
+    static generateSMG(game, position, owner) {
+        return new Gun(game, owner, position, 'rgb(0, 0, 0)', 6, 32, 420, 1100, 1000, '../assets/SMG.png',
+            new Audio('../assets/smg-reload.mp3'), 'SMG');
     }
 
     draw(context) {
@@ -160,13 +165,13 @@ export class Gun extends Weapon {
 
 }
 
-export class Axe extends Weapon{
-    constructor(game, position, color, name){
+export class Axe extends Weapon {
+    constructor(game, position, color, name) {
         super(game, position, 100, color, name);
         this.damage = 10;
     }
 
     step() {
-        
+
     }
 }

@@ -23,9 +23,7 @@ export class Resource extends StaticObjects {
      * Transfer resource to player
      */
     harvest() {
-        this.health -= this.harvestCount;
-        if (this.health <= 0) this.game.removeActor(this);
-
+        this.updateHealth(this.harvestCount);
         return this.harvestCount;
     }
 

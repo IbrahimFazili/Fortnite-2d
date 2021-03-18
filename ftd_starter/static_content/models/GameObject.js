@@ -20,6 +20,7 @@ class GameObject {
 		this.boundingVolume = null;
 		this.label = name;
 		this.displayLabel = false;
+		this.displayHealth = true;
 	}
 
 	toString() {
@@ -30,6 +31,8 @@ class GameObject {
 	 * Callback to execute on destruction of this object from the game world
 	 */
 	onDestroy() {}
+
+	notifyCollision(actor) {}
 
 	updateHealth(h) {
 		this.health = clamp(this.health + h, 0, this.maxHealth);
@@ -54,11 +57,7 @@ class GameObject {
 		return null;
 	}
 
-	drawLabel(context){
-		// context.globalAlpha = 0.1;
-		// context.fillStyle = "rgba(0, 0, 0)";
-		// context.fillRect(this.position.x - 50, this.position.y - 50, 100, 20);
-		// context.globalAlpha = 1.0;
+	drawLabel(context) {
 		context.fillStyle = "white";
 		context.font='200 12px sans-serif';
 		context.fillText(this.label, this.position.x - 20, this.position.y - 35);
@@ -66,7 +65,7 @@ class GameObject {
 
 	draw(context) {
 		if (this.displayLabel) this.drawLabel(context);
-		if (this.maxHealth < Infinity) {
+		if (this.displayHealth && this.maxHealth < Infinity) {
 			context.strokeStyle = "white";
 			context.strokeRect(this.position.x - 24, this.position.y - 30, 52, 7);
 
@@ -119,6 +118,8 @@ export class DynamicObjects extends GameObject {
 		if (collision) {
 			// call onCollision callback and pass in the object it collided with
 			onCollision && onCollision(collision)
+			// let the other object know that this bullet collided with them
+			collision.notifyCollision(this);
 			if (destroyOnCollision) {
 				this.game.removeActor(this);
 				return;

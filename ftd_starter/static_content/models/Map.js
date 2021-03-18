@@ -38,11 +38,14 @@ export class Map {
                 // width 100 height 10
                 for (var w = -1; w < width + 1; w++) {
                     for (var h = -1; h < height + 1; h++) {
+                        if (x + w < 0 || y + h < 0) continue;
+                        if (x + w >= this.grid.length || y + h >= this.grid[0].length) continue;
                         this.grid[x + w][y + h] = 'Occupied';
                     }
                 }
             }
             this.grid[x][y] = 'Occupied';
+
         }
 
         // fix this
@@ -50,6 +53,8 @@ export class Map {
         var py = Math.floor(this.game.player.position.y / this.squaresize);
         for (let i = -1; i < 2; i++) {
             for (let j = -1; j < 2; j++) {
+                if (px + i < 0 || py + j < 0) continue;
+                if (px + i >= this.grid.length || py + j >= this.grid[0].length) continue;
                 this.grid[px + i][py + j] = 'Player';
             }
             

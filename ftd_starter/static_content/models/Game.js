@@ -3,6 +3,7 @@ import { Player, AI } from './CustomGameObjects';
 import { Gun } from './Weapons';
 import { Map } from './Map';
 import { Resource } from './Resources';
+import { Spawner } from './Spawner';
 
 export class Stage {
 	constructor(canvas, restartGame) {
@@ -38,19 +39,20 @@ export class Stage {
 		// Add the player to the center of the stage
 		var health = 100.0;
 		var colour = 'rgba(0,0,0,1)';
-		var enemyColor = 'rgba(220, 40, 100, 1)';
 		var position = new Pair(Math.floor(this.width / 2), Math.floor(this.height / 2));
 		this.addPlayer(new Player(this, position, health, colour));
-		for (let index = 0; index < 5; index++) {
-			var enemyPosition = new Pair(randint(500), randint(500));
-			this.addActor(new AI(this, enemyPosition, health, enemyColor));
-		}
-		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
-		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position)));
-		this.addActor(Resource.generateRock(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
-		this.addActor(Resource.generateSteel(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
-		this.addActor(Resource.generateARAmmo(this, (new Pair(randint(600), randint(600))).add(this.player.position)));
-		this.accumTime = 0;
+		// for (let index = 0; index < 5; index++) {
+		// 	var enemyPosition = new Pair(randint(500), randint(500));
+		// 	this.addActor(new AI(this, enemyPosition, health, enemyColor));
+		// }
+		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position), null));
+		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position), null));
+		// this.addActor(Resource.generateRock(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
+		// this.addActor(Resource.generateSteel(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
+		// const ammo = Resource.generateARAmmo(this, (new Pair(randint(600), randint(600))).add(this.player.position));
+		// ammo.displayHealth = false;
+		// this.addActor(ammo);
+		this.spawner = new Spawner(this, 1, 4);
 	}
 
 	resetGame() {
@@ -76,16 +78,26 @@ export class Stage {
 		if (index != -1) {
 			const destroyed = this.actors.splice(index, 1)[0];
 			destroyed.onDestroy();
+
+			if (destroyed instanceof AI) {
+				if (this.actors.findIndex((actor) => actor instanceof AI) === -1) {
+					setTimeout(() => {
+						this.spawner.startNextRound();
+						console.log(this.spawner.toString());
+					}, 5000);
+					console.log(`Starting round ${this.spawner.round + 1} in 5 sec`);
+				}
+			}
 		}
 	}
 
-	togglePause(){
+	togglePause() {
 		this.isPaused = !this.isPaused;
 	}
 
 	trigger() {
 		this.actors.forEach(actor => {
-			if (actor instanceof AI) actor.followPath = true;
+			if (actor instanceof AI) actor.followPath = !actor.followPath;
 		});
 	}
 
@@ -97,20 +109,9 @@ export class Stage {
 			this.actors[i].step(delta);
 		}
 
-		// this.accumTime += delta;
-		// if (this.accumTime >= 15000) {
-		// 	for (var index = 0; index < this.round; index++){
-		// 		var enemyPosition = new Pair(randint(this.worldWidth), randint(this.worldHeight));
-		// 		const enemy = new AI(this, enemyPosition, 100.0, `rgba(220, 40, 100, 1)`);
-		// 		enemy.followPath = true;
-		// 		this.addActor(enemy);
-		// 	}
-		// 	this.accumTime = 0;
-		// 	this.round++;
-		// }
-
 		this.internal_map_grid.clearGrid();
 		this.internal_map_grid.updateGrid();
+		this.spawner.step(delta);
 	}
 
 	setGameWindowSize(ctx) {

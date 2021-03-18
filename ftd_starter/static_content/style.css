@@ -34,14 +34,37 @@ main {
 	font-size: 1em;
 }
 
+#restart-btn{
+	border: 1px solid #c2b5b5;
+	background-color: transparent;
+	color: #c2b5b5;
+	padding: 5px;
+	height: 2.5em;
+	margin-top: 1em;
+	text-transform: uppercase;
+	font-size: 1em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#restart-btn:hover{
+	background-color: #c2b5b5;
+	color: #000000;
+}
+
 #login-btn:hover {
 	background-color: #261D20;
 	color: #F24141;
 }
 
+
 #overlay {
 	position: fixed; /* Sit on top of the page content */
-	display: none; /* Hidden by default */
+	display: flex; /* Hidden by default */
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 	width: 100%; /* Full width (cover the whole page) */
 	height: 100%; /* Full height (cover the whole page) */
 	top: 0;
@@ -52,11 +75,8 @@ main {
 	z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
   }
   
-#paused {
+#overlay-text {
 	color: antiquewhite;
-	display: flex;
-	margin-top: 20%;
-	justify-content: center;
 }
 
 .input {

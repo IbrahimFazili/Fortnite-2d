@@ -1,7 +1,7 @@
 import { DynamicObjects, StaticObjects } from './GameObject';
 import { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint } from './utils';
 import { Stage } from './Game';
-import { Gun, Weapon } from './Weapons';
+import { Bullet, Gun, Weapon } from './Weapons';
 import { Resource } from './Resources';
 
 export class Player extends DynamicObjects {
@@ -12,7 +12,7 @@ export class Player extends DynamicObjects {
 	 * @param color {string}
 	 * @param radius {Number}
 	 */
-	constructor(game, position, health, color) {
+	constructor(game, position, health, color, regenEnabled = true) {
 		super(game, position, health, color, false, "Player 1");
 		// keeping it rectangle for now. need to change it to circle
 		this.radius = Player.PLAYER_SIZE;
@@ -21,6 +21,9 @@ export class Player extends DynamicObjects {
 		this.inventory = new Inventory(3, 100, 360);
 		// this.inventory.addWeapon(Gun.generateAR(this.game, this.position));
 		this.displayLabel = true;
+		this.regenEnabled = regenEnabled;
+		this.regenTimeout = -1;
+		this.regenInterval = -1;
 	}
 
 	setCenter() { this.center = this.position; }
@@ -40,7 +43,7 @@ export class Player extends DynamicObjects {
 	}
 
 	// 1 Wall = 10 steel
-	deploySteelWall(){
+	deploySteelWall() {
 		if (this.game.player.inventory.steel < 10) return;
 		this.game.player.inventory.steel -= 10;
 		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
@@ -78,12 +81,35 @@ export class Player extends DynamicObjects {
 
 	pickupWeapon(weapon) {
 		weapon.position = this.position;
+		weapon.owner = this;
 		const dropped = this.inventory.addWeapon(weapon);
 		if (dropped) {
+			dropped.owner = null;
 			dropped.position = dropped.position.copy();
 			this.game.addActor(dropped)
 		};
 		this.game.removeActor(weapon);
+	}
+
+	pickupResource(item) {
+		switch (item.label) {
+			case 'Rock':
+				this.inventory.brick += item.harvest();
+				break;
+			case 'Steel':
+				this.inventory.steel += item.harvest();
+				break;
+			case 'AR Ammo':
+				if (this.inventory.ARammo + item.harvestCount < 320) {
+					this.inventory.ARammo += item.harvest();
+					break;
+				}
+			case 'SMG Ammo':
+				if (this.inventory.SMGammo + item.harvestCount < 320) {
+					this.inventory.SMGammo += item.harvest();
+					break;
+				}
+		}
 	}
 
 	/**
@@ -107,29 +133,44 @@ export class Player extends DynamicObjects {
 
 		const item = this.game.actors[minIndex];
 		if (item instanceof Weapon) this.pickupWeapon(item);
-		else {
-			switch (item.label){
-				case 'Rock':
-					this.inventory.brick += item.harvest();
-					break;
-				case 'Steel':
-					this.inventory.steel += item.harvest();
-					break;
-				case 'AR Ammo':
-					if (this.inventory.ARammo + item.harvest() < 320){
-						this.inventory.ARammo += item.harvest();
-						break;
-					}
-				case 'SMG Ammo':
-					if (this.inventory.SMGammo + item.harvest() < 320){
-						this.inventory.SMGammo += item.harvest();
-						break;
-					}
-			}
-		}
+		else this.pickupResource(item);
 	}
 
 	switchWeapon(i) { this.inventory.switchWeapon(i); }
+
+	// onUpdateHealth() {
+	// 	super.onUpdateHealth();
+	// 	if (this.regenEnabled) {
+	// 		clearTimeout(this.regenTimeout);
+	// 		clearInterval(this.regenInterval);
+	// 		setTimeout(() => {
+	// 			this.regenInterval = setInterval(() => this.updateHealth(10), 250)
+	// 		}, 4000);
+	// 	}
+	// }
+
+	notifyCollision(actor) {
+		if (!(actor instanceof Bullet)) return;
+
+		clearInterval(this.regenInterval);
+		clearTimeout(this.regenTimeout);
+
+		if (this.regenEnabled) {
+			this.regenTimeout = setTimeout(() => {
+				this.regenInterval = setInterval(() => {
+					this.updateHealth(10)
+				}, 250);
+			}, 4000);
+		}
+	}
+
+	step(delta) {
+		super.step(delta);
+		if (this.health >= this.maxHealth) {
+			clearTimeout(this.regenTimeout);
+			clearInterval(this.regenInterval);
+		}
+	}
 
 	draw(context) {
 		super.draw(context);
@@ -152,15 +193,17 @@ export class AI extends Player {
 	 * @param radius {Number}
 	 */
 	constructor(game, position, health, color) {
-		super(game, position, health, color);
+		super(game, position, health, color, false);
 		this.label = "Stupid AI";
 		// this.inventory.addWeapon(Gun.generateAR(this.game, this.position));
-		this.followPath = false;
+		this.followPath = true;
 		this.timeSinceLastPath = 0;
-		this.inventory.addWeapon(Gun.generateAR(this.game, this.position));
+		this.inventory.ARammo = Infinity;
+		this.inventory.SMGammo = Infinity;
+		this.inventory.addWeapon(Gun.generateAR(this.game, this.position, this));
 	}
 
-	onDestroy() {}
+	onDestroy() { }
 
 	step(delta) {
 		this.timeSinceLastPath += delta;

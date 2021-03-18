@@ -13,12 +13,20 @@ var lastRenderTime = 0;
 var delta = 0; 
 var pauseStatus = false;
 
-function restartGame() {
-	stage = new Stage(document.getElementById('stage'), restartGame);
+function showOverlay(text) {
+	$("#overlay").show();
+	$("#overlay-text").text(text);
+	pauseGame();
+	// stage = new Stage(document.getElementById('stage'), restartGame);
+	// pauseStatus = true;
+}
+
+function initGame() {
+	stage = new Stage(document.getElementById('stage'), (() => showOverlay('Game Over')));
 }
 
 function setupGame() {
-	stage = new Stage(document.getElementById('stage'), restartGame);
+	initGame();
 
 	// https://javascript.info/keyboard-events
 	document.addEventListener('keydown', () => moveByKey(event, false));
@@ -57,7 +65,12 @@ function showDebugInfo() {
 	debugDiv.append(`<span>Mouse: (${mPos.x.toFixed(2)}, ${mPos.y.toFixed(2)})</span><br>`);
 	debugDiv.append(`<span>Direction: ${stage.ptrDirection.toString()}</span><br>`);
 	debugDiv.append(`<span>Object count: ${stage.actors.length}</span><br>`);
-	// debugDiv.append(`<span>Gun: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].currentAmmo}</span><br>`);
+	if (stage.player.inventory.weapons.length > 0){
+		var reserves = stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].label === 'AR' ? stage.player.inventory.ARammo :
+		stage.player.inventory.SMGammo;
+		debugDiv.append(`<span>Ammo: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].currentAmmo}</span>
+		<span> / ${reserves}</span><br>`);
+	}
 	delta > 0 && debugDiv.append(`<span>FPS: ${Math.round(1000 / delta)} (${delta.toFixed(2)} ms)</span><br>`);
 }
 
@@ -139,6 +152,7 @@ function togglePause(){
 		pauseStatus = true;
 		pauseGame();
 		$("#overlay").show();
+		$("#overlay").val("Paused");
 	}
 	else{
 		pauseStatus = false;
@@ -231,6 +245,7 @@ function test() {
 
 $(function () {
 	// Setup all events here and display the appropriate UI
+	$("#overlay").hide();
 	$("#loginSubmit").on('click', function () { login(); });
 	$("#register").on('click', () => register());
 	$("#login").on('click', function () {
@@ -247,12 +262,17 @@ $(function () {
 		$("#ui_register").show();
 		$("#left-text").text("REGISTER");
 	});
+	$("#restart-btn").on('click', function(){
+		initGame();
+		$("#overlay").hide();
+	});
 
 	$("#landing").show();
 	$("#ui_login").show();
 	$("#left-text").text("LOGIN");
 	$("#ui_play").hide();
 	$("#ui_register").hide();
+	$("#restart").hide();
 	debugDiv = $("#debug");
 });
 
