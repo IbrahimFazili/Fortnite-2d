@@ -118,7 +118,6 @@ export class Gun extends Weapon {
 
             // this.currentAmmo += clamp(amount, 0, this.game.player.inventory.SMGammo - amount);
             // this.game.player.inventory.SMGammo -= clamp(amount, 0, this.game.player.inventory.SMGammo - amount);
-            console.log(`reserve ammo before: ${this.owner.inventory[this.label+'ammo']}`);
             var amount = this.clipSize - this.currentAmmo;
             this.currentAmmo += clamp(amount, 0, this.owner.inventory[this.label + 'ammo']);
 
@@ -130,7 +129,6 @@ export class Gun extends Weapon {
                 used = this.owner.inventory[this.label+'ammo'];
             }
             this.owner.inventory[this.label+'ammo'] -= used;
-            console.log(`reserve ammo after: ${this.owner.inventory[this.label+'ammo']}`);
             // const upperBound = this.owner.inventory[this.label + 'ammo'] - amount;
             // this.currentAmmo += clamp(amount, 0, upperBound);
             // this.owner.inventory[this.label + 'ammo'] -= clamp(amount, 0, upperBound);

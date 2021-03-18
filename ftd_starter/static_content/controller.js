@@ -153,11 +153,13 @@ function togglePause(){
 		pauseGame();
 		$("#overlay").show();
 		$("#overlay").val("Paused");
+		$("#navbar").show();
 	}
 	else{
 		pauseStatus = false;
 		pauseGame();
 		$("#overlay").hide();
+		$("#navbar").hide();
 	}
 }
 
@@ -267,12 +269,24 @@ $(function () {
 		$("#overlay").hide();
 	});
 
+	$("#logout-btn").on('click', function(){
+		$("#landing").show();
+		$("#ui_login").show();
+		$("#left-text").text("LOGIN");
+		$("#ui_play").hide();
+		$("#ui_register").hide();
+		$("#restart").hide();
+		$("#navbar").hide();
+		$("#overlay").hide();
+	});
+
 	$("#landing").show();
 	$("#ui_login").show();
 	$("#left-text").text("LOGIN");
 	$("#ui_play").hide();
 	$("#ui_register").hide();
 	$("#restart").hide();
+	$("#navbar").hide();
 	debugDiv = $("#debug");
 });
 

@@ -8,7 +8,7 @@
 	<script language="javascript" type="module" src="models/Game.js"> </script>
 	<script language="javascript" type="module" src="controller.js"> </script>
 	<link rel="stylesheet" type="text/css" href="style.css" />
-	<style>
+	<!-- <style>
 		#ui_login {
 			display: true;
 		}
@@ -102,7 +102,7 @@
 		.weapon-selected {
 			border: #F24141 2px solid !important;
 		}
-	</style>
+	</style> -->
 	<title>f0rt9it32d</title>
 </head>
 
@@ -113,12 +113,21 @@
 		<canvas id="stage" width="400" height="400" style="display: block; margin: 0%; padding: 0%;"> </canvas>
 	</div>
 	<div id="overlay">
+		<div id="navbar">
+			<button id="leaderboard-btn">Leaderboard</button>
+			<button id="logout-btn">Logout</button>
+		</div>
 		<span id="overlay-text">PAUSED</span>
-		<button id="restart-btn">Restart</button>
+		<div id="restart-div">
+			<button id="restart-btn">Restart</button>
+		</div>
 	</div>
 	<div id="landing">
 		<main>
 			<section id="register-left">
+				<div id="logo-container">
+					<img src="assets/Logo.png" id="logo">
+				</div>
 				<span id="left-text">Register</span>
 			</section>
 			<section id="register-right">
