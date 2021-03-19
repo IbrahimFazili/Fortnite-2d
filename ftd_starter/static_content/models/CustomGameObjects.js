@@ -1,5 +1,5 @@
 import { DynamicObjects, StaticObjects } from './GameObject';
-import { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint } from './utils';
+import { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint, clamp } from './utils';
 import { Stage } from './Game';
 import { Bullet, Gun, Weapon } from './Weapons';
 import { Resource } from './Resources';
@@ -14,16 +14,15 @@ export class Player extends DynamicObjects {
 	 */
 	constructor(game, position, health, color, regenEnabled = true) {
 		super(game, position, health, color, false, "Player 1");
-		// keeping it rectangle for now. need to change it to circle
 		this.radius = Player.PLAYER_SIZE;
 		this.center = this.position;
 		this.boundingVolume = new AABC(this.center, Player.PLAYER_SIZE);
 		this.inventory = new Inventory(3, 100, 360);
-		// this.inventory.addWeapon(Gun.generateAR(this.game, this.position));
 		this.displayLabel = true;
 		this.regenEnabled = regenEnabled;
 		this.regenTimeout = -1;
 		this.regenInterval = -1;
+		// this.maxHealth = 1000;
 	}
 
 	setCenter() { this.center = this.position; }
@@ -32,20 +31,20 @@ export class Player extends DynamicObjects {
 		this.game.resetGame();
 	}
 
-	// 1 Wall = 5 bricks
+	// 1 Wall = 10 bricks
 	deployItem() {
-		if (this.game.player.inventory.brick < 5) return;
-		this.game.player.inventory.brick -= 5;
+		if (this.game.player.inventory.brick < 10) return;
+		this.game.player.inventory.brick -= 10;
 		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
 		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
 			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
 		this.game.addActor(new Wall(this.game, newPos, 50, 'rgb(200, 1, 1)', orientation));
 	}
 
-	// 1 Wall = 10 steel
+	// 1 Wall = 35 steel
 	deploySteelWall() {
-		if (this.game.player.inventory.steel < 10) return;
-		this.game.player.inventory.steel -= 10;
+		if (this.game.player.inventory.steel < 35) return;
+		this.game.player.inventory.steel -= 35;
 		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
 		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
 			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
@@ -100,15 +99,13 @@ export class Player extends DynamicObjects {
 				this.inventory.steel += item.harvest();
 				break;
 			case 'AR Ammo':
-				if (this.inventory.ARammo + item.harvestCount < 320) {
-					this.inventory.ARammo += item.harvest();
-					break;
-				}
+				const pickupAmount = clamp(item.harvestCount, 0, this.inventory.maxAmmoCount - this.inventory.ARammo);
+				this.inventory.ARammo += Math.min(pickupAmount, item.harvest());
+				break;
 			case 'SMG Ammo':
-				if (this.inventory.SMGammo + item.harvestCount < 320) {
-					this.inventory.SMGammo += item.harvest();
-					break;
-				}
+				const pickSMGAmmo = clamp(item.harvestCount, 0, this.inventory.maxAmmoCount - this.inventory.SMGammo);
+				this.inventory.SMGammo += Math.min(pickSMGAmmo, item.harvest());
+				break;
 		}
 	}
 
@@ -137,17 +134,6 @@ export class Player extends DynamicObjects {
 	}
 
 	switchWeapon(i) { this.inventory.switchWeapon(i); }
-
-	// onUpdateHealth() {
-	// 	super.onUpdateHealth();
-	// 	if (this.regenEnabled) {
-	// 		clearTimeout(this.regenTimeout);
-	// 		clearInterval(this.regenInterval);
-	// 		setTimeout(() => {
-	// 			this.regenInterval = setInterval(() => this.updateHealth(10), 250)
-	// 		}, 4000);
-	// 	}
-	// }
 
 	notifyCollision(actor) {
 		if (!(actor instanceof Bullet)) return;
@@ -192,7 +178,7 @@ export class AI extends Player {
 	 * @param color {string}
 	 * @param radius {Number}
 	 */
-	constructor(game, position, health, color) {
+	constructor(game, position, health, color, aimVarianceFactor) {
 		super(game, position, health, color, false);
 		this.label = "Stupid AI";
 		// this.inventory.addWeapon(Gun.generateAR(this.game, this.position));
@@ -200,6 +186,7 @@ export class AI extends Player {
 		this.timeSinceLastPath = 0;
 		this.inventory.ARammo = Infinity;
 		this.inventory.SMGammo = Infinity;
+		this.aimVarianceFactor = aimVarianceFactor
 		this.inventory.addWeapon(Gun.generateAR(this.game, this.position, this));
 	}
 
@@ -223,7 +210,13 @@ export class AI extends Player {
 			let playerDir = this.game.player.position.sub(this.position);
 			const dist = playerDir.norm();
 			if (dist <= 400 && this.timeSinceLastPath >= 500) {
+				const randDir = randint(2);
+				let perpVec = null;
+				if (randDir < 1) perpVec = new Pair(playerDir.y, -playerDir.x);
+				else perpVec = new Pair(-playerDir.y, playerDir.x);
+				playerDir = playerDir.add(perpVec.multiply(this.aimVarianceFactor / 100));
 				playerDir.normalize();
+				// playerdir + (perpVec * (factor / 100))
 				super.fire(false, playerDir, false);
 				this.timeSinceLastPath = 0;
 			} else super.reload(false);
@@ -232,15 +225,6 @@ export class AI extends Player {
 
 		super.step(delta);
 	}
-
-	// draw(context) {
-	// 	super.draw(context);
-	// 	context.beginPath();
-	// 	context.fillStyle = this.color;
-	// 	// context.fillRect(this.position.x, this.position.y, this.size, this.size);
-	// 	context.arc(this.position.x, this.position.y, Player.PLAYER_SIZE, 0, 2 * Math.PI);
-	// 	context.fill();
-	// }
 }
 
 export class Wall extends StaticObjects {

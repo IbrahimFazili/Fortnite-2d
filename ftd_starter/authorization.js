@@ -1,76 +1,39 @@
-// https://www.freecodecamp.org/news/express-explained-with-examples-installation-routing-middleware-and-more/
-// https://medium.com/@viral_shah/express-middlewares-demystified-f0c2c37ea6a1
-// https://www.sohamkamani.com/blog/2018/05/30/understanding-how-expressjs-works/
+const jwt = require('jsonwebtoken');
 
-var port = 9000; 
-var express = require('express');
-var app = express();
-
-// Non authenticated route. Can visit this without credentials
-app.get('/api/test', function (req, res) {
-	res.status(200); 
-	res.json({"message":"got here"}); 
-});
-
-app.use('/',express.static('static_content'));
-
-// server helper modules needed for the main game model
-app.get('/models/:model', (req, res) => {
-        res.status(200).sendFile(`${__dirname}/static_content/models/${req.params.model}.js`);
-});
-
+const tokenExpiryTime = 86400;
 /**
- * middleware function used to intercept non authorized requests
- * Authorization: Basic YXJub2xkOnNwaWRlcm1hbg==
- * Authorization: Basic " + btoa("arnold:spiderman"); in javascript
- **/
-function authorize(req, res, next){
-        if (!req.headers.authorization) {
-                return res.status(403).json({ error: 'No credentials sent!' });
+ * Authenticate incoming request. If the incoming request contains a valid authorization token, call the
+ * next middleware. Otherwise respond with a 401 (Forbidden)
+ * @param req Express Request object
+ * @param res Express Response object
+ * @param next next middleware
+ */
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).send("No authorization token found in the request header");
+
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.JWT_TOKEN_SECRET, (err, user) => {
+        if (err) {
+            res.status(401).send(`${err.name}: ${err.message}`);
+        } else {
+            req.username = jwt.decode(token, { json: true }).username;
+            next(); // user is authorized, let them access the requested resource
         }
-        try {
-                // var credentialsString = Buffer.from(req.headers.authorization.split(" ")[1], 'base64').toString();
-                var m = /^Basic\s+(.*)$/.exec(req.headers.authorization);
-
-                var user_pass = Buffer.from(m[1], 'base64').toString()
-                m = /^(.*):(.*)$/.exec(user_pass); // probably should do better than this
-
-                var username = m[1];
-                var password = m[2];
-
-                if(username=="arnold" && password=="spiderman"){
-                        next();
-                } else {
-                        res.status(403).json({ error: 'Not authorized'});
-                }
-        } catch(err) {
-                res.status(403).json({ error: 'Not authorized'});
-        }
+    });
 }
 
-/** 
- * This is middleware to restrict access to subroutes of /api/auth/ and /content/auth/
- * To get past this middleware, all requests should be sent with appropriate
- * credentials. Now this is not secure, but this is a first step.
- *
-**/
-app.use('/api/auth', authorize);
-app.use('/content/auth/',authorize); 
+/**
+ * Generate access token for an authenticated user. The generated access token will be valid for 86400 seconds, i.e., 24 hrs.
+ * Once the access token expires, user will need to request a new access token
+ * @param uid Unique identifier for a user. This is used in the hashing process when generating the jwt
+ */
+function generateAccessToken(uid) {
+    return jwt.sign(uid, process.env.JWT_TOKEN_SECRET, { expiresIn: tokenExpiryTime });
+}
 
-// All routes below /api/auth require credentials 
-app.post('/api/auth/login', function (req, res) {
-	res.status(200); 
-	res.json({"message":"authentication success"}); 
-});
-
-app.get('/api/auth/test', function (req, res) {
-	res.status(200); 
-	res.json({"message":"got to /api/auth/test"}); 
-});
-
-app.use('/content/auth/',express.static('static_content_auth')); 
-
-app.listen(port, function () {
-  	console.log('Example app listening on port '+port);
-});
-
+module.exports = {
+    generateAccessToken,
+    authenticateToken,
+    tokenExpiryTime
+};

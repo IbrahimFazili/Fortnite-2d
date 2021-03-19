@@ -8,21 +8,26 @@ var credentials = { "username": "", "password": "" };
 var lastKey = [];
 var mousePos = null;
 var debugDiv = null;
+var inventoryUIDiv = null;
 var DEBUG_MODE = true;
 var lastRenderTime = 0;
-var delta = 0; 
+var delta = 0;
 var pauseStatus = false;
 
 function showOverlay(text) {
 	$("#overlay").show();
+	$("#navbar").show();
 	$("#overlay-text").text(text);
-	pauseGame();
-	// stage = new Stage(document.getElementById('stage'), restartGame);
-	// pauseStatus = true;
+	$("#overlay-text").show();
+	$("#controls").hide();
 }
 
 function initGame() {
-	stage = new Stage(document.getElementById('stage'), (() => showOverlay('Game Over')));
+	stage = new Stage(document.getElementById('stage'), (() => {
+		showOverlay('Game Over');
+		pauseGame();
+	}), reportScore);
+	pauseStatus = false;
 }
 
 function setupGame() {
@@ -55,23 +60,24 @@ function setupGame() {
 }
 
 function showDebugInfo() {
+	debugDiv.empty();
 	if (!DEBUG_MODE) return;
+
 	var mPos = mousePos !== null ? new Pair(mousePos.x, mousePos.y) : new Pair(NaN, NaN);
 	const dir = mPos.sub(stage.player.position);
 	dir.normalize();
 
-	debugDiv.empty();
 	debugDiv.append(`<span>${stage.player.toString()}</span><br>`)
 	debugDiv.append(`<span>Mouse: (${mPos.x.toFixed(2)}, ${mPos.y.toFixed(2)})</span><br>`);
 	debugDiv.append(`<span>Direction: ${stage.ptrDirection.toString()}</span><br>`);
 	debugDiv.append(`<span>Object count: ${stage.actors.length}</span><br>`);
-	if (stage.player.inventory.weapons.length > 0){
+	delta > 0 && debugDiv.append(`<span>FPS: ${Math.round(1000 / delta)} (${delta.toFixed(2)} ms)</span><br><br>`);
+	if (stage.player.inventory.weapons.length > 0) {
 		var reserves = stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].label === 'AR' ? stage.player.inventory.ARammo :
-		stage.player.inventory.SMGammo;
+			stage.player.inventory.SMGammo;
 		debugDiv.append(`<span>Ammo: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].currentAmmo}</span>
 		<span> / ${reserves}</span><br>`);
 	}
-	delta > 0 && debugDiv.append(`<span>FPS: ${Math.round(1000 / delta)} (${delta.toFixed(2)} ms)</span><br>`);
 }
 
 function renderUI() {
@@ -91,6 +97,21 @@ function renderUI() {
 	for (; rem > 0; rem--) {
 		$("#weapons").append(`<div class="weapon-img" />`);
 	}
+
+	inventoryUIDiv.empty();
+	if (DEBUG_MODE) return;
+	inventoryUIDiv.append(`<span><b>Inventory</b></span><br><br>`);
+	inventoryUIDiv.append(`<span>Brick in inventory: ${stage.player.inventory.brick}</span><br>`);
+	inventoryUIDiv.append(`<span>Steel in inventory: ${stage.player.inventory.steel}</span><br>`);
+	inventoryUIDiv.append(`<span>Enemies remaining in round: ${stage.activeAI}</span><br>`);
+	inventoryUIDiv.append(`<span>Round: ${stage.spawner.round}</span><br><br>`);
+	if (stage.player.inventory.weapons.length > 0) {
+		var reserves = stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].label === 'AR' ?
+			stage.player.inventory.ARammo : stage.player.inventory.SMGammo;
+		inventoryUIDiv.append(`<span>Ammo: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].currentAmmo}</span>
+			<span> / ${reserves}</span><br>`);
+	}
+
 }
 
 function gameLoop(t) {
@@ -102,22 +123,21 @@ function gameLoop(t) {
 	renderUI();
 	showDebugInfo();
 }
-function startGame() {
-	requestAnimationFrame(gameLoop);
-}
-function pauseGame() {
-	stage.togglePause();
-}
+
+function startGame() { requestAnimationFrame(gameLoop); }
+function pauseGame() { stage.togglePause(); }
+
 function moveByKey(event, released) {
 	var key = event.key;
 	if (key === 'x' && !released && !pauseStatus) stage.player.deployItem();
 	if (key === 'c' && !released && !pauseStatus) stage.player.deploySteelWall();
 	if (key === 'f' && !released && !pauseStatus) stage.player.pickupItem();
 	if (key === 'r' && !released && !pauseStatus) stage.player.reload();
-	if (key === 'i' && !released) stage.trigger();
 	if (key === 'Escape' && !released) togglePause();
+	// for debugging
+	if (key === ';' && !released) DEBUG_MODE = !DEBUG_MODE;
 	if (Number(key) && !released) stage.player.switchWeapon(Number(key) - 1);
-	
+
 	var moveMap = {
 		'a': new Pair(-100, 0),
 		's': new Pair(0, 100),
@@ -147,20 +167,15 @@ function moveByKey(event, released) {
 	}
 }
 
-function togglePause(){
-	if (!pauseStatus){
-		pauseStatus = true;
-		pauseGame();
-		$("#overlay").show();
-		$("#overlay").val("Paused");
-		$("#navbar").show();
-	}
-	else{
-		pauseStatus = false;
-		pauseGame();
+function togglePause() {
+	if (!pauseStatus) showOverlay("Paused");
+	else {
 		$("#overlay").hide();
 		$("#navbar").hide();
 	}
+
+	pauseGame();
+	pauseStatus = !pauseStatus;
 }
 
 function getMousePos(canvas, evt) {
@@ -169,6 +184,34 @@ function getMousePos(canvas, evt) {
 		x: evt.clientX - rect.left,
 		y: evt.clientY - rect.top
 	};
+}
+
+function reportScore(score, kills, round) {
+	// make request to server to store the stats for this game
+	const stats = {
+		'score': score,
+		'kills': kills,
+		'round': round
+	};
+	const token = localStorage.getItem('auth');
+	if (!token) {
+		$("#logout-btn").click();
+		return;
+	}
+
+	$.ajax({
+		method: "POST",
+		url: '/api/auth/reportGame',
+		data: JSON.stringify(stats),
+		processData: false,
+		headers: { "Authorization": `Bearer ${token}` },
+		contentType: "application/json; charset=utf-8",
+		dataType: "json"
+	}).done(function (data, text_status, jqXHR) {
+		console.log(jqXHR.status + " " + text_status + JSON.stringify(data));
+	}).fail(function (err) {
+		console.log("fail " + err.status + " " + JSON.stringify(err.responseJSON));
+	});
 }
 
 function register() {
@@ -201,7 +244,32 @@ function register() {
 	});
 }
 
+function updateScore() {
+
+	const formData = {
+		'username': $('#user').val(),
+		'score': stage.score,
+		'enemiesKilled': stage.enemiesKilled,
+		'roundNo': stage.round
+	};
+
+	$.ajax({
+		method: "POST",
+		url: '/app/registerScore',
+		data: JSON.stringify(formData),
+		processData: false,
+		contentType: "application/json; charset=utf-8",
+		dataType: "json"
+	}).done(function (data, text_status, jqXHR) {
+		console.log(jqXHR.status + " " + text_status + JSON.stringify(data));
+
+	}).fail(function (err) {
+		console.log("fail " + err.status + " " + JSON.stringify(err.responseJSON));
+	});
+}
+
 function login() {
+
 	credentials = {
 		"username": $("#username").val(),
 		"password": $("#password").val()
@@ -209,34 +277,44 @@ function login() {
 
 	$.ajax({
 		method: "POST",
-		url: "/api/auth/login",
-		data: JSON.stringify({}),
-		headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+		url: "/api/login",
+		data: JSON.stringify(credentials),
 		processData: false,
 		contentType: "application/json; charset=utf-8",
 		dataType: "json"
 	}).done(function (data, text_status, jqXHR) {
-		console.log(jqXHR.status + " " + text_status + JSON.stringify(data));
+		if (jqXHR.status === 200) {
+			const token = data.authorization;
+			localStorage.setItem('auth', token);
 
-		$("#landing").hide();
-		$("#ui_play").show();
-		$("#overlay").hide();
+			$("#landing").hide();
+			$("#ui_play").show();
+			$("#overlay").hide();
+		} else {
+			$("#err").text(data.error ? data.error : data.message);
+		}
 
 		setupGame();
 		startGame();
+		stage.player.label = credentials.username;
 
 	}).fail(function (err) {
-		console.log("fail " + err.status + " " + JSON.stringify(err.responseJSON));
+		$("#err").text(err.responseJSON.info);
 	});
 }
 
 // Using the /api/auth/test route, must send authorization header
 function test() {
+	const token = localStorage.getItem('auth');
+	if (!token) {
+		$("#logout-btn").click();
+		return;
+	}
 	$.ajax({
-		method: "GET",
+		method: "POST",
 		url: "/api/auth/test",
 		data: {},
-		headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+		headers: { "Authorization": `Bearer ${token}` },
 		dataType: "json"
 	}).done(function (data, text_status, jqXHR) {
 		console.log(jqXHR.status + " " + text_status + JSON.stringify(data));
@@ -257,6 +335,9 @@ $(function () {
 		$("#ui_register").hide();
 		$("#left-text").text("LOGIN");
 	});
+	$("#leaderboard-btn").on('click', () => {
+		test();
+	});
 	$("#register-nav").on('click', function () {
 		$("#landing").show();
 		$("#ui_login").hide();
@@ -264,12 +345,16 @@ $(function () {
 		$("#ui_register").show();
 		$("#left-text").text("REGISTER");
 	});
-	$("#restart-btn").on('click', function(){
+	$("#restart-btn").on('click', function () {
 		initGame();
 		$("#overlay").hide();
 	});
+	$("#control-btn").on('click', function () {
+		$("#overlay-text").hide();
+		$("#controls").show();
+	})
 
-	$("#logout-btn").on('click', function(){
+	$("#logout-btn").on('click', function () {
 		$("#landing").show();
 		$("#ui_login").show();
 		$("#left-text").text("LOGIN");
@@ -278,6 +363,7 @@ $(function () {
 		$("#restart").hide();
 		$("#navbar").hide();
 		$("#overlay").hide();
+		localStorage.removeItem('auth');
 	});
 
 	$("#landing").show();
@@ -287,6 +373,8 @@ $(function () {
 	$("#ui_register").hide();
 	$("#restart").hide();
 	$("#navbar").hide();
+	$("#controls").hide();
 	debugDiv = $("#debug");
+	inventoryUIDiv = $("#inventory-ui");
 });
 

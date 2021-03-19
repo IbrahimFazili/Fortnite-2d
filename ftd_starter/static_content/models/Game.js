@@ -2,13 +2,13 @@ import { clamp, Pair, randint } from './utils';
 import { Player, AI } from './CustomGameObjects';
 import { Gun } from './Weapons';
 import { Map } from './Map';
-import { Resource } from './Resources';
 import { Spawner } from './Spawner';
 
 export class Stage {
-	constructor(canvas, restartGame) {
+	constructor(canvas, restartGame, reportScore) {
 		this.canvas = canvas;
 		this.restartCallback = restartGame;
+		this.reportScore = reportScore;
 
 		this.actors = []; // all actors on this stage (monsters, player, boxes, ...)
 		this.player = null; // a special actor, the player
@@ -21,7 +21,9 @@ export class Stage {
 		this.worldHeight = 2000;
 		this.map = null;
 
-		this.round = 1;
+		// stats for the game
+		this.activeAI = 0;
+		this.score = 0;
 
 		this.cols = this.worldWidth / this.squareSize;
 		this.rows = this.worldHeight / this.squareSize;
@@ -41,21 +43,14 @@ export class Stage {
 		var colour = 'rgba(0,0,0,1)';
 		var position = new Pair(Math.floor(this.width / 2), Math.floor(this.height / 2));
 		this.addPlayer(new Player(this, position, health, colour));
-		// for (let index = 0; index < 5; index++) {
-		// 	var enemyPosition = new Pair(randint(500), randint(500));
-		// 	this.addActor(new AI(this, enemyPosition, health, enemyColor));
-		// }
 		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position), null));
 		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position), null));
-		// this.addActor(Resource.generateRock(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
-		// this.addActor(Resource.generateSteel(this, (new Pair(randint(1000), randint(1000))).add(this.player.position)));
-		// const ammo = Resource.generateARAmmo(this, (new Pair(randint(600), randint(600))).add(this.player.position));
-		// ammo.displayHealth = false;
-		// this.addActor(ammo);
 		this.spawner = new Spawner(this, 1, 4);
 	}
 
 	resetGame() {
+		const enemiesKilled = this.spawner.totalEnemiesSpawned - this.activeAI;
+		this.reportScore(this.score, enemiesKilled, this.spawner.round - 1);
 		this.restartCallback();
 	}
 
@@ -73,6 +68,16 @@ export class Stage {
 		this.actors.push(actor);
 	}
 
+	countAI(){
+		var c = 0;
+		for (var i = 0; i < this.actors.length; i++){
+			if (this.actors[i] instanceof AI){
+				c++;
+			}
+		}
+		this.activeAI = c;
+	}
+
 	removeActor(actor) {
 		var index = this.actors.indexOf(actor);
 		if (index != -1) {
@@ -80,12 +85,14 @@ export class Stage {
 			destroyed.onDestroy();
 
 			if (destroyed instanceof AI) {
+				this.score += this.spawner.getScorePerKill();
 				if (this.actors.findIndex((actor) => actor instanceof AI) === -1) {
+					// queue next round with a delay to allow player to get ready
 					setTimeout(() => {
 						this.spawner.startNextRound();
 						console.log(this.spawner.toString());
 					}, 5000);
-					console.log(`Starting round ${this.spawner.round + 1} in 5 sec`);
+					this.score += this.spawner.round * 100;
 				}
 			}
 		}
@@ -95,14 +102,7 @@ export class Stage {
 		this.isPaused = !this.isPaused;
 	}
 
-	trigger() {
-		this.actors.forEach(actor => {
-			if (actor instanceof AI) actor.followPath = !actor.followPath;
-		});
-	}
-
 	// Take one step in the animation of the game.  Do this by asking each of the actors to take a single step. 
-	// NOTE: Careful if an actor died, this may break!
 	step(delta) {
 		if (this.isPaused) return;
 		for (var i = 0; i < this.actors.length; i++) {
@@ -112,6 +112,8 @@ export class Stage {
 		this.internal_map_grid.clearGrid();
 		this.internal_map_grid.updateGrid();
 		this.spawner.step(delta);
+
+		this.countAI();
 	}
 
 	setGameWindowSize(ctx) {

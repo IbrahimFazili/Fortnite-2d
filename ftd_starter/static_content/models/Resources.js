@@ -3,7 +3,7 @@ import { AABB, Pair } from './utils';
 
 const RESOURCE_IMG_SIZE = {
     'Rock': new Pair(75, 45),
-    'Iron': new Pair(55, 35),
+    'Steel': new Pair(55, 35),
     'AR Ammo': new Pair(60, 60,)
 };
 
@@ -23,7 +23,7 @@ export class Resource extends StaticObjects {
      * Transfer resource to player
      */
     harvest() {
-        this.updateHealth(this.harvestCount);
+        this.updateHealth(-this.harvestCount);
         return this.harvestCount;
     }
 
@@ -38,19 +38,23 @@ export class Resource extends StaticObjects {
     }
 
     static generateRock(game, position) {
-        return new Resource(game, position, 100, 10, '../assets/brick.png', 'Rock');
+        let res = new Resource(game, position, 100, 10, '../assets/brick.png', 'Rock');
+        res.isCollidable = true;
+        return res;
     }
 
     static generateSteel(game, position){
-        return new Resource(game, position, 100, 10, '../assets/iron.png', 'Steel');
+        let res = new Resource(game, position, 100, 10, '../assets/iron.png', 'Steel');
+        res.isCollidable = true;
+        return res;
     }
 
-    static generateARAmmo(game, position){
-        return new Resource(game, position, 40, 10, '../assets/ar-ammo.png', 'AR Ammo');
+    static generateARAmmo(game, position, amount){
+        return new Resource(game, position, amount, amount, '../assets/ar-ammo.png', 'AR Ammo');
     }
 
-    static generateSMGAmmo(game, position){
-        return new Resource(game, position, 40, 10, '../assets/smg-ammo.png', 'SMG Ammo');
+    static generateSMGAmmo(game, position, amount){
+        return new Resource(game, position, amount, amount, '../assets/smg-ammo.png', 'SMG Ammo');
     }
 }
 

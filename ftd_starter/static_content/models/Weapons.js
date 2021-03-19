@@ -110,31 +110,23 @@ export class Gun extends Weapon {
     }
 
     reload(sound) {
-        if (this.reloading || this.currentAmmo === this.clipSize) return;
+        if (this.reloading || this.currentAmmo === this.clipSize
+            || this.owner.inventory[this.label + 'ammo'] === 0) return;
         this.reloading = true;
         sound && this.reloadSound && this.reloadSound.play();
 
         setTimeout(() => {
 
-            // this.currentAmmo += clamp(amount, 0, this.game.player.inventory.SMGammo - amount);
-            // this.game.player.inventory.SMGammo -= clamp(amount, 0, this.game.player.inventory.SMGammo - amount);
-            var amount = this.clipSize - this.currentAmmo;
+            const amount = this.clipSize - this.currentAmmo;
             this.currentAmmo += clamp(amount, 0, this.owner.inventory[this.label + 'ammo']);
 
             var used = null;
-            if (amount < this.owner.inventory[this.label+'ammo'] && this.owner.inventory[this.label+'ammo'] - amount > 0){
-                used = amount - this.owner.inventory[this.label+'ammo'];
+            if (amount < this.owner.inventory[this.label + 'ammo']
+                && this.owner.inventory[this.label + 'ammo'] - amount > 0) {
+                used = this.owner.inventory[this.label + 'ammo'] - amount;
             }
-            else{
-                used = this.owner.inventory[this.label+'ammo'];
-            }
-            this.owner.inventory[this.label+'ammo'] -= used;
-            // const upperBound = this.owner.inventory[this.label + 'ammo'] - amount;
-            // this.currentAmmo += clamp(amount, 0, upperBound);
-            // this.owner.inventory[this.label + 'ammo'] -= clamp(amount, 0, upperBound);
-            // if (this.currentAmmo < this.clipSize) {
-            //     this.currentAmmo += (this.clipSize - this.currentAmmo);
-            // }
+            else used = 0;
+            this.owner.inventory[this.label + 'ammo'] = used;
 
             this.reloading = false;
         }, this.reloadTime);
