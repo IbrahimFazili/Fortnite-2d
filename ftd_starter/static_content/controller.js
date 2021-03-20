@@ -1,32 +1,31 @@
 import { Stage } from './models/Game';
 import { Pair } from './models/utils';
+import { login, register, reportScore, getLeaderboard, fetchUserData, updateInfo, deleteProfile } from './controllers/APICallers';
+import { showOverlay, showDebugInfo, renderUI, populateLeaderboard, renderProfile } from './controllers/renderer';
 
 var stage = null;
 var view = null;
 var interval = null;
-var credentials = { "username": "", "password": "" };
 var lastKey = [];
 var mousePos = null;
 var debugDiv = null;
 var inventoryUIDiv = null;
-var DEBUG_MODE = true;
+var leaderboardDiv = null;
+var profileDiv = null;
+var DEBUG_MODE = false;
 var lastRenderTime = 0;
 var delta = 0;
 var pauseStatus = false;
+var username = null;
+var backgroundSound = new Audio('../assets/background_music.mp3');
 
-function showOverlay(text) {
-	$("#overlay").show();
-	$("#navbar").show();
-	$("#overlay-text").text(text);
-	$("#overlay-text").show();
-	$("#controls").hide();
-}
 
 function initGame() {
 	stage = new Stage(document.getElementById('stage'), (() => {
 		showOverlay('Game Over');
 		pauseGame();
 	}), reportScore);
+	if (username) stage.player.label = username;
 	pauseStatus = false;
 }
 
@@ -59,72 +58,27 @@ function setupGame() {
 	});
 }
 
-function showDebugInfo() {
-	debugDiv.empty();
-	if (!DEBUG_MODE) return;
-
-	var mPos = mousePos !== null ? new Pair(mousePos.x, mousePos.y) : new Pair(NaN, NaN);
-	const dir = mPos.sub(stage.player.position);
-	dir.normalize();
-
-	debugDiv.append(`<span>${stage.player.toString()}</span><br>`)
-	debugDiv.append(`<span>Mouse: (${mPos.x.toFixed(2)}, ${mPos.y.toFixed(2)})</span><br>`);
-	debugDiv.append(`<span>Direction: ${stage.ptrDirection.toString()}</span><br>`);
-	debugDiv.append(`<span>Object count: ${stage.actors.length}</span><br>`);
-	delta > 0 && debugDiv.append(`<span>FPS: ${Math.round(1000 / delta)} (${delta.toFixed(2)} ms)</span><br><br>`);
-	if (stage.player.inventory.weapons.length > 0) {
-		var reserves = stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].label === 'AR' ? stage.player.inventory.ARammo :
-			stage.player.inventory.SMGammo;
-		debugDiv.append(`<span>Ammo: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].currentAmmo}</span>
-		<span> / ${reserves}</span><br>`);
-	}
-}
-
-function renderUI() {
-	$("#weapons").empty();
-	let rem = stage.player.inventory.maxWeaponSlots;
-	stage.player.inventory.weapons.forEach((e, i) => {
-		const img = e.label === 'AR' ? './assets/AR.png' : './assets/SMG.png';
-		const selected = i === stage.player.inventory.equippedWeapon;
-		$("#weapons").append(`<img
-		src="${img}"
-		class="weapon-img ${selected ? 'weapon-selected' : ''}"
-		/>`);
-		rem--;
-	});
-
-	const noWeapons = rem === stage.player.inventory.maxWeaponSlots;
-	for (; rem > 0; rem--) {
-		$("#weapons").append(`<div class="weapon-img" />`);
-	}
-
-	inventoryUIDiv.empty();
-	if (DEBUG_MODE) return;
-	inventoryUIDiv.append(`<span><b>Inventory</b></span><br><br>`);
-	inventoryUIDiv.append(`<span>Brick in inventory: ${stage.player.inventory.brick}</span><br>`);
-	inventoryUIDiv.append(`<span>Steel in inventory: ${stage.player.inventory.steel}</span><br>`);
-	inventoryUIDiv.append(`<span>Enemies remaining in round: ${stage.activeAI}</span><br>`);
-	inventoryUIDiv.append(`<span>Round: ${stage.spawner.round}</span><br><br>`);
-	if (stage.player.inventory.weapons.length > 0) {
-		var reserves = stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].label === 'AR' ?
-			stage.player.inventory.ARammo : stage.player.inventory.SMGammo;
-		inventoryUIDiv.append(`<span>Ammo: ${stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].currentAmmo}</span>
-			<span> / ${reserves}</span><br>`);
-	}
-
-}
-
 function gameLoop(t) {
 	requestAnimationFrame(gameLoop);
 	delta = t - lastRenderTime;
 	lastRenderTime = t;
 	stage.step(delta);
 	stage.draw();
-	renderUI();
-	showDebugInfo();
+	if (!DEBUG_MODE) {
+		debugDiv.empty();
+		renderUI(inventoryUIDiv, stage);
+	}
+	else {
+		inventoryUIDiv.empty();
+		showDebugInfo(debugDiv, stage, mousePos, delta);
+	}
 }
 
-function startGame() { requestAnimationFrame(gameLoop); }
+function startGame() { 
+	requestAnimationFrame(gameLoop); 
+	backgroundSound.play();
+	backgroundSound.loop = true;
+}
 function pauseGame() { stage.togglePause(); }
 
 function moveByKey(event, released) {
@@ -168,7 +122,9 @@ function moveByKey(event, released) {
 }
 
 function togglePause() {
-	if (!pauseStatus) showOverlay("Paused");
+	if (!pauseStatus) {
+		showOverlay("Paused");
+	}
 	else {
 		$("#overlay").hide();
 		$("#navbar").hide();
@@ -186,147 +142,36 @@ function getMousePos(canvas, evt) {
 	};
 }
 
-function reportScore(score, kills, round) {
-	// make request to server to store the stats for this game
-	const stats = {
-		'score': score,
-		'kills': kills,
-		'round': round
-	};
-	const token = localStorage.getItem('auth');
-	if (!token) {
-		$("#logout-btn").click();
-		return;
-	}
-
-	$.ajax({
-		method: "POST",
-		url: '/api/auth/reportGame',
-		data: JSON.stringify(stats),
-		processData: false,
-		headers: { "Authorization": `Bearer ${token}` },
-		contentType: "application/json; charset=utf-8",
-		dataType: "json"
-	}).done(function (data, text_status, jqXHR) {
-		console.log(jqXHR.status + " " + text_status + JSON.stringify(data));
-	}).fail(function (err) {
-		console.log("fail " + err.status + " " + JSON.stringify(err.responseJSON));
-	});
-}
-
-function register() {
-	const formData = {
-		'username': $("#user").val(),
-		'password': $("#pass").val(),
-		'confirmPassword': $("#confirm-pass").val()
-	};
-
-	if (formData.password !== formData.confirmPassword) {
-		alert("Passwords don't match!");
-		return;
-	}
-
-	$.ajax({
-		method: "POST",
-		url: "/api/register",
-		data: JSON.stringify(formData),
-		processData: false,
-		contentType: "application/json; charset=utf-8",
-		dataType: "json"
-	}).done(function (data, text_status, jqXHR) {
-		console.log(jqXHR.status + " " + text_status + JSON.stringify(data));
-
-		$("#ui_login").show();
-		$("#ui_register").hide();
-
-	}).fail(function (err) {
-		console.log("fail " + err.status + " " + JSON.stringify(err.responseJSON));
-	});
-}
-
-function updateScore() {
-
-	const formData = {
-		'username': $('#user').val(),
-		'score': stage.score,
-		'enemiesKilled': stage.enemiesKilled,
-		'roundNo': stage.round
-	};
-
-	$.ajax({
-		method: "POST",
-		url: '/app/registerScore',
-		data: JSON.stringify(formData),
-		processData: false,
-		contentType: "application/json; charset=utf-8",
-		dataType: "json"
-	}).done(function (data, text_status, jqXHR) {
-		console.log(jqXHR.status + " " + text_status + JSON.stringify(data));
-
-	}).fail(function (err) {
-		console.log("fail " + err.status + " " + JSON.stringify(err.responseJSON));
-	});
-}
-
-function login() {
-
-	credentials = {
-		"username": $("#username").val(),
-		"password": $("#password").val()
-	};
-
-	$.ajax({
-		method: "POST",
-		url: "/api/login",
-		data: JSON.stringify(credentials),
-		processData: false,
-		contentType: "application/json; charset=utf-8",
-		dataType: "json"
-	}).done(function (data, text_status, jqXHR) {
-		if (jqXHR.status === 200) {
-			const token = data.authorization;
-			localStorage.setItem('auth', token);
-
-			$("#landing").hide();
-			$("#ui_play").show();
-			$("#overlay").hide();
-		} else {
-			$("#err").text(data.error ? data.error : data.message);
-		}
-
-		setupGame();
-		startGame();
-		stage.player.label = credentials.username;
-
-	}).fail(function (err) {
-		$("#err").text(err.responseJSON.info);
-	});
-}
-
-// Using the /api/auth/test route, must send authorization header
-function test() {
-	const token = localStorage.getItem('auth');
-	if (!token) {
-		$("#logout-btn").click();
-		return;
-	}
-	$.ajax({
-		method: "POST",
-		url: "/api/auth/test",
-		data: {},
-		headers: { "Authorization": `Bearer ${token}` },
-		dataType: "json"
-	}).done(function (data, text_status, jqXHR) {
-		console.log(jqXHR.status + " " + text_status + JSON.stringify(data));
-	}).fail(function (err) {
-		console.log("fail " + err.status + " " + JSON.stringify(err.responseJSON));
-	});
-}
-
 $(function () {
 	// Setup all events here and display the appropriate UI
 	$("#overlay").hide();
-	$("#loginSubmit").on('click', function () { login(); });
+	$("#loginSubmit").on('click', async () => {
+		try {
+			const _username = await login();
+			username = _username;
+			$("#landing").hide();
+			$("#ui_play").show();
+			$("#overlay").hide();
+			setupGame();
+            startGame();
+		} catch (err) {
+			return;
+		}
+	});
+
+	$("#profileSubmit").on('click', async () => {
+		try {
+			username = await updateInfo();
+			stage.player.label = username;
+		} catch (error) {
+			console.log(error);
+		}
+	} );
+	$("#profileDelete").on('click', function(){
+		deleteProfile();
+		
+	});
+
 	$("#register").on('click', () => register());
 	$("#login").on('click', function () {
 		$("#landing").show();
@@ -335,9 +180,33 @@ $(function () {
 		$("#ui_register").hide();
 		$("#left-text").text("LOGIN");
 	});
-	$("#leaderboard-btn").on('click', () => {
-		test();
+	$("#leaderboard-btn").on('click', async () => {
+		try {
+			const data = await getLeaderboard();
+			populateLeaderboard(leaderboardDiv, data);
+			$("#overlay-text").hide();
+			$("#leaderboard").show();
+			$("#controls").hide();
+			$("#profile").hide();
+		} catch (error) {
+			console.log(error);	
+		}
 	});
+
+	$("#profile-btn").on('click', async()=> {
+		try{
+			const data = await fetchUserData(username);
+			$("#overlay-text").hide();
+			$("#controls").hide();
+			$("#leaderboard").hide();
+			renderProfile(profileDiv, data);
+			$("#profile").show();
+		}
+		catch (error){
+			console.log(error);
+		}
+	});
+
 	$("#register-nav").on('click', function () {
 		$("#landing").show();
 		$("#ui_login").hide();
@@ -352,6 +221,8 @@ $(function () {
 	$("#control-btn").on('click', function () {
 		$("#overlay-text").hide();
 		$("#controls").show();
+		$("#leaderboard").hide();
+		$("#profile").hide();
 	})
 
 	$("#logout-btn").on('click', function () {
@@ -364,6 +235,7 @@ $(function () {
 		$("#navbar").hide();
 		$("#overlay").hide();
 		localStorage.removeItem('auth');
+		backgroundSound.pause();
 	});
 
 	$("#landing").show();
@@ -374,7 +246,11 @@ $(function () {
 	$("#restart").hide();
 	$("#navbar").hide();
 	$("#controls").hide();
+	$("#leaderboard").hide();
+	$("#profile").hide();
 	debugDiv = $("#debug");
 	inventoryUIDiv = $("#inventory-ui");
+	leaderboardDiv = $("#leaderboard");
+	profileDiv = $("#profile");
 });
 

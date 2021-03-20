@@ -91,7 +91,6 @@ button:hover {
 #weapons {
 	position: absolute;
 	display: flex;
-	/* justify-content: space-evenly; */
 	bottom: 5px;
 	left: 5px;
 	width: 35%;
@@ -128,7 +127,7 @@ main {
 	font-size: 1em;
 }
 
-#controls{
+#controls {
 	display: grid;
 	width: 90%;
 	grid-template-columns: 1fr 1fr;
@@ -137,7 +136,8 @@ main {
 	grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
 }
 
-#restart-btn, #leaderboard-btn, #logout-btn, #control-btn{
+#restart-btn, #leaderboard-btn, #logout-btn,
+#control-btn, #profile-btn, .update-btn {
 	border: 1px solid #c2b5b5;
 	background-color: transparent;
 	color: #c2b5b5;
@@ -151,19 +151,40 @@ main {
 	align-items: center;
 }
 
+#leaderboard {
+	display: flex;
+	flex-direction: column;
+	border: antiquewhite 1px solid;
+	align-items: center;
+	width: 40%;
+}
+
+#leaderboardEntry {
+	display: flex;
+	justify-content: space-between;
+	color: white;
+	width: 70%;
+}
+
+#leaderboardHeader {
+	font-size: 1.45em;
+	font-weight: 300;
+}
+
 #logout-btn {
 	justify-self: flex-end;
 	margin-left: auto;
 }
 
-#restart-div{
+#restart-div {
 	display:flex;
 	justify-content: center;
 }
 
-#restart-btn:hover, #leaderboard-btn:hover, #logout-btn:hover, #control-btn:hover{
+#restart-btn:hover, #leaderboard-btn:hover, #logout-btn:hover,
+#control-btn:hover, #profile-btn:hover, .update-btn:hover {
 	background-color: #c2b5b5;
-	color: #000000;
+	color: #261D20;
 }
 
 #login-btn:hover {
@@ -193,13 +214,12 @@ main {
 	z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
   }
   
-#overlay-text {
+#overlay-text, #profile-err {
 	color: antiquewhite;
-	grid-column: 2/3;
-	grid-row: 2/3;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	width: 90%;
 }
 
 .input {
@@ -242,7 +262,7 @@ main {
 	box-shadow: -6px 0px 25px 0px rgba(0,0,0,0.75);
 }
 
-#register-right > div > div {
+#register-right > div > div, #profile {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-evenly;
@@ -253,6 +273,19 @@ main {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+}
+
+#profile {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	width: 40%;
+}
+
+#profileRow {
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
 }
 
 #logo{

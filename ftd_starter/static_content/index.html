@@ -20,11 +20,52 @@
 	</div>
 	<div id="overlay">
 		<div id="navbar">
+			<button id="profile-btn">Profile</button>
 			<button id="control-btn">Controls</button>
 			<button id="leaderboard-btn">Leaderboard</button>
 			<button id="logout-btn">Logout</button>
 		</div>
 		<span id="overlay-text">PAUSED</span>
+		<div id="leaderboard">
+		</div>
+		<div id="profile">
+			<h2 id="overlay-text" style="align-self: center;">Profile</h2>
+			<div id="profileRow">
+				<label for="usernameInput">Username</label>
+				<input id="usernameInput" class="input" type='text' value="">
+			</div>
+			<br>
+
+			<div id="profileRow">
+				<label for="emailInput">Email</label>
+				<input id="emailInput" class="input" type="email" value="">
+			</div>
+			<br>
+			<div id="profileRow">
+				<label for="genderInput">Gender</label>
+				<div style="display: flex; justify-content: space-evenly;">
+					<label for="maleUpdate">Male</label>
+					<input id="maleUpdate" class="input" type="radio" name="genderInput" autocomplete="off" required
+						value="M"
+						autofocus />
+					<label for="femaleUpdate">Female</label>
+					<input id="femaleUpdate" class="input" type="radio" name="genderInput" autocomplete="off" required
+					value="F"
+					autofocus />
+					<label for="otherUpdate">Other</label>
+					<input id="otherUpdate" class="input" type="radio" name="genderInput" autocomplete="off" required
+						value="O"
+						autofocus />
+				</div>
+			</div>
+
+			<br>
+			<input id="profileSubmit" style="align-self: center;" class="update-btn" type="submit" name="submit" value="Update">
+			<input id="profileDelete" style="align-self: center;" class="update-btn" type="submit" name="submit" value="Delete">
+
+			<br>
+			<div id="profile-err"></div>
+		</div>
 		<div id="controls">
 			<span id="overlay-text" style="grid-column: 1/2;grid-row: 1/2;">Press 'W' key to move up</span>
 			<span id="overlay-text" style="grid-column: 1/2;grid-row: 2/3;">Press 'A' key to move left</span>
@@ -34,8 +75,8 @@
 			<span id="overlay-text" style="grid-column: 2/3;grid-row: 1/2;">Move your move mouse in the direction you want to shoot</span>
 			<span id="overlay-text" style="grid-column: 2/3;grid-row: 2/3;">Left click to shoot</span>
 			<span id="overlay-text" style="grid-column: 2/3;grid-row: 3/4;">Hold left mouse to continuously shoot</span>
-			<span id="overlay-text" style="grid-column: 2/3;grid-row: 4/5;">Aim your mouse in the direction you want and press 'X' to drop a brick wall</span>
-			<span id="overlay-text" style="grid-column: 2/3;grid-row: 5/6;">Aim your mouse in the direction you want and press 'C' to drop a steel wall</span>
+			<span id="overlay-text" style="grid-column: 2/3;grid-row: 4/5;">Aim your mouse in the direction you want and press 'X' to drop a brick wall (10 bricks)</span>
+			<span id="overlay-text" style="grid-column: 2/3;grid-row: 5/6;">Aim your mouse in the direction you want and press 'C' to drop a steel wall (35 steel)</span>
 
 		</div>
 		<div id="restart-div">
@@ -61,6 +102,32 @@
 						<br><br>
 
 						<div>
+							<span>Email</span><br>
+							<input id="email" class="input" type="email" name="email" autocomplete="off" required
+								autofocus />
+						</div>
+						<br><br>
+
+						<div>
+							<span>Gender</span><br>
+							<div style="display: flex; justify-content: space-evenly;">
+								<label for="male">Male</label>
+								<input id="male" class="input" type="radio" name="gender" autocomplete="off" required
+									value="M"
+									autofocus />
+								<label for="female">Female</label>
+								<input id="female" class="input" type="radio" name="gender" autocomplete="off" required
+								value="F"
+								autofocus />
+								<label for="other">Other</label>
+								<input id="other" class="input" type="radio" name="gender" autocomplete="off" required
+									value="O"
+									autofocus />
+							</div>
+						</div>
+						<br><br>
+
+						<div>
 							<span>Password</span><br>
 							<input id="pass" class="input" type="password" name="password" autocomplete="off"
 								required />
@@ -72,10 +139,12 @@
 							<input id="confirm-pass" class="input" type="password" name="confirm_password"
 								autocomplete="off" required />
 						</div>
-
+						<br><br>
+						<span id="register-err" style="color: #261D20; overflow-wrap: anywhere;">
+						</span>
 					</div>
 
-					<br><br><br><br>
+					<br>
 
 					<input id="register" class="btn" type="submit" name="submit" value="Register" id="submit" />
 					<br><br>
