@@ -38,7 +38,12 @@ export class Player extends DynamicObjects {
 		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
 		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
 			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
-		this.game.addActor(new Wall(this.game, newPos, 50, 'rgb(200, 1, 1)', orientation));
+		
+		const wall = new Wall(this.game, newPos, 50, 'rgb(200, 1, 1)', orientation);
+		if (!this.game.spawner._check_collision_with_world(wall.boundingVolume))
+		{
+			this.game.addActor(wall);
+		}
 	}
 
 	// 1 Wall = 35 steel
@@ -48,7 +53,11 @@ export class Player extends DynamicObjects {
 		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
 		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
 			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
-		this.game.addActor(new Wall(this.game, newPos, 100, 'rgb(67, 70, 75)', orientation));
+		const wall = new Wall(this.game, newPos, 100, 'rgb(67, 70, 75)', orientation);
+		if (!this.game.spawner._check_collision_with_world(wall.boundingVolume))
+		{
+			this.game.addActor(wall);
+		}
 	}
 
 	/**
@@ -240,5 +249,22 @@ export class Wall extends StaticObjects {
 		super.draw(context);
 		context.fillStyle = this.color;
 		context.fillRect(this.position.x, this.position.y, this.w, this.h);
+	}
+}
+
+export class Obstacles extends StaticObjects {
+
+	constructor(game, position, health, color, name='Obstacle'){
+		super(game, position, health, color, true, name=name);
+		this.w = Math.floor(Math.random() * (400 - 201)) + 201;
+		this.h = Math.floor(Math.random() * (400 - 201)) + 201;
+		this.boundingVolume = new AABB(this.position, this.position.add(new Pair(this.w, this.h)));
+		this.image = new Image(300, 300);
+		this.image.src = '../assets/wall.png';
+	}
+
+	draw(context){
+		super.draw(context);
+		context.drawImage(this.image, this.position.x, this.position.y, this.w, this.h);
 	}
 }

@@ -1,5 +1,5 @@
 import { clamp, Pair, randint } from './utils';
-import { Player, AI } from './CustomGameObjects';
+import { Player, AI, Obstacles } from './CustomGameObjects';
 import { Gun } from './Weapons';
 import { Map } from './Map';
 import { Spawner } from './Spawner';
@@ -46,12 +46,25 @@ export class Stage {
 		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position), null));
 		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position), null));
 		this.spawner = new Spawner(this, 1, 4);
+		this.generateObstacles();
 	}
 
 	resetGame() {
 		const enemiesKilled = this.spawner.totalEnemiesSpawned - this.activeAI;
 		this.reportScore(this.score, enemiesKilled, this.spawner.round - 1);
 		this.restartCallback();
+	}
+
+	generateObstacles(){
+		var  i = 0;
+		while (i < 8){
+			var position = new Pair(randint(this.worldWidth), randint(this.worldHeight));
+			var obj = new Obstacles(this, position, Infinity, 'rgb(0,0,0)', 'Obstacle');
+			if (!obj.intersects()){
+				i++;
+				this.addActor(obj);
+			}
+		}
 	}
 
 	addPlayer(player) {

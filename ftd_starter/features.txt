@@ -1,0 +1,14 @@
+Member1: Lakshya Gupta  guptalak
+Member2: Ibrahim Fazili faziliib
+
+Additional Features:
+Rounds become harder, more enemies spawn in
+Score is stored in the gameStats table with the round difficulty, enemiesKilled and Score
+Leaderboarded implemented, can be accessed through pause screen, you can see top 10 peoples scores
+
+Advanced Features:
+AI uses pathfinding
+Two kinds of guns, SMG and AR
+Reload sounds and background music
+Players can mine resources and build wall obstacles
+When new game is created, random placement of resources, guns and obstacles

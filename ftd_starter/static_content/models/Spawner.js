@@ -49,15 +49,24 @@ export class Spawner {
         const splitFactor = Math.random();
         const split1 = Math.round(splitFactor * this.maxAmmoToSpawn);
         const split2 = this.maxAmmoToSpawn - split1;
+        let pos1 = null, pos2 = null;
 
-        let ammo = Resource.generateARAmmo(this.game,
-            new Pair(randint(this.game.worldWidth), randint(this.game.worldHeight)), split1);
+        while (true) {
+            pos1 = new Pair(randint(this.game.worldWidth), randint(this.game.worldHeight));
+            if (!this._check_collision_with_world(new AABC(pos1, 30))) break;
+        }
+        
+        let ammo = Resource.generateARAmmo(this.game, pos1, split1);
         ammo.displayHealth = false;
         this.game.addActor(ammo);
 
         if (split2 > 0) {
+            while (true) {
+                pos2 = new Pair(randint(this.game.worldWidth), randint(this.game.worldHeight));
+                if (!this._check_collision_with_world(new AABC(pos2, 30))) break;
+            }
             ammo = Resource.generateSMGAmmo(this.game,
-                new Pair(randint(this.game.worldWidth), randint(this.game.worldHeight)), split2);
+                pos2, split2);
             ammo.displayHealth = false;
             this.game.addActor(ammo);
         }
