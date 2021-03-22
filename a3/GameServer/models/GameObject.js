@@ -1,5 +1,5 @@
-import { randint, Pair, clamp } from './utils';
-// import { Stage } from './Game';
+const { randint, Pair, clamp } = require('./utils');
+const { Stage } = require('./Game');
 
 class GameObject {
 
@@ -30,14 +30,18 @@ class GameObject {
 	/**
 	 * Callback to execute on destruction of this object from the game world
 	 */
-	onDestroy() {}
+	onDestroy() { }
 
-	notifyCollision(actor) {}
+	/**
+	 * Notify other actor of collision with this actor
+	 * @param {GameObject} actor 
+	 */
+	notifyCollision(actor) { }
 
 	updateHealth(h) {
 		this.health = clamp(this.health + h, 0, this.maxHealth);
 	}
-	
+
 	step(delta) {
 		if (this.health === 0) {
 			this.game.removeActor(this);
@@ -59,7 +63,7 @@ class GameObject {
 
 	drawLabel(context) {
 		context.fillStyle = "white";
-		context.font='200 12px sans-serif';
+		context.font = '200 12px sans-serif';
 		context.fillText(this.label, this.position.x - 20, this.position.y - 35);
 	}
 
@@ -81,13 +85,13 @@ class GameObject {
 	}
 }
 
-export class DynamicObjects extends GameObject {
+class DynamicObjects extends GameObject {
 
 	/**
 	 *  DynamicObjects are those that move in the game
 	 */
-	constructor(game, position, health, color = undefined, collison=true, name="") {
-		super(game, position, health, color, collison=true, name=name);
+	constructor(game, position, health, color = undefined, collison = true, name = "") {
+		super(game, position, health, color, collison = true, name = name);
 		// initally, object is still
 		this.velocity = new Pair(0, 0);
 	}
@@ -99,7 +103,7 @@ export class DynamicObjects extends GameObject {
 	/**
 	 * Update the object's center position based on its current position
 	 */
-	setCenter() {}
+	setCenter() { }
 
 	/**
 	 * Called on every game tick (every time the game state updates)
@@ -107,7 +111,7 @@ export class DynamicObjects extends GameObject {
 	 * @param {boolean} destroyOnCollision Optional argument which if set to true, destroys the obj on collision
 	 * @param {CallableFunction} onCollision Optinal callback which is called with the collided object on collision
 	 */
-	step(delta, destroyOnCollision=false, onCollision=null) {
+	step(delta, destroyOnCollision = false, onCollision = null) {
 		super.step();
 		const oldPos = this.position.copy();
 		// s = ut
@@ -130,7 +134,7 @@ export class DynamicObjects extends GameObject {
 			this.setCenter();
 			return;
 		}
-		
+
 
 		// stop at the walls
 		if (this.position.x < 0) {
@@ -172,12 +176,17 @@ export class DynamicObjects extends GameObject {
 	}
 }
 
-export class StaticObjects extends GameObject {
+class StaticObjects extends GameObject {
 
 	/**
 	 *  StaticObjects are those that don't move in the game
 	 */
 	constructor(game, position, health, color = undefined, collison = true, name = "") {
-		super(game, position, health, color, collison, name=name);
+		super(game, position, health, color, collison, name = name);
 	}
+}
+
+module.exports = {
+	DynamicObjects,
+	StaticObjects
 }

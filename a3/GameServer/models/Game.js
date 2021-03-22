@@ -1,10 +1,10 @@
-import { clamp, Pair, randint } from './utils';
-import { Player, AI, Obstacles } from './CustomGameObjects';
-import { Gun } from './Weapons';
-import { Map } from './Map';
-import { Spawner } from './Spawner';
+const { clamp, Pair, randint } =  require('./utils');
+const { Player, AI, Obstacles } = require('./CustomGameObjects');
+const { Gun } = require('./Weapons');
+const { Map } = require('./Map');
+const { Spawner } = require('./Spawner');
 
-export class Stage {
+class Stage {
 	constructor(canvas, restartGame, reportScore) {
 		this.canvas = canvas;
 		this.restartCallback = restartGame;
@@ -200,3 +200,7 @@ export class Stage {
 		return null;
 	}
 } // End Class Stage
+
+module.exports = {
+	Stage
+}

@@ -1,5 +1,5 @@
-import { StaticObjects } from "./GameObject";
-import { AABB, Pair } from './utils';
+const { StaticObjects } = require("./GameObject");
+const { AABB, Pair } = require('./utils');
 
 const RESOURCE_IMG_SIZE = {
     'Rock': new Pair(75, 45),
@@ -7,7 +7,7 @@ const RESOURCE_IMG_SIZE = {
     'AR Ammo': new Pair(60, 60,)
 };
 
-export class Resource extends StaticObjects {
+class Resource extends StaticObjects {
     constructor(game, position, health, harvestCount, image = null, name = "") {
         super(game, position, health, 'rgb(0,0,0)', false, name);
         this.image = image ? new Image(this.w, this.h) : undefined;
@@ -58,3 +58,6 @@ export class Resource extends StaticObjects {
     }
 }
 
+module.exports = {
+    Resource
+};

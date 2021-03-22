@@ -1,10 +1,10 @@
-import { DynamicObjects, StaticObjects } from './GameObject';
-import { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint, clamp } from './utils';
-import { Stage } from './Game';
-import { Bullet, Gun, Weapon } from './Weapons';
-import { Resource } from './Resources';
+const { DynamicObjects, StaticObjects } = require('./GameObject');
+const { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint, clamp } = require('./utils');
+const { Stage } = require('./Game');
+const { Bullet, Gun, Weapon } = require('./Weapons');
+const { Resource } = require('./Resources');
 
-export class Player extends DynamicObjects {
+class Player extends DynamicObjects {
 	/**
 	 * @param game {Stage}
 	 * @param position {Pair}
@@ -179,7 +179,7 @@ export class Player extends DynamicObjects {
 
 Player.PLAYER_SIZE = 20;
 
-export class AI extends Player {
+class AI extends Player {
 	/**
 	 * @param game {Stage}
 	 * @param position {Pair}
@@ -236,7 +236,7 @@ export class AI extends Player {
 	}
 }
 
-export class Wall extends StaticObjects {
+class Wall extends StaticObjects {
 	constructor(game, position, health, color = undefined, orientation) {
 		super(game, position, health, color, true, "Wall");
 		this.w = orientation.y === 0 ? 10 : 100;
@@ -252,7 +252,7 @@ export class Wall extends StaticObjects {
 	}
 }
 
-export class Obstacles extends StaticObjects {
+class Obstacles extends StaticObjects {
 
 	constructor(game, position, health, color, name='Obstacle'){
 		super(game, position, health, color, true, name=name);
@@ -267,4 +267,11 @@ export class Obstacles extends StaticObjects {
 		super.draw(context);
 		context.drawImage(this.image, this.position.x, this.position.y, this.w, this.h);
 	}
+}
+
+module.exports = {
+	Player,
+	AI,
+	Wall,
+	Obstacles
 }

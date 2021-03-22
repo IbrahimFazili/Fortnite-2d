@@ -1,13 +1,13 @@
-import { StaticObjects, DynamicObjects } from './GameObject';
-import { Player } from './CustomGameObjects';
-import { Pair, AABB, AABC, clamp } from './utils';
+const { StaticObjects, DynamicObjects } = require('./GameObject');
+const { Player } = require('./CustomGameObjects');
+const { Pair, AABB, AABC, clamp } = require('./utils');
 
 const GUN_IMG_SIZE_MAP = {
     'AR': new Pair(75, 45),
     'SMG': new Pair(55, 35),
 };
 
-export class Weapon extends StaticObjects {
+class Weapon extends StaticObjects {
     constructor(game, owner, position, health, color, name = "Weapon") {
         super(game, position, health, color, false, name);
         this.w = name in GUN_IMG_SIZE_MAP ? GUN_IMG_SIZE_MAP[name].x : 55;
@@ -26,7 +26,7 @@ export class Weapon extends StaticObjects {
     }
 }
 
-export class Bullet extends DynamicObjects {
+class Bullet extends DynamicObjects {
     constructor(game, position, damage, maxRange, dir) {
         super(game, position, Infinity, 'rgb(255, 255, 255)');
         this.damage = damage;
@@ -68,7 +68,7 @@ export class Bullet extends DynamicObjects {
 /**
  * For Gun varieties we have Pistols, SMG, AR
  * */
-export class Gun extends Weapon {
+class Gun extends Weapon {
     constructor(game, owner, position, color, damage, clipSize, fireRate, maxRange,
         reloadTime, image = undefined, reloadSound = null, name = "Gun") {
         super(game, owner, position, Infinity, color, name);
@@ -155,13 +155,8 @@ export class Gun extends Weapon {
 
 }
 
-export class Axe extends Weapon {
-    constructor(game, position, color, name) {
-        super(game, position, 100, color, name);
-        this.damage = 10;
-    }
-
-    step() {
-
-    }
+exports.module = {
+    Weapon,
+    Bullet,
+    Gun
 }

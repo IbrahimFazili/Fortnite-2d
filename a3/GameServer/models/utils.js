@@ -1,20 +1,20 @@
-export function randint(n) { return Math.round(Math.random() * n); }
-export function rand(n) { return Math.random() * n; }
+function randint(n) { return Math.round(Math.random() * n); }
+function rand(n) { return Math.random() * n; }
 
-export function clamp(value, min, max) {
+function clamp(value, min, max) {
 	if (value < min) return min;
 	else if (value > max) return max;
 	return value;
 }
 
-export function getOrientation(theta) {
+function getOrientation(theta) {
 	if (theta <= Math.PI / 4 && theta > -Math.PI / 4) return new Pair(1, 0);
 	if (theta <= 3 * Math.PI / 4 && theta > Math.PI / 4) return new Pair(0, 1);
 	if (theta <= 5 * Math.PI / 4 && theta > 3 * Math.PI / 4) return new Pair(-1, 0);
 	return new Pair(0, -1);
 }
 
-export function getMouseAngle(dir) {
+function getMouseAngle(dir) {
 	// const posX = new Pair(1, 0);
 	// const det = dir.y;
 	// const theta = Math.acos(posX.dot(dir) / (posX.norm() * dir.norm()));
@@ -25,7 +25,7 @@ function isBetween(smaller, bigger, x) {
 	return x >= smaller && x <= bigger;
 }
 
-export class Pair {
+class Pair {
 	constructor(x, y) {
 		this.x = x; this.y = y;
 	}
@@ -78,7 +78,7 @@ class BoundingVolume {
 	intersect(other) { }
 }
 
-export class AABB extends BoundingVolume {
+class AABB extends BoundingVolume {
 	/**
 	 * @param topLeft top left of the rectangle Pair
 	 * @param bottomRight bottom right point of the rectangle Pair
@@ -156,7 +156,7 @@ export class AABB extends BoundingVolume {
 	}
 }
 
-export class AABC extends BoundingVolume {
+class AABC extends BoundingVolume {
 
 	/**
 	 * @param center is a Pair
@@ -184,7 +184,7 @@ export class AABC extends BoundingVolume {
 
 }
 
-export class Line {
+class Line {
 	constructor(start, end) {
 		this.start = start;
 		this.end = end;
@@ -208,7 +208,7 @@ export class Line {
 	}
 }
 
-export class Inventory {
+class Inventory {
 	constructor(maxWeaponSlots, maxResourceCount, maxAmmoCount) {
 		this.maxWeaponSlots = maxWeaponSlots;
 		this.maxResourceCount = maxResourceCount;
@@ -243,4 +243,18 @@ export class Inventory {
 		this.equippedWeapon = i;
 	}
 
+}
+
+module.exports = {
+	AABB,
+	AABC,
+	Line,
+	Pair,
+	Inventory,
+	randint,
+	rand,
+	clamp,
+	getOrientation,
+	getMouseAngle,
+	isBetween
 }

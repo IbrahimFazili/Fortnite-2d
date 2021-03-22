@@ -1,8 +1,8 @@
-import { AI, Player } from "./CustomGameObjects";
-import { Resource } from "./Resources";
-import { AABC, clamp, Pair, randint } from "./utils";
+const { AI, Player } = require("./CustomGameObjects");
+const { Resource } = require("./Resources");
+const { AABC, clamp, Pair, randint } = require("./utils");
 
-export class Spawner {
+class Spawner {
 
     constructor(game, initSpawnRate, initSpawnCount) {
         this.game = game;
@@ -134,3 +134,7 @@ export class Spawner {
         }
     }
 }
+
+module.exports = {
+    Spawner
+};

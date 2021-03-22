@@ -1,7 +1,7 @@
-import { Stage } from './models/Game';
-import { Pair } from './models/utils';
-import { login, register, reportScore, getLeaderboard, fetchUserData, updateInfo, deleteProfile } from './controllers/APICallers';
-import { showOverlay, showDebugInfo, renderUI, populateLeaderboard, renderProfile } from './controllers/renderer';
+import { Stage } from './models/Game';  // @todo
+import { Pair } from './models/utils';  // @todo
+import { login, register, reportScore, getLeaderboard, fetchUserData, updateInfo, deleteProfile } from './controllers/APICallers'; // @todo
+import { showOverlay, showDebugInfo, renderUI, populateLeaderboard, renderProfile } from './controllers/renderer'; // @todo
 
 var stage = null;
 var view = null;
@@ -19,13 +19,12 @@ var pauseStatus = false;
 var username = null;
 var backgroundSound = new Audio('../assets/background_music.mp3');
 
-
 function initGame() {
-	stage = new Stage(document.getElementById('stage'), (() => {
+	stage = new Stage(document.getElementById('stage'), (() => { // @todo
 		showOverlay('Game Over');
 		pauseGame();
 	}), reportScore);
-	if (username) stage.player.label = username;
+	if (username) stage.player.label = username; // @todo
 	pauseStatus = false;
 }
 
@@ -37,11 +36,11 @@ function setupGame() {
 	document.addEventListener('keyup', () => moveByKey(event, true));
 	document.addEventListener('click', (event) => {
 		if (!pauseStatus)
-			stage.player.fire();
+			stage.player.fire(); // @todo
 	});
 	document.addEventListener('mousedown', (event) => {
 		if (!pauseStatus)
-			interval = stage.player.fire(true);
+			interval = stage.player.fire(true); // @todo
 	});
 
 	document.addEventListener('mouseup', (event) => {
@@ -50,11 +49,11 @@ function setupGame() {
 
 	stage.canvas.addEventListener('mousemove', function (evt) {
 		mousePos = getMousePos(stage.canvas, evt);
-		mousePos.x += stage.ptrOffset.x;
-		mousePos.y += stage.ptrOffset.y;
+		mousePos.x += stage.ptrOffset.x; // @todo
+		mousePos.y += stage.ptrOffset.y; // @todo
 		const dir = (new Pair(mousePos.x, mousePos.y)).sub(stage.player.position);
 		dir.normalize();
-		stage.ptrDirection = dir;
+		stage.ptrDirection = dir; // @todo
 	});
 }
 
@@ -62,8 +61,8 @@ function gameLoop(t) {
 	requestAnimationFrame(gameLoop);
 	delta = t - lastRenderTime;
 	lastRenderTime = t;
-	stage.step(delta);
-	stage.draw();
+	stage.step(delta); // @todo
+	stage.draw(); // @todo
 	if (!DEBUG_MODE) {
 		debugDiv.empty();
 		renderUI(inventoryUIDiv, stage);
@@ -79,10 +78,11 @@ function startGame() {
 	backgroundSound.play();
 	backgroundSound.loop = true;
 }
-function pauseGame() { stage.togglePause(); }
+function pauseGame() { stage.togglePause(); } // @tpdp
 
 function moveByKey(event, released) {
 	var key = event.key;
+	// @todo
 	if (key === 'x' && !released && !pauseStatus) stage.player.deployItem();
 	if (key === 'c' && !released && !pauseStatus) stage.player.deploySteelWall();
 	if (key === 'f' && !released && !pauseStatus) stage.player.pickupItem();
@@ -147,6 +147,7 @@ $(function () {
 	$("#overlay").hide();
 	$("#loginSubmit").on('click', async () => {
 		try {
+			// @todo
 			const _username = await login();
 			username = _username;
 			$("#landing").hide();
@@ -161,6 +162,7 @@ $(function () {
 
 	$("#profileSubmit").on('click', async () => {
 		try {
+			// @todo
 			username = await updateInfo();
 			stage.player.label = username;
 		} catch (error) {
@@ -182,6 +184,7 @@ $(function () {
 	});
 	$("#leaderboard-btn").on('click', async () => {
 		try {
+			// @todo
 			const data = await getLeaderboard();
 			populateLeaderboard(leaderboardDiv, data);
 			$("#overlay-text").hide();
@@ -195,6 +198,7 @@ $(function () {
 
 	$("#profile-btn").on('click', async()=> {
 		try{
+			// @todo
 			const data = await fetchUserData(username);
 			$("#overlay-text").hide();
 			$("#controls").hide();

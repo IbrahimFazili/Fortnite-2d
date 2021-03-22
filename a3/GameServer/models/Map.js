@@ -1,7 +1,7 @@
-import { Wall } from './CustomGameObjects';
-import { Pair } from './utils';
+const { Wall } = require('./CustomGameObjects');
+const { Pair } = require('./utils');
 
-export class Map {
+class Map {
     constructor(game, rows, cols, squaresize) {
         this.game = game;
         this.rows = rows / 4;
@@ -209,4 +209,8 @@ export class Map {
 
         return vectors;
     }
+}
+
+module.exports = {
+    Map
 }

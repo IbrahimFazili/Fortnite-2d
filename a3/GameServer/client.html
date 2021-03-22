@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<body>
+    This is a test WebSocket client
+</body>
+<script>
+    const ws = new WebSocket("ws://localhost:8100");
+    ws.onmessage = function (ev) {
+        console.log(ev);
+        this.send('hello nibba');
+    }
+</script>
