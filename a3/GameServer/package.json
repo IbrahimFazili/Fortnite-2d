@@ -1,0 +1,19 @@
+{
+  "name": "gameserver",
+  "version": "1.0.0",
+  "description": "Game Server for Fortnite 2d",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IbrahimFazili/Fortnite-2d.git"
+  },
+  "author": "guptalak, faiziliib",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IbrahimFazili/Fortnite-2d/issues"
+  },
+  "homepage": "https://github.com/IbrahimFazili/Fortnite-2d#readme"
+}
