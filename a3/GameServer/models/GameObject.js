@@ -61,6 +61,12 @@ class GameObject {
 		return null;
 	}
 
+	intPosition() {
+		x = Math.round(this.position.x);
+		y = Math.round(this.position.y);
+		return new Pair(x, y);
+	}
+
 	drawLabel(context) {
 		context.fillStyle = "white";
 		context.font = '200 12px sans-serif';
@@ -78,11 +84,25 @@ class GameObject {
 		}
 	}
 
-	intPosition() {
-		x = Math.round(this.position.x);
-		y = Math.round(this.position.y);
-		return new Pair(x, y);
+	/**
+	 * JSONify this object to be sent over network
+	 * 
+	 * @param {Object | null} obj optional object that can be populated with the
+	 * props of this object. If it's not provided, function returns a new
+	 * JSON object
+	 * @returns JSON representation of this object
+	 */
+	pack(obj = null) {
+		if (obj === null) obj = {};
+		obj['displayLabel'] = this.displayLabel;
+		obj['displayHealth'] = this.health;
+		obj['maxHealth'] = this.maxHealth;
+		obj['position'] = this.position.pack();
+
+		return obj;
 	}
+
+
 }
 
 class DynamicObjects extends GameObject {

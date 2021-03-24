@@ -31,22 +31,39 @@ class Stage {
 		this.internal_map_grid = new Map(this, this.rows, this.cols, this.squareSize);
 
 		// the logical width and height of the stage (viewport/window)
-		this.width = window.innerWidth;
-		this.height = window.innerHeight;
-		this.ptrOffset = new Pair(0, 0);
-		this.ptrDirection = new Pair(1, 0);
+		// this.width = window.innerWidth;
+		// this.height = window.innerHeight;
 
 		this.idCounter = 0;
 
 		// Add the player to the center of the stage
 		var health = 100.0;
 		var colour = 'rgba(0,0,0,1)';
-		var position = new Pair(Math.floor(this.width / 2), Math.floor(this.height / 2));
+		var position = new Pair(Math.floor(this.worldWidth / 2), Math.floor(this.worldHeight / 2));
 		this.addPlayer(new Player(this, position, health, colour));
 		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position), null));
 		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position), null));
 		this.spawner = new Spawner(this, 1, 4);
 		this.generateObstacles();
+	}
+
+	/**
+	 * JSONify this class to be sent over network
+	 */
+	pack() {
+		const json = {};
+		json['player'] = this.player.pack();
+		json['worldWidth'] = this.worldWidth;
+		json['worldHeight'] = this.worldHeight;
+		json['squareSize'] = this.squareSize;
+		json['rows'] = this.rows;
+		json['cols'] = this.cols;
+
+		let actors = [];
+		this.actors.forEach(actor => actors.push(actor.pack()));
+		json['actors'] = actors;
+		
+		return json;
 	}
 
 	resetGame() {
@@ -128,42 +145,42 @@ class Stage {
 
 		this.countAI();
 	}
+	// TODO: migrate to frontend
+	// setGameWindowSize(ctx) {
+	// 	ctx.canvas.width = window.innerWidth;
+	// 	ctx.canvas.height = window.innerHeight;
+	// 	this.width = ctx.canvas.width;
+	// 	this.height = ctx.canvas.height;
+	// }
 
-	setGameWindowSize(ctx) {
-		ctx.canvas.width = window.innerWidth;
-		ctx.canvas.height = window.innerHeight;
-		this.width = ctx.canvas.width;
-		this.height = ctx.canvas.height;
-	}
+	// draw() {
+	// 	var context = this.canvas.getContext('2d');
+	// 	this.setGameWindowSize(context);
 
-	draw() {
-		var context = this.canvas.getContext('2d');
-		this.setGameWindowSize(context);
+	// 	context.clearRect(0, 0, this.width, this.height);
 
-		context.clearRect(0, 0, this.width, this.height);
+	// 	context.save();
 
-		context.save();
+	// 	const camX = clamp(this.player.position.x - (this.width / 2), 0, this.worldWidth - this.width);
+	// 	const camY = clamp(this.player.position.y - (this.height / 2), 0, this.worldHeight - this.height);
+	// 	this.ptrOffset = new Pair(camX, camY);
+	// 	context.translate(-camX, -camY);
 
-		const camX = clamp(this.player.position.x - (this.width / 2), 0, this.worldWidth - this.width);
-		const camY = clamp(this.player.position.y - (this.height / 2), 0, this.worldHeight - this.height);
-		this.ptrOffset = new Pair(camX, camY);
-		context.translate(-camX, -camY);
+	// 	this.drawCheckeredBoard(context, this.squareSize, this.rows, this.cols)
 
-		this.drawCheckeredBoard(context, this.squareSize, this.rows, this.cols)
+	// 	for (var i = 0; i < this.actors.length; i++) {
+	// 		if (this.actors[i] instanceof Player) continue;
+	// 		this.actors[i].draw(context);
+	// 	}
 
-		for (var i = 0; i < this.actors.length; i++) {
-			if (this.actors[i] instanceof Player) continue;
-			this.actors[i].draw(context);
-		}
+	// 	// draw player at the end to make sure it's drawn on top of everything else
+	// 	this.actors.forEach(act => {
+	// 		if (act instanceof Player) act.draw(context);
+	// 	});
 
-		// draw player at the end to make sure it's drawn on top of everything else
-		this.actors.forEach(act => {
-			if (act instanceof Player) act.draw(context);
-		});
+	// 	context.restore();
 
-		context.restore();
-
-	}
+	// }
 
 	generateMap(squareSize, rows, cols) {
 		this.map = new Array(rows);
@@ -180,15 +197,16 @@ class Stage {
 			}
 	}
 
-	drawCheckeredBoard(ctx, squareSize, rows, cols) {
-		if (!this.map) this.generateMap(squareSize, rows, cols);
-		for (let j = 0; j < rows; j++) {
-			for (let i = 0; i < cols; i++) {
-				ctx.fillStyle = this.map[j][i];
-				ctx.fillRect(i * squareSize, j * squareSize, squareSize, squareSize)
-			}
-		}
-	}
+	// TODO: migrate to frontend
+	// drawCheckeredBoard(ctx, squareSize, rows, cols) {
+	// 	if (!this.map) this.generateMap(squareSize, rows, cols);
+	// 	for (let j = 0; j < rows; j++) {
+	// 		for (let i = 0; i < cols; i++) {
+	// 			ctx.fillStyle = this.map[j][i];
+	// 			ctx.fillRect(i * squareSize, j * squareSize, squareSize, squareSize)
+	// 		}
+	// 	}
+	// }
 
 	// return the first actor at coordinates (x,y) return null if there is no such actor
 	getActor(x, y) {

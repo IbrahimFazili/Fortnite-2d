@@ -67,6 +67,13 @@ class Pair {
 	multiply(value) {
 		return new Pair(this.x * value, this.y * value);
 	}
+
+	pack() {
+		return {
+			x: this.x,
+			y: this.y
+		};
+	}
 }
 
 class BoundingVolume {

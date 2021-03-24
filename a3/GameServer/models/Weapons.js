@@ -56,6 +56,13 @@ class Bullet extends DynamicObjects {
         }
     }
 
+    pack(obj = null) {
+        const json = {};
+        super.pack(json);
+        json['radius'] = this.radius;
+        json['color'] = this.color;
+    }
+
     draw(context) {
         super.draw(context);
         context.beginPath();
@@ -77,15 +84,11 @@ class Gun extends Weapon {
         this.clipSize = clipSize;
         this.maxRange = maxRange;
         this.currentAmmo = this.clipSize;
-        this.image = image ? new Image(this.w, this.h) : undefined;
-        if (image) this.image.src = image;
+        this.image = image;
         this.velocity = 750;
         this.reloading = false;
         this.reloadTime = reloadTime;
         this.reloadSound = reloadSound;
-
-        if (this.reloadSound) this.reloadSound.volume = 0.5;
-        // burst or auto?
     }
 
     toString() {
@@ -135,12 +138,12 @@ class Gun extends Weapon {
 
     static generateAR(game, position, owner) {
         return new Gun(game, owner, position, 'rgb(0, 0, 0)', 11, 25, 280, 1500, 1500, '../assets/AR.png',
-            new Audio('../assets/ar-reload.mp3'), 'AR');
+            'ar-reload.mp3', 'AR');
     }
 
     static generateSMG(game, position, owner) {
         return new Gun(game, owner, position, 'rgb(0, 0, 0)', 6, 32, 420, 1100, 1000, '../assets/SMG.png',
-            new Audio('../assets/smg-reload.mp3'), 'SMG');
+            'smg-reload.mp3', 'SMG');
     }
 
     draw(context) {
@@ -153,9 +156,21 @@ class Gun extends Weapon {
         }
     }
 
+    pack(obj = null) {
+        const json = {};
+        super.pack(json);
+        json['image'] = this.image;
+        json['w'] = this.w;
+        json['h'] = this.h;
+        json['currentAmmo'] = this.currentAmmo;
+        json['reloading'] = this.reloading;
+
+        return json;
+    }
+
 }
 
-exports.module = {
+module.exports = {
     Weapon,
     Bullet,
     Gun

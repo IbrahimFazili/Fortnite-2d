@@ -167,6 +167,12 @@ class Player extends DynamicObjects {
 		}
 	}
 
+	/*
+	position
+	health
+	maxhealth
+	radius
+	*/
 	draw(context) {
 		super.draw(context);
 		context.beginPath();
@@ -175,6 +181,15 @@ class Player extends DynamicObjects {
 		context.arc(this.position.x, this.position.y, Player.PLAYER_SIZE, 0, 2 * Math.PI);
 		context.fill();
 	}
+
+	pack(obj = null) {
+		const json = {};
+		super.pack(json);
+		json['color'] = this.color;
+		json['size'] = Player.PLAYER_SIZE;
+		return json;
+	}
+	
 }
 
 Player.PLAYER_SIZE = 20;
@@ -244,6 +259,15 @@ class Wall extends StaticObjects {
 		this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
 		this.boundingVolume = new AABB(this.position, this.position.add(new Pair(this.w, this.h)));
 	}
+	
+	pack(obj = null) {
+		const json = {};
+		super.pack(json);
+		json['w'] = this.w;
+		json['h'] = this.h;
+		json['color'] = this.color;
+		return json;
+	}
 
 	draw(context) {
 		super.draw(context);
@@ -259,8 +283,18 @@ class Obstacles extends StaticObjects {
 		this.w = Math.floor(Math.random() * (400 - 201)) + 201;
 		this.h = Math.floor(Math.random() * (400 - 201)) + 201;
 		this.boundingVolume = new AABB(this.position, this.position.add(new Pair(this.w, this.h)));
-		this.image = new Image(300, 300);
-		this.image.src = '../assets/wall.png';
+		this.image = 'wall.png';
+	}
+
+	pack(obj = null) {
+		const json = {};
+		super.pack(json);
+		json['w'] = this.w;
+		json['h'] = this.h;
+		json['image'] = this.image;
+		json['color'] = this.color;
+
+		return json;
 	}
 
 	draw(context){

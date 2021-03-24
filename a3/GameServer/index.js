@@ -11,7 +11,8 @@ app.get('/', (req, res) => {
 });
 
 wss.on('connection', (ws) => {
-    ws.send("Hello World!");
+    const json = JSON.stringify((new Stage()).pack());
+    ws.send(json);
 
     ws.on('message', (data) => {
         console.log(`client sent ${data}`);

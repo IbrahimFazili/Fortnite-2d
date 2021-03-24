@@ -10,8 +10,7 @@ const RESOURCE_IMG_SIZE = {
 class Resource extends StaticObjects {
     constructor(game, position, health, harvestCount, image = null, name = "") {
         super(game, position, health, 'rgb(0,0,0)', false, name);
-        this.image = image ? new Image(this.w, this.h) : undefined;
-        if (image) this.image.src = image;
+        this.image = image;
         this.w = name in RESOURCE_IMG_SIZE ? RESOURCE_IMG_SIZE[name].x : 55;
         this.h = name in RESOURCE_IMG_SIZE ? RESOURCE_IMG_SIZE[name].y : 35;
         this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
@@ -35,6 +34,16 @@ class Resource extends StaticObjects {
             context.fillStyle = "purple";
             context.fillRect(this.position.x, this.position.y, this.w, this.h);
         }
+    }
+
+    pack(obj = null){
+        const json = {};
+        super.pack(json);
+        json['image'] = this.image;
+        json['w'] = this.w;
+        json['h'] = this.h;
+
+        return json;
     }
 
     static generateRock(game, position) {

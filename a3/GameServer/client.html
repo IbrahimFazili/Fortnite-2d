@@ -5,7 +5,8 @@
 <script>
     const ws = new WebSocket("ws://localhost:8100");
     ws.onmessage = function (ev) {
-        console.log(ev);
-        this.send('hello nibba');
+        const json = JSON.parse(ev.data);
+        console.log(json);
+        this.send('hello, world!');
     }
 </script>
