@@ -62,6 +62,7 @@ class Stage {
 		let actors = [];
 		this.actors.forEach(actor => actors.push(actor.pack()));
 		json['actors'] = actors;
+		json['time'] = Date.now();
 		
 		return json;
 	}

@@ -1,10 +1,10 @@
-const { DynamicObjects, StaticObjects } = require('./GameObject');
-const { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint, clamp } = require('./utils');
-const { Stage } = require('./Game');
-const { Bullet, Gun, Weapon } = require('./Weapons');
-const { Resource } = require('./Resources');
+import { DynamicObjects, StaticObjects } from './GameObject';
+import { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint, clamp } from './utils';
+import { Stage } from './Game';
+import { Bullet, Gun, Weapon } from './Weapons';
+import { Resource } from './Resources';
 
-class Player extends DynamicObjects {
+export class Player extends DynamicObjects {
 	/**
 	 * @param game {Stage}
 	 * @param position {Pair}
@@ -12,8 +12,8 @@ class Player extends DynamicObjects {
 	 * @param color {string}
 	 * @param radius {Number}
 	 */
-	constructor(game, position, health, color, regenEnabled = true) {
-		super(game, position, health, color, false, "Player 1");
+	constructor(game, position, health, color, name, regenEnabled = true) {
+		super(game, position, health, color, false, name);
 		this.radius = Player.PLAYER_SIZE;
 		this.center = this.position;
 		this.boundingVolume = new AABC(this.center, Player.PLAYER_SIZE);
@@ -24,7 +24,7 @@ class Player extends DynamicObjects {
 		this.regenInterval = -1;
 		// this.maxHealth = 1000;
 	}
-
+ 
 	setCenter() { this.center = this.position; }
 
 	onDestroy() {
@@ -175,21 +175,11 @@ class Player extends DynamicObjects {
 		context.arc(this.position.x, this.position.y, Player.PLAYER_SIZE, 0, 2 * Math.PI);
 		context.fill();
 	}
-
-	pack(obj = null) {
-		const json = {};
-		super.pack(json);
-		json['color'] = this.color;
-		json['size'] = Player.PLAYER_SIZE;
-		// json['name'] = 
-		return json;
-	}
-	
 }
 
 Player.PLAYER_SIZE = 20;
 
-class AI extends Player {
+export class AI extends Player {
 	/**
 	 * @param game {Stage}
 	 * @param position {Pair}
@@ -246,22 +236,13 @@ class AI extends Player {
 	}
 }
 
-class Wall extends StaticObjects {
+export class Wall extends StaticObjects {
 	constructor(game, position, health, color = undefined, orientation) {
 		super(game, position, health, color, true, "Wall");
 		this.w = orientation.y === 0 ? 10 : 100;
 		this.h = orientation.y === 0 ? 100 : 10;
 		this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
 		this.boundingVolume = new AABB(this.position, this.position.add(new Pair(this.w, this.h)));
-	}
-	
-	pack(obj = null) {
-		const json = {};
-		super.pack(json);
-		json['w'] = this.w;
-		json['h'] = this.h;
-		json['color'] = this.color;
-		return json;
 	}
 
 	draw(context) {
@@ -271,36 +252,19 @@ class Wall extends StaticObjects {
 	}
 }
 
-class Obstacles extends StaticObjects {
+export class Obstacles extends StaticObjects {
 
 	constructor(game, position, health, color, name='Obstacle'){
 		super(game, position, health, color, true, name=name);
 		this.w = Math.floor(Math.random() * (400 - 201)) + 201;
 		this.h = Math.floor(Math.random() * (400 - 201)) + 201;
 		this.boundingVolume = new AABB(this.position, this.position.add(new Pair(this.w, this.h)));
-		this.image = 'wall.png';
-	}
-
-	pack(obj = null) {
-		const json = {};
-		super.pack(json);
-		json['w'] = this.w;
-		json['h'] = this.h;
-		json['image'] = this.image;
-		json['color'] = this.color;
-
-		return json;
+		this.image = new Image(300, 300);
+		this.image.src = '../assets/wall.png';
 	}
 
 	draw(context){
 		super.draw(context);
 		context.drawImage(this.image, this.position.x, this.position.y, this.w, this.h);
 	}
-}
-
-module.exports = {
-	Player,
-	AI,
-	Wall,
-	Obstacles
 }

@@ -1,5 +1,5 @@
-const { StaticObjects } = require("./GameObject");
-const { AABB, Pair } = require('./utils');
+import { StaticObjects } from "./GameObject";
+import { AABB, Pair } from './utils';
 
 const RESOURCE_IMG_SIZE = {
     'Rock': new Pair(75, 45),
@@ -7,10 +7,11 @@ const RESOURCE_IMG_SIZE = {
     'AR Ammo': new Pair(60, 60,)
 };
 
-class Resource extends StaticObjects {
+export class Resource extends StaticObjects {
     constructor(game, position, health, harvestCount, image = null, name = "") {
         super(game, position, health, 'rgb(0,0,0)', false, name);
-        this.image = image;
+        this.image = image ? new Image(this.w, this.h) : undefined;
+        if (image) this.image.src = image;
         this.w = name in RESOURCE_IMG_SIZE ? RESOURCE_IMG_SIZE[name].x : 55;
         this.h = name in RESOURCE_IMG_SIZE ? RESOURCE_IMG_SIZE[name].y : 35;
         this.center = new Pair(this.position.x + (this.w / 2), this.position.y + (this.h / 2));
@@ -36,17 +37,6 @@ class Resource extends StaticObjects {
         }
     }
 
-    pack(obj = null){
-        const json = {};
-        super.pack(json);
-        json['image'] = this.image;
-        json['w'] = this.w;
-        json['h'] = this.h;
-        json['harvestCount'] = this.harvestCount;
-
-        return json;
-    }
-
     static generateRock(game, position) {
         let res = new Resource(game, position, 100, 10, '../assets/brick.png', 'Rock');
         res.isCollidable = true;
@@ -68,6 +58,3 @@ class Resource extends StaticObjects {
     }
 }
 
-module.exports = {
-    Resource
-};

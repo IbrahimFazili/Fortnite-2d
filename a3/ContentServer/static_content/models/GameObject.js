@@ -1,5 +1,5 @@
-const { randint, Pair, clamp } = require('./utils');
-const { Stage } = require('./Game');
+import { randint, Pair, clamp } from './utils';
+// import { Stage } from './Game';
 
 class GameObject {
 
@@ -28,20 +28,24 @@ class GameObject {
 	}
 
 	/**
-	 * Callback to execute on destruction of this object from the game world
+	 * Update the object's properties with the properties inside the provided JSON
+	 * @param {Object} json JSON object containing properties about this object
 	 */
-	onDestroy() { }
+	unpack(json) {
+
+	}
 
 	/**
-	 * Notify other actor of collision with this actor
-	 * @param {GameObject} actor 
+	 * Callback to execute on destruction of this object from the game world
 	 */
-	notifyCollision(actor) { }
+	onDestroy() {}
+
+	notifyCollision(actor) {}
 
 	updateHealth(h) {
 		this.health = clamp(this.health + h, 0, this.maxHealth);
 	}
-
+	
 	step(delta) {
 		if (this.health === 0) {
 			this.game.removeActor(this);
@@ -61,15 +65,9 @@ class GameObject {
 		return null;
 	}
 
-	intPosition() {
-		x = Math.round(this.position.x);
-		y = Math.round(this.position.y);
-		return new Pair(x, y);
-	}
-
 	drawLabel(context) {
 		context.fillStyle = "white";
-		context.font = '200 12px sans-serif';
+		context.font='200 12px sans-serif';
 		context.fillText(this.label, this.position.x - 20, this.position.y - 35);
 	}
 
@@ -84,37 +82,20 @@ class GameObject {
 		}
 	}
 
-	/**
-	 * JSONify this object to be sent over network
-	 * 
-	 * @param {Object | null} obj optional object that can be populated with the
-	 * props of this object. If it's not provided, function returns a new
-	 * JSON object
-	 * @returns JSON representation of this object
-	 */
-	pack(obj = null) {
-		if (obj === null) obj = {};
-		obj['displayLabel'] = this.displayLabel;
-		obj['displayHealth'] = this.health;
-		obj['maxHealth'] = this.maxHealth;
-		obj['position'] = this.position.pack();
-		obj['name'] = this.constructor.name;
-		obj['id'] = this.id;
-		obj['label'] = this.label;
-
-		return obj;
+	intPosition() {
+		x = Math.round(this.position.x);
+		y = Math.round(this.position.y);
+		return new Pair(x, y);
 	}
-
-
 }
 
-class DynamicObjects extends GameObject {
+export class DynamicObjects extends GameObject {
 
 	/**
 	 *  DynamicObjects are those that move in the game
 	 */
-	constructor(game, position, health, color = undefined, collison = true, name = "") {
-		super(game, position, health, color, collison = true, name = name);
+	constructor(game, position, health, color = undefined, collison=true, name="") {
+		super(game, position, health, color, collison=true, name=name);
 		// initally, object is still
 		this.velocity = new Pair(0, 0);
 	}
@@ -126,7 +107,7 @@ class DynamicObjects extends GameObject {
 	/**
 	 * Update the object's center position based on its current position
 	 */
-	setCenter() { }
+	setCenter() {}
 
 	/**
 	 * Called on every game tick (every time the game state updates)
@@ -134,7 +115,7 @@ class DynamicObjects extends GameObject {
 	 * @param {boolean} destroyOnCollision Optional argument which if set to true, destroys the obj on collision
 	 * @param {CallableFunction} onCollision Optinal callback which is called with the collided object on collision
 	 */
-	step(delta, destroyOnCollision = false, onCollision = null) {
+	step(delta, destroyOnCollision=false, onCollision=null) {
 		super.step();
 		const oldPos = this.position.copy();
 		// s = ut
@@ -157,7 +138,7 @@ class DynamicObjects extends GameObject {
 			this.setCenter();
 			return;
 		}
-
+		
 
 		// stop at the walls
 		if (this.position.x < 0) {
@@ -199,17 +180,12 @@ class DynamicObjects extends GameObject {
 	}
 }
 
-class StaticObjects extends GameObject {
+export class StaticObjects extends GameObject {
 
 	/**
 	 *  StaticObjects are those that don't move in the game
 	 */
 	constructor(game, position, health, color = undefined, collison = true, name = "") {
-		super(game, position, health, color, collison, name = name);
+		super(game, position, health, color, collison, name=name);
 	}
-}
-
-module.exports = {
-	DynamicObjects,
-	StaticObjects
 }
