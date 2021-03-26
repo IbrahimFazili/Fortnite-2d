@@ -105,6 +105,14 @@ class GameObject {
 		return obj;
 	}
 
+	update(json) {
+		Object.keys(json).forEach(prop => {
+			if (prop in this) {
+				const val = typeof json[prop] === 'object' ? (new Pair(json[prop].x, json[prop].y)) : json[prop];
+				this[prop] = val;
+			}
+		});
+	}
 
 }
 
@@ -121,6 +129,11 @@ class DynamicObjects extends GameObject {
 
 	toString() {
 		return `${super.toString()} | v ${this.velocity.toString()}`;
+	}
+
+	pack(obj = null) {
+		if (obj === null) obj = {};
+		obj['velocity'] = this.velocity.pack();
 	}
 
 	/**

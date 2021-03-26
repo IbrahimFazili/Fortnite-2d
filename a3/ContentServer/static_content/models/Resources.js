@@ -56,5 +56,9 @@ export class Resource extends StaticObjects {
     static generateSMGAmmo(game, position, amount){
         return new Resource(game, position, amount, amount, '../assets/smg-ammo.png', 'SMG Ammo');
     }
+
+    unpack(json){
+        this.health = json['displayHealth'];
+    }
 }
 

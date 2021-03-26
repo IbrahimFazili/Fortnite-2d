@@ -4,9 +4,14 @@
 </body>
 <script>
     const ws = new WebSocket("ws://localhost:8100");
+    ws.onopen = function (ev) {
+        this.send(JSON.stringify({
+            type: 'Auth',
+            username: 'testuser' + Math.round(Math.random() * 100)
+        }));
+    }
     ws.onmessage = function (ev) {
         const json = JSON.parse(ev.data);
         console.log(json);
-        this.send('hello, world!');
     }
 </script>

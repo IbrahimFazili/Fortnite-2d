@@ -45,70 +45,92 @@ export class Stage {
 
 	unpack(json) {
 		Object.keys(json).forEach((prop) => {
-			switch (prop['name']) {
-
-				case 'Player':
-					var player = new Player(this,
-						new Pair(prop['position']['x'], prop['position']['y']),
-						prop['maxHealth'], prop['color'], prop['label'], true);
-					player.health = prop['displayHealth'];
-					this.addPlayer(player);
-					
-					break;
-				case 'Resource':
-					var resource = new Resource(this,
-						new Pair(prop['position']['x'], prop['position'][y]),
-						prop['maxHealth'], prop['harvestCount'], image,
-						prop['label']);
-					resource.health = prop['displayHealth'];
-					this.addActor(resource);
-					break;
-
-				case 'Gun':
-					if (prop['label'] === 'SMG') {
-						// make SMG
-
-						//another condition to check if it has an owner
-						var smg = Gun.generateSMG(this, 
-							new Pair(prop['position']['x'], prop['position']['y']), 
-							null);
-						smg.w = prop['w'];
-						smg.h = prop['h'];
-						smg.currentAmmo = prop['currentAmmo'];
-						smg.displayHealth = prop['displayHealth'];
-						smg.displayLabel = prop['displayLabel'];
-						smg.image.src = prop['image'];
-						smg.reloading = prop['reloading'];
-
-						this.addActor(smg);
-						break;
-					}
-					else if (prop['label'] === 'AR') {
-						// make AR
-
-						//another condition to check if it has an owner
-						var ar = Gun.generateAR(this, new Pair(prop['position']['x'], prop['position']['y']), null);
-						ar.w = prop['w'];
-						ar.h = prop['h'];
-						ar.currentAmmo = prop['currentAmmo'];
-						ar.displayHealth = prop['displayHealth'];
-						ar.displayLabel = prop['displayLabel'];
-						ar.image.src = prop['image'];
-						ar.reloading = prop['reloading'];
-
-						this.addActor(ar);
-						break;
-					}
-
-				case 'Obstacles':
-					var obj = new Obstacles(this, new Pair(prop['position']['x'], prop['position']['y']), Infinity, prop['color'], prop['label']);
-					obj.w = prop['w'];
-					obj.h = prop['h'];
-
-					this.addActor(obj);
-					return;
+			if (prop === 'actors') {
+				// clear actors list to process update from server
+				// could do better than this?
+				this.actors = [];
+				json[prop].forEach(actor => {
+					this.unpackActor(actor);
+				});
 			}
+			else this[prop] = json[prop];
 		});
+	}
+
+	unpackActor(prop) {
+		switch (prop['name']) {
+
+			case 'Player':
+				var player = new Player(this,
+					new Pair(prop['position']['x'], prop['position']['y']),
+					prop['maxHealth'], prop['color'], prop['label'], true);
+				player.unpack(prop);
+				this.addPlayer(player);
+				break;
+
+			case 'Resource':
+				var resource = new Resource(this,
+					new Pair(prop['position']['x'], prop['position'][y]),
+					prop['maxHealth'], prop['harvestCount'], image,
+					prop['label']);
+				resource.unpack(prop);
+				this.addActor(resource);
+				break;
+
+			case 'Gun':
+				if (prop['label'] === 'SMG') {
+					// make SMG
+
+					//another condition to check if it has an owner
+					var smg = Gun.generateSMG(this,
+						new Pair(prop['position']['x'], prop['position']['y']),
+						null);
+					smg.unpack(prop);
+					smg.owner = this.getActor(prop['owner']);
+					this.addActor(smg);
+					break;
+				}
+				else if (prop['label'] === 'AR') {
+					// make AR
+
+					//another condition to check if it has an owner
+					var ar = Gun.generateAR(this,
+						new Pair(prop['position']['x'], prop['position']['y']),
+						null)
+					ar.unpack(prop);
+					ar.owner = this.getActor(prop['owner']);
+					this.addActor(ar);
+					break;
+				}
+
+			case 'Obstacles':
+				var obj = new Obstacles(this,
+					new Pair(prop['position']['x'], prop['position']['y']),
+					Infinity, prop['color'], prop['label']);
+				obj.unpack(prop);
+				this.addActor(obj);
+				return;
+		}
+	}
+
+	pack() {
+		const json = {};
+		json['position'] = {
+			x: this.player.position.x,
+			y: this.player.position.y
+		};
+
+		json['velocity'] = {
+			x: this.player.velocity.x,
+			y: this.player.velocity.y
+		};
+
+		json['dir'] = {
+			x: this.ptrDirection.x,
+			y: this.ptrDirection.y
+		}
+
+		return json;
 	}
 
 	resetGame() {
@@ -140,6 +162,7 @@ export class Stage {
 	}
 
 	addActor(actor) {
+		const _actor = this.getActor(actor.id);
 		this.actors.push(actor);
 	}
 
@@ -184,10 +207,6 @@ export class Stage {
 			this.actors[i].step(delta);
 		}
 
-		this.internal_map_grid.clearGrid();
-		this.internal_map_grid.updateGrid();
-		this.spawner.step(delta);
-
 		this.countAI();
 	}
 
@@ -227,21 +246,6 @@ export class Stage {
 
 	}
 
-	generateMap(squareSize, rows, cols) {
-		this.map = new Array(rows);
-		for (let index = 0; index < this.map.length; index++) {
-			this.map[index] = new Array(cols);
-		}
-
-		for (let j = 0; j < rows; j++)
-			for (let i = 0; i < cols; i++) {
-				let color = [0, 143, 5];
-				color[1] += randint(40) - 20;
-				// if ((i % 2 == 0 && j % 2 == 0) || (i % 2 != 0 && j % 2 != 0)) 
-				this.map[i][j] = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-			}
-	}
-
 	drawCheckeredBoard(ctx, squareSize, rows, cols) {
 		if (!this.map) this.generateMap(squareSize, rows, cols);
 		for (let j = 0; j < rows; j++) {
@@ -252,13 +256,13 @@ export class Stage {
 		}
 	}
 
-	// return the first actor at coordinates (x,y) return null if there is no such actor
-	getActor(x, y) {
+	getActor(id) {
 		for (var i = 0; i < this.actors.length; i++) {
-			if (this.actors[i].x == x && this.actors[i].y == y) {
+			if (this.actors[i].id === id) {
 				return this.actors[i];
 			}
 		}
+
 		return null;
 	}
 } // End Class Stage

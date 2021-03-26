@@ -20,9 +20,10 @@ class Player extends DynamicObjects {
 		this.inventory = new Inventory(3, 100, 360);
 		this.displayLabel = true;
 		this.regenEnabled = regenEnabled;
-		this.regenTimeout = -1;
-		this.regenInterval = -1;
-		// this.maxHealth = 1000;
+		this._regenTimeout = -1;
+		this._regenInterval = -1;
+		this.dir = new Pair(0, 0);
+		this._fireInterval = -1;
 	}
 
 	setCenter() { this.center = this.position; }
@@ -35,7 +36,7 @@ class Player extends DynamicObjects {
 	deployItem() {
 		if (this.game.player.inventory.brick < 10) return;
 		this.game.player.inventory.brick -= 10;
-		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
+		const orientation = getOrientation(getMouseAngle(this.dir));
 		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
 			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
 		
@@ -50,7 +51,7 @@ class Player extends DynamicObjects {
 	deploySteelWall() {
 		if (this.game.player.inventory.steel < 35) return;
 		this.game.player.inventory.steel -= 35;
-		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
+		const orientation = getOrientation(getMouseAngle(this.dir));
 		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
 			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
 		const wall = new Wall(this.game, newPos, 100, 'rgb(67, 70, 75)', orientation);
@@ -63,18 +64,21 @@ class Player extends DynamicObjects {
 	/**
 	 * Fire the weapon in hand
 	 * @param {boolean} hold wheter to tap fire or auto fire (hold trigger -> hold = true)
-	 * @param {Pair} dir unit direction vector along which to fire in
 	 * @param {boolean} reloadSound whether to play the reload sound or not
 	 * @returns {NodeJS.Timeout} return value of the setInterval call used to simulate auto fire
 	 * at weapon's rate of fire
 	 */
-	fire(hold = false, dir = null, reloadSound = true) {
+	fire(hold = false, reloadSound = true) {
 		if (this.inventory.weapons.length === 0) return;
 		const weapon = this.inventory.weapons[this.inventory.equippedWeapon];
 		if (hold) {
-			return setInterval(() => weapon.fire(dir ? dir : this.game.ptrDirection, reloadSound),
+			this._fireInterval = setInterval(() => weapon.fire(this.dir, reloadSound),
 				Math.round((1000 * 60) / weapon.fireRate));
-		} else weapon.fire(dir ? dir : this.game.ptrDirection, reloadSound);
+		} else weapon.fire(this.dir, reloadSound);
+	}
+
+	stopFire() {
+		clearInterval(this._fireInterval);
 	}
 
 	/**
@@ -147,12 +151,12 @@ class Player extends DynamicObjects {
 	notifyCollision(actor) {
 		if (!(actor instanceof Bullet)) return;
 
-		clearInterval(this.regenInterval);
-		clearTimeout(this.regenTimeout);
+		clearInterval(this._regenInterval);
+		clearTimeout(this._regenTimeout);
 
 		if (this.regenEnabled) {
-			this.regenTimeout = setTimeout(() => {
-				this.regenInterval = setInterval(() => {
+			this._regenTimeout = setTimeout(() => {
+				this._regenInterval = setInterval(() => {
 					this.updateHealth(10)
 				}, 250);
 			}, 4000);
@@ -162,8 +166,8 @@ class Player extends DynamicObjects {
 	step(delta) {
 		super.step(delta);
 		if (this.health >= this.maxHealth) {
-			clearTimeout(this.regenTimeout);
-			clearInterval(this.regenInterval);
+			clearTimeout(this._regenTimeout);
+			clearInterval(this._regenInterval);
 		}
 	}
 
@@ -171,7 +175,6 @@ class Player extends DynamicObjects {
 		super.draw(context);
 		context.beginPath();
 		context.fillStyle = this.color;
-		// context.fillRect(this.position.x, this.position.y, this.size, this.size);
 		context.arc(this.position.x, this.position.y, Player.PLAYER_SIZE, 0, 2 * Math.PI);
 		context.fill();
 	}
@@ -181,7 +184,7 @@ class Player extends DynamicObjects {
 		super.pack(json);
 		json['color'] = this.color;
 		json['size'] = Player.PLAYER_SIZE;
-		// json['name'] = 
+		json['inventory'] = this.inventory.pack();
 		return json;
 	}
 	
@@ -200,7 +203,6 @@ class AI extends Player {
 	constructor(game, position, health, color, aimVarianceFactor) {
 		super(game, position, health, color, false);
 		this.label = "Stupid AI";
-		// this.inventory.addWeapon(Gun.generateAR(this.game, this.position));
 		this.followPath = true;
 		this.timeSinceLastPath = 0;
 		this.inventory.ARammo = Infinity;

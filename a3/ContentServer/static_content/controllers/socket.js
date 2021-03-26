@@ -73,7 +73,7 @@ class Socket {
         if (!this.connected) return;
 
         const data = this.game.pack();
-        data['type'] = 'GameState';
+        data['type'] = 'State';
         this.ws.send(JSON.stringify(data));
     }
 }

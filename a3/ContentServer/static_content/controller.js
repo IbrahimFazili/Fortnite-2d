@@ -18,6 +18,7 @@ var delta = 0;
 var pauseStatus = false;
 var username = null;
 var backgroundSound = new Audio('../assets/background_music.mp3');
+var actionQueue = new Array();
 
 function initGame() {
 	stage = new Stage(document.getElementById('stage'), (() => { // @todo
@@ -35,16 +36,21 @@ function setupGame() {
 	document.addEventListener('keydown', () => moveByKey(event, false));
 	document.addEventListener('keyup', () => moveByKey(event, true));
 	document.addEventListener('click', (event) => {
-		if (!pauseStatus)
+		if (!pauseStatus){
 			stage.player.fire(); // @todo
+			enqueueAction('fire');
+		}
 	});
 	document.addEventListener('mousedown', (event) => {
-		if (!pauseStatus)
+		if (!pauseStatus){
 			interval = stage.player.fire(true); // @todo
+			enqueueAction('fire_auto');
+		}
 	});
 
 	document.addEventListener('mouseup', (event) => {
 		interval !== null && clearInterval(interval);
+		enqueueAction('fire_stop');
 	});
 
 	stage.canvas.addEventListener('mousemove', function (evt) {
@@ -80,13 +86,33 @@ function startGame() {
 }
 function pauseGame() { stage.togglePause(); } // @tpdp
 
+function enqueueAction(action) {
+	this.actionQueue.push(action);
+}
+
+function clearActions() {
+	actionQueue = [];
+}
+
 function moveByKey(event, released) {
 	var key = event.key;
 	// @todo
-	if (key === 'x' && !released && !pauseStatus) stage.player.deployItem();
-	if (key === 'c' && !released && !pauseStatus) stage.player.deploySteelWall();
-	if (key === 'f' && !released && !pauseStatus) stage.player.pickupItem();
-	if (key === 'r' && !released && !pauseStatus) stage.player.reload();
+	if (key === 'x' && !released && !pauseStatus) {
+		enqueueAction('deploy_brick_wall');
+		stage.player.deployItem();
+	}
+	if (key === 'c' && !released && !pauseStatus) {
+		enqueueAction('deploy_steel_wall');
+		stage.player.deploySteelWall();
+	}
+	if (key === 'f' && !released && !pauseStatus) {
+		enqueueAction('pick')
+		stage.player.pickupItem();
+	}
+	if (key === 'r' && !released && !pauseStatus) {
+		enqueueAction('reload');
+		stage.player.reload();
+	}
 	if (key === 'Escape' && !released) togglePause();
 	// for debugging
 	if (key === ';' && !released) DEBUG_MODE = !DEBUG_MODE;

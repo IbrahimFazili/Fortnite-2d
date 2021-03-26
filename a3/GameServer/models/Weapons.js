@@ -164,7 +164,7 @@ class Gun extends Weapon {
         json['h'] = this.h;
         json['currentAmmo'] = this.currentAmmo;
         json['reloading'] = this.reloading;
-
+        json['owner'] = this.owner ? this.owner.id : -1;
         return json;
     }
 

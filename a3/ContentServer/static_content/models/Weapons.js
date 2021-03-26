@@ -153,6 +153,15 @@ export class Gun extends Weapon {
         }
     }
 
+    unpack(json){
+        this.w = json['w'];
+        this.h = json['h'];
+        this.currentAmmo = json['currentAmmo'];
+        this.displayHealth = json['displayHealth'];
+        this.displayLabel = json['displayLabel'];
+        this.image.src = json['image'];
+        this.reloading = json['reloading'];
+    }
 }
 
 export class Axe extends Weapon {

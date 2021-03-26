@@ -19,10 +19,10 @@ export class Player extends DynamicObjects {
 		this.boundingVolume = new AABC(this.center, Player.PLAYER_SIZE);
 		this.inventory = new Inventory(3, 100, 360);
 		this.displayLabel = true;
-		this.regenEnabled = regenEnabled;
+		// disable regen on the client side
+		this.regenEnabled = false;
 		this.regenTimeout = -1;
 		this.regenInterval = -1;
-		// this.maxHealth = 1000;
 	}
  
 	setCenter() { this.center = this.position; }
@@ -175,6 +175,10 @@ export class Player extends DynamicObjects {
 		context.arc(this.position.x, this.position.y, Player.PLAYER_SIZE, 0, 2 * Math.PI);
 		context.fill();
 	}
+
+	unpack(json){
+		this.health = json['displayHealth'];
+	}
 }
 
 Player.PLAYER_SIZE = 20;
@@ -266,5 +270,10 @@ export class Obstacles extends StaticObjects {
 	draw(context){
 		super.draw(context);
 		context.drawImage(this.image, this.position.x, this.position.y, this.w, this.h);
+	}
+
+	unpack(json){
+		this.w = json['w'];
+		this.h = json['h'];
 	}
 }

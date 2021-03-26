@@ -145,6 +145,12 @@ app.post('/api/login', function (req, res) {
 
 app.use(authenticateToken);
 
+app.get('/api/auth', (req, res) => {
+	res.status(200).send({
+		username: req.username
+	});
+});
+
 app.patch('/api/auth/profile/update', async (req, res)=> {
 	const { username, email, gender } = req.body;
 	// validate input here

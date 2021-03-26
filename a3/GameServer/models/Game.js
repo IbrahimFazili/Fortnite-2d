@@ -27,6 +27,7 @@ class Stage {
 
 		this.cols = this.worldWidth / this.squareSize;
 		this.rows = this.worldHeight / this.squareSize;
+		this.generateMap(this.squareSize, this.rows, this.cols);
 
 		this.internal_map_grid = new Map(this, this.rows, this.cols, this.squareSize);
 
@@ -63,8 +64,31 @@ class Stage {
 		this.actors.forEach(actor => actors.push(actor.pack()));
 		json['actors'] = actors;
 		json['time'] = Date.now();
+		json['map'] = this.map;
 		
 		return json;
+	}
+
+	updateActor(json) {
+		const actor = this.getActor(json.id);
+		if (!actor) return;
+
+		// update actors' own props
+		actor.update(json);
+		// process actions actor has done
+		if (!json['actions']) return;
+
+		json['actions'].forEach(action => {
+			switch (action) {
+				case 'fire_auto': actor.fire(hold=true); break;
+				case 'fire': actor.fire(); break;
+				case 'fire_stop': actor.stopFire(); break;
+				case 'reload': actor.reload(); break;
+				case 'pick': actor.pickupItem(); break;
+				case 'deploy_steel_wall': actor.deploySteelWall(); break;
+				case 'deploy_brick_wall': actor.deployItem(); break;
+			}
+		});
 	}
 
 	resetGame() {
@@ -146,42 +170,6 @@ class Stage {
 
 		this.countAI();
 	}
-	// TODO: migrate to frontend
-	// setGameWindowSize(ctx) {
-	// 	ctx.canvas.width = window.innerWidth;
-	// 	ctx.canvas.height = window.innerHeight;
-	// 	this.width = ctx.canvas.width;
-	// 	this.height = ctx.canvas.height;
-	// }
-
-	// draw() {
-	// 	var context = this.canvas.getContext('2d');
-	// 	this.setGameWindowSize(context);
-
-	// 	context.clearRect(0, 0, this.width, this.height);
-
-	// 	context.save();
-
-	// 	const camX = clamp(this.player.position.x - (this.width / 2), 0, this.worldWidth - this.width);
-	// 	const camY = clamp(this.player.position.y - (this.height / 2), 0, this.worldHeight - this.height);
-	// 	this.ptrOffset = new Pair(camX, camY);
-	// 	context.translate(-camX, -camY);
-
-	// 	this.drawCheckeredBoard(context, this.squareSize, this.rows, this.cols)
-
-	// 	for (var i = 0; i < this.actors.length; i++) {
-	// 		if (this.actors[i] instanceof Player) continue;
-	// 		this.actors[i].draw(context);
-	// 	}
-
-	// 	// draw player at the end to make sure it's drawn on top of everything else
-	// 	this.actors.forEach(act => {
-	// 		if (act instanceof Player) act.draw(context);
-	// 	});
-
-	// 	context.restore();
-
-	// }
 
 	generateMap(squareSize, rows, cols) {
 		this.map = new Array(rows);
@@ -198,24 +186,13 @@ class Stage {
 			}
 	}
 
-	// TODO: migrate to frontend
-	// drawCheckeredBoard(ctx, squareSize, rows, cols) {
-	// 	if (!this.map) this.generateMap(squareSize, rows, cols);
-	// 	for (let j = 0; j < rows; j++) {
-	// 		for (let i = 0; i < cols; i++) {
-	// 			ctx.fillStyle = this.map[j][i];
-	// 			ctx.fillRect(i * squareSize, j * squareSize, squareSize, squareSize)
-	// 		}
-	// 	}
-	// }
-
 	// return the first actor at coordinates (x,y) return null if there is no such actor
-	getActor(x, y) {
-		for (var i = 0; i < this.actors.length; i++) {
-			if (this.actors[i].x == x && this.actors[i].y == y) {
-				return this.actors[i];
-			}
+	getActor(id) {
+		for (let i = 0; i < this.actors.length; i++) {
+			const actor = this.actors[i];
+			if (actor.id === id) return actor;
 		}
+
 		return null;
 	}
 } // End Class Stage

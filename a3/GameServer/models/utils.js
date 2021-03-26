@@ -229,6 +229,15 @@ class Inventory {
 		this.SMGammo = 0;
 	}
 
+	pack() {
+		const json = {};
+		Object.keys(this).forEach(prop => {
+			json[prop] = this[prop];
+		});
+
+		return json;
+	}
+
 	/**
 	 * add weapon to the inventory if there's space, otherwise drop
 	 * the equipped weapon
