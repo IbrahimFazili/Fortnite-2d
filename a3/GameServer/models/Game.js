@@ -59,6 +59,8 @@ class Stage {
 		json['squareSize'] = this.squareSize;
 		json['rows'] = this.rows;
 		json['cols'] = this.cols;
+		json['round'] = this.spawner.round;
+		json['score'] = this.score;
 
 		let actors = [];
 		this.actors.forEach(actor => actors.push(actor.pack()));

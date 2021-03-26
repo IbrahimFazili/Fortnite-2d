@@ -177,7 +177,11 @@ export class Player extends DynamicObjects {
 	}
 
 	unpack(json){
-		this.health = json['displayHealth'];
+		super.unpack(json);
+		this.inventory.unpack(json['inventory']);
+		this.inventory.weapons.forEach((id, i) => {
+			this.inventory.weapons[i] = this.game.getActor(id);
+		});
 	}
 }
 
@@ -205,35 +209,29 @@ export class AI extends Player {
 
 	onDestroy() { }
 
+	unpack(json){
+		super.unpack(json);
+		this.velocity = new Pair(json['velocity'].x, json['velocity'].y);
+	}
+
 	step(delta) {
 		this.timeSinceLastPath += delta;
-		// if (this.timeSinceLastPath >= 0) {
-		if (this.followPath) {
-			const path = this.game.internal_map_grid.findPlayer(this);
-			if (path.length > 0) {
-				const randVelocity = new Pair(randint(60) - 30, randint(60) - 30);
-				this.velocity = path[0].multiply(120).add(randVelocity);
-			}
-			else this.velocity = new Pair(0, 0);
-		}
-		// this.timeSinceLastPath = 0;
-		// }
 
-		if (this.game.player) {
-			let playerDir = this.game.player.position.sub(this.position);
-			const dist = playerDir.norm();
-			if (dist <= 400 && this.timeSinceLastPath >= 500) {
-				const randDir = randint(2);
-				let perpVec = null;
-				if (randDir < 1) perpVec = new Pair(playerDir.y, -playerDir.x);
-				else perpVec = new Pair(-playerDir.y, playerDir.x);
-				playerDir = playerDir.add(perpVec.multiply(this.aimVarianceFactor / 100));
-				playerDir.normalize();
-				// playerdir + (perpVec * (factor / 100))
-				super.fire(false, playerDir, false);
-				this.timeSinceLastPath = 0;
-			} else super.reload(false);
-		}
+		// if (this.game.player) {
+		// 	let playerDir = this.game.player.position.sub(this.position);
+		// 	const dist = playerDir.norm();
+		// 	if (dist <= 400 && this.timeSinceLastPath >= 500) {
+		// 		const randDir = randint(2);
+		// 		let perpVec = null;
+		// 		if (randDir < 1) perpVec = new Pair(playerDir.y, -playerDir.x);
+		// 		else perpVec = new Pair(-playerDir.y, playerDir.x);
+		// 		playerDir = playerDir.add(perpVec.multiply(this.aimVarianceFactor / 100));
+		// 		playerDir.normalize();
+		// 		// playerdir + (perpVec * (factor / 100))
+		// 		super.fire(false, playerDir, false);
+		// 		this.timeSinceLastPath = 0;
+		// 	} else super.reload(false);
+		// }
 
 
 		super.step(delta);
@@ -265,6 +263,7 @@ export class Obstacles extends StaticObjects {
 		this.boundingVolume = new AABB(this.position, this.position.add(new Pair(this.w, this.h)));
 		this.image = new Image(300, 300);
 		this.image.src = '../assets/wall.png';
+		this.displayHealth = false;
 	}
 
 	draw(context){

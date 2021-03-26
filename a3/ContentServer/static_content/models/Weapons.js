@@ -157,7 +157,8 @@ export class Gun extends Weapon {
         this.w = json['w'];
         this.h = json['h'];
         this.currentAmmo = json['currentAmmo'];
-        this.displayHealth = json['displayHealth'];
+        this.displayHealth = false;
+        this.maxHealth = Infinity
         this.displayLabel = json['displayLabel'];
         this.image.src = json['image'];
         this.reloading = json['reloading'];

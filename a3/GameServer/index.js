@@ -8,7 +8,7 @@ const { Inventory } = require('./models/utils');
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const TICK_RATE = 1;
+const TICK_RATE = 10;
 const clients = {};
 const game = new Stage();
 
@@ -50,6 +50,7 @@ function tick() {
     // 2 copies of the game state, 1 with map, 1 without.
     // if the client has recieved the map, don't send it again as
     // it doesn't change
+    game.step(1000 / TICK_RATE);
     const json_map = game.pack();
     json_map['type'] = 'GameState';
     const json = JSON.parse(JSON.stringify(json_map));

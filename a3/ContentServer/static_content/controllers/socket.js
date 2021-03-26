@@ -1,5 +1,5 @@
 
-class Socket {
+export class Socket {
 
     /**
      * 
@@ -9,8 +9,7 @@ class Socket {
     constructor(game, tickRate=60) {
         this.game = game;
         this.tickRate = tickRate;
-        // ws://localhost:8100
-        this.url = document.URL.replace('http', 'ws');
+        this.url = 'ws://localhost:8100';
         this.ws = null;
         this.connected = false;
         // number for the setInterval that sends data over fixed intervals
@@ -20,13 +19,15 @@ class Socket {
     /**
      * Establish socket connection
      */
-    connect() {
+    connect(username) {
         this.ws = new WebSocket(this.url);
         this.ws.onopen = (ev) => {
-            this.ws.send({
+            console.log('connection open');
+            this.ws.send(JSON.stringify({
                 type: 'Auth',
+                username, // only for testing purpose, need to remove it
                 token: `Bearer ${localStorage.getItem('auth')}`
-            });
+            }));
         }
 
         this.ws.onerror = (ev) => {
@@ -40,10 +41,10 @@ class Socket {
         }
 
         this.ws.onmessage = (ev) => {
-            const json = JSON.parse(ev.data);
+            const data = JSON.parse(ev.data);
             // invalid packet -> drop
             if (!data.type) return;
-            else if (data.type === 'GameState') this.game.unpack(json);
+            else if (data.type === 'GameState') this.game.unpack(data);
             // TODO: handle error
             else if (data.type === 'Error') console.log(data);
             else if (data.type === 'Auth') {
@@ -51,6 +52,8 @@ class Socket {
                 else {
                     // auth failed, handle appropriately
                 }
+
+                console.log(`Connection status ${this.connected}`);
             }
         }
     }

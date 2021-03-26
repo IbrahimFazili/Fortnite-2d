@@ -180,12 +180,13 @@ class Player extends DynamicObjects {
 	}
 
 	pack(obj = null) {
-		const json = {};
-		super.pack(json);
-		json['color'] = this.color;
-		json['size'] = Player.PLAYER_SIZE;
-		json['inventory'] = this.inventory.pack();
-		return json;
+		
+		if (!obj) obj = {};
+		super.pack(obj);
+		obj['color'] = this.color;
+		obj['size'] = Player.PLAYER_SIZE;
+		obj['inventory'] = this.inventory.pack();
+		return obj;
 	}
 	
 }
@@ -238,13 +239,21 @@ class AI extends Player {
 				playerDir = playerDir.add(perpVec.multiply(this.aimVarianceFactor / 100));
 				playerDir.normalize();
 				// playerdir + (perpVec * (factor / 100))
-				super.fire(false, playerDir, false);
+				this.dir = playerDir;
+				super.fire(false, false);
 				this.timeSinceLastPath = 0;
 			} else super.reload(false);
 		}
 
 
 		super.step(delta);
+	}
+
+	pack(obj = null) {
+		const json = {};
+		super.pack(json);
+		json['aimVarianceFactor'] = this.aimVarianceFactor;
+		return json;
 	}
 }
 
@@ -304,5 +313,5 @@ module.exports = {
 	Player,
 	AI,
 	Wall,
-	Obstacles
+	Obstacles,
 }

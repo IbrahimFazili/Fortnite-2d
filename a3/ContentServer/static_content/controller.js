@@ -2,6 +2,7 @@ import { Stage } from './models/Game';  // @todo
 import { Pair } from './models/utils';  // @todo
 import { login, register, reportScore, getLeaderboard, fetchUserData, updateInfo, deleteProfile } from './controllers/APICallers'; // @todo
 import { showOverlay, showDebugInfo, renderUI, populateLeaderboard, renderProfile } from './controllers/renderer'; // @todo
+import { Socket } from './controllers/socket';
 
 var stage = null;
 var view = null;
@@ -19,13 +20,14 @@ var pauseStatus = false;
 var username = null;
 var backgroundSound = new Audio('../assets/background_music.mp3');
 var actionQueue = new Array();
+var socket = null;
 
 function initGame() {
 	stage = new Stage(document.getElementById('stage'), (() => { // @todo
 		showOverlay('Game Over');
 		pauseGame();
 	}), reportScore);
-	if (username) stage.player.label = username; // @todo
+	// if (username) stage.player.label = username; // @todo
 	pauseStatus = false;
 }
 
@@ -87,7 +89,7 @@ function startGame() {
 function pauseGame() { stage.togglePause(); } // @tpdp
 
 function enqueueAction(action) {
-	this.actionQueue.push(action);
+	actionQueue.push(action);
 }
 
 function clearActions() {
@@ -180,6 +182,8 @@ $(function () {
 			$("#ui_play").show();
 			$("#overlay").hide();
 			setupGame();
+			socket = new Socket(stage, 1);
+			socket.connect(username);
             startGame();
 		} catch (err) {
 			return;

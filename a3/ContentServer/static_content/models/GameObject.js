@@ -32,7 +32,7 @@ class GameObject {
 	 * @param {Object} json JSON object containing properties about this object
 	 */
 	unpack(json) {
-
+		this.health = json['displayHealth'];
 	}
 
 	/**

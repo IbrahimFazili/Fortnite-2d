@@ -32,6 +32,7 @@ export function showDebugInfo(debugDiv, stage, mousePos, frametime) {
 
 export function renderUI(inventoryUIDiv, stage) {
 	$("#weapons").empty();
+	if (!stage.player) return;
 	let rem = stage.player.inventory.maxWeaponSlots;
 	stage.player.inventory.weapons.forEach((e, i) => {
 		const img = e.label === 'AR' ? './assets/AR.png' : './assets/SMG.png';
@@ -54,7 +55,7 @@ export function renderUI(inventoryUIDiv, stage) {
 	inventoryUIDiv.append(`<span>Steel in inventory: ${stage.player.inventory.steel}</span><br>`);
 	inventoryUIDiv.append(`<span>Enemies remaining in round: ${stage.activeAI}</span><br>`);
 	inventoryUIDiv.append(`<span>Score: ${stage.score}</span><br>`);
-	inventoryUIDiv.append(`<span>Round: ${stage.spawner.round}</span><br><br>`);
+	inventoryUIDiv.append(`<span>Round: ${stage.round}</span><br><br>`);
 	if (stage.player.inventory.weapons.length > 0) {
 		var reserves = stage.player.inventory.weapons[stage.player.inventory.equippedWeapon].label === 'AR' ?
 			stage.player.inventory.ARammo : stage.player.inventory.SMGammo;

@@ -59,7 +59,6 @@ export class Stage {
 
 	unpackActor(prop) {
 		switch (prop['name']) {
-
 			case 'Player':
 				var player = new Player(this,
 					new Pair(prop['position']['x'], prop['position']['y']),
@@ -68,10 +67,20 @@ export class Stage {
 				this.addPlayer(player);
 				break;
 
+			case 'AI':
+				var ai = new AI(this, 
+					new Pair(prop['position']['x'], prop['position']['y']),
+					prop['maxHealth'],
+					prop['color'],
+					prop['aimVarianceFactor']);
+				ai.unpack(prop);
+				this.addActor(ai);
+				break;
+
 			case 'Resource':
 				var resource = new Resource(this,
-					new Pair(prop['position']['x'], prop['position'][y]),
-					prop['maxHealth'], prop['harvestCount'], image,
+					new Pair(prop['position']['x'], prop['position']['y']),
+					prop['maxHealth'], prop['harvestCount'], prop['image'],
 					prop['label']);
 				resource.unpack(prop);
 				this.addActor(resource);
@@ -223,6 +232,7 @@ export class Stage {
 
 		context.clearRect(0, 0, this.width, this.height);
 
+		if (!this.player) return;
 		context.save();
 
 		const camX = clamp(this.player.position.x - (this.width / 2), 0, this.worldWidth - this.width);
@@ -247,7 +257,7 @@ export class Stage {
 	}
 
 	drawCheckeredBoard(ctx, squareSize, rows, cols) {
-		if (!this.map) this.generateMap(squareSize, rows, cols);
+		if (!this.map) return;
 		for (let j = 0; j < rows; j++) {
 			for (let i = 0; i < cols; i++) {
 				ctx.fillStyle = this.map[j][i];

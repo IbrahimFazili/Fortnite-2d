@@ -1,4 +1,4 @@
-const { Wall } = require('./CustomGameObjects');
+const { Wall, AI } = require('./CustomGameObjects');
 const { Pair } = require('./utils');
 
 class Map {
@@ -44,8 +44,8 @@ class Map {
                     }
                 }
             }
-            this.grid[x][y] = 'Occupied';
 
+            this.grid[x][y] = 'Occupied';
         }
 
         // fix this

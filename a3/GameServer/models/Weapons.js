@@ -97,14 +97,13 @@ class Gun extends Weapon {
 
     step(delta) {
         super.step(delta);
-
     }
 
     fire(dir, playReloadSound) {
         if (this.reloading) return;
         if (this.currentAmmo > 0) {
             this.currentAmmo -= 1;
-            const newPos = this.position.add(dir.multiply(Player.PLAYER_SIZE + 0.1));
+            const newPos = this.position.add(dir.multiply(this.owner.radius + 0.1));
             let bullet = new Bullet(this.game, newPos.copy(), this.damage, this.maxRange, dir);
             bullet.velocity = bullet.dir.multiply(this.velocity);
             this.game.addActor(bullet);
@@ -116,7 +115,6 @@ class Gun extends Weapon {
         if (this.reloading || this.currentAmmo === this.clipSize
             || this.owner.inventory[this.label + 'ammo'] === 0) return;
         this.reloading = true;
-        sound && this.reloadSound && this.reloadSound.play();
 
         setTimeout(() => {
 

@@ -232,7 +232,14 @@ class Inventory {
 	pack() {
 		const json = {};
 		Object.keys(this).forEach(prop => {
-			json[prop] = this[prop];
+			if (prop !== 'weapons') json[prop] = this[prop];
+			else {
+				let arr = [];
+				this[prop].forEach((w) => {
+					arr.push(w.id)
+				});
+				json[prop] = arr;
+			}
 		});
 
 		return json;

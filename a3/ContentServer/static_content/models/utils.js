@@ -222,6 +222,12 @@ export class Inventory {
 		this.SMGammo = 0;
 	}
 
+	unpack(json) {
+		Object.keys(json).forEach(prop => {
+			this[prop] = json[prop];
+		});
+	}
+
 	/**
 	 * add weapon to the inventory if there's space, otherwise drop
 	 * the equipped weapon

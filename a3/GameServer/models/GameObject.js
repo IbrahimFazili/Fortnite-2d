@@ -133,6 +133,7 @@ class DynamicObjects extends GameObject {
 
 	pack(obj = null) {
 		if (obj === null) obj = {};
+		super.pack(obj);
 		obj['velocity'] = this.velocity.pack();
 	}
 
