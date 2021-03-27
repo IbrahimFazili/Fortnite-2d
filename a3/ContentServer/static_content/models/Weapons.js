@@ -39,7 +39,7 @@ export class Bullet extends DynamicObjects {
     }
 
     _onCollision(object) {
-        object.updateHealth(-this.damage);
+        // object.updateHealth(-this.damage);
     }
 
     toString() {
@@ -62,6 +62,11 @@ export class Bullet extends DynamicObjects {
         context.fillStyle = this.color;
         context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
         context.fill();
+    }
+
+    unpack(json) {
+        super.unpack(json);
+        this.distanceTravelled = json['distanceTravelled'];
     }
 }
 

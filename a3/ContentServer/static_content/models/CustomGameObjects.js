@@ -211,7 +211,7 @@ export class AI extends Player {
 
 	unpack(json){
 		super.unpack(json);
-		this.velocity = new Pair(json['velocity'].x, json['velocity'].y);
+		// this.velocity = new Pair(json['velocity'].x, json['velocity'].y);
 	}
 
 	step(delta) {

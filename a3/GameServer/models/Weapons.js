@@ -61,6 +61,11 @@ class Bullet extends DynamicObjects {
         super.pack(json);
         json['radius'] = this.radius;
         json['color'] = this.color;
+        json['damage'] = this.damage;
+        json['maxRange'] = this.maxRange;
+        json['dir'] = this.dir.pack();
+        json['distanceTravelled'] = this.distanceTravelled;
+        return json;
     }
 
     draw(context) {

@@ -1,6 +1,6 @@
 import { clamp, Pair, randint } from './utils';
 import { Player, AI, Obstacles } from './CustomGameObjects';
-import { Gun } from './Weapons';
+import { Bullet, Gun } from './Weapons';
 import { Map } from './Map';
 import { Resource } from './Resources';
 
@@ -112,6 +112,15 @@ export class Stage {
 					break;
 				}
 
+			case 'Bullet':
+				const b = new Bullet(this,
+					new Pair(prop['position']['x'], prop['position']['y']),
+					prop['damage'],
+					prop['maxRange'],
+					new Pair(prop['dir']['x'], prop['dir']['y']));
+				
+				this.addActor(b);
+				break;
 			case 'Obstacles':
 				var obj = new Obstacles(this,
 					new Pair(prop['position']['x'], prop['position']['y']),
@@ -171,7 +180,6 @@ export class Stage {
 	}
 
 	addActor(actor) {
-		const _actor = this.getActor(actor.id);
 		this.actors.push(actor);
 	}
 

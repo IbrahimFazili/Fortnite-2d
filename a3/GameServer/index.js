@@ -8,7 +8,8 @@ const { Inventory } = require('./models/utils');
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const TICK_RATE = 10;
+const TICK_RATE = 30;
+const SIMULATION_RATE = 60;
 const clients = {};
 const game = new Stage();
 
@@ -46,11 +47,14 @@ wss.on('connection', (ws) => {
 
 });
 
+function simulateGame() {
+    game.step(1000 / SIMULATION_RATE);
+}
+
 function tick() {
     // 2 copies of the game state, 1 with map, 1 without.
     // if the client has recieved the map, don't send it again as
     // it doesn't change
-    game.step(1000 / TICK_RATE);
     const json_map = game.pack();
     json_map['type'] = 'GameState';
     const json = JSON.parse(JSON.stringify(json_map));
@@ -67,7 +71,12 @@ function startTick() {
     setInterval(tick, 1000 / TICK_RATE);
 }
 
+function startSimulation() {
+    setInterval(simulateGame, 1000 / SIMULATION_RATE);
+}
+
 server.listen(8100, () => {
     console.log('Listening on Port 8100');
+    startSimulation();
     startTick();
 });
