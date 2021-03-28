@@ -19,14 +19,6 @@ export class Resource extends StaticObjects {
         this.harvestCount = harvestCount;
     }
 
-    /**
-     * Transfer resource to player
-     */
-    harvest() {
-        this.updateHealth(-this.harvestCount);
-        return this.harvestCount;
-    }
-
     draw(context) {
         super.draw(context);
         if (this.image) {
@@ -57,8 +49,9 @@ export class Resource extends StaticObjects {
         return new Resource(game, position, amount, amount, '../assets/smg-ammo.png', 'SMG Ammo');
     }
 
-    unpack(json){
-        this.health = json['displayHealth'];
+    unpack(json) {
+        super.unpack(json);
+        this.harvestCount = json['harvestCount'];
     }
 }
 

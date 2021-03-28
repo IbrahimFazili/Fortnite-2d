@@ -1,3 +1,10 @@
+const ASSET_MAP = {
+	'Rock': 'brick.png',
+	'Steel': 'iron.png',
+	'AR Ammo': 'ar-ammo.png',
+	'SMG Ammo': 'smg-ammo.png'
+};
+
 export function randint(n) { return Math.round(Math.random() * n); }
 export function rand(n) { return Math.random() * n; }
 
@@ -25,8 +32,21 @@ function isBetween(smaller, bigger, x) {
 	return x >= smaller && x <= bigger;
 }
 
+export function getAssetPath(assetName) {
+	if (assetName in ASSET_MAP) {
+		return '../assets/' + ASSET_MAP[assetName];
+	}
+
+	return '';
+}
+
 export class Pair {
 	constructor(x, y) {
+		if (y === undefined || y === null) {
+			this.x = x.x;
+			this.y = x.y;
+			return;
+		}
 		this.x = x; this.y = y;
 	}
 
@@ -166,6 +186,10 @@ export class AABC extends BoundingVolume {
 		super();
 		this.center = center;
 		this.radius = radius;
+	}
+	
+	update(pos) {
+		this.center = pos;
 	}
 
 	intersectAABC(other) {

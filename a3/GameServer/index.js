@@ -8,7 +8,7 @@ const { Inventory } = require('./models/utils');
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const TICK_RATE = 30;
+const TICK_RATE = 45;
 const SIMULATION_RATE = 60;
 const clients = {};
 const game = new Stage();
@@ -20,10 +20,11 @@ app.get('/', (req, res) => {
 wss.on('connection', (ws) => {
     ws.on('message', (data) => {
         data = JSON.parse(data);
+        // console.log(data);
         // invalid packet -> drop
         if (!data.type) return;
         // update client's state
-        else if (data.type === 'State') return;
+        else if (data.type === 'State') game.updateActor(data);
         else if (data.type === 'Auth') {
             // TODO: call API to verify this user is valid by verifying data.token
             ws.send(JSON.stringify({

@@ -8,12 +8,14 @@ export class Socket {
      */
     constructor(game, tickRate=60) {
         this.game = game;
+        this.userActions = [];
         this.tickRate = tickRate;
         this.url = 'ws://localhost:8100';
         this.ws = null;
         this.connected = false;
         // number for the setInterval that sends data over fixed intervals
         this.ticker = -1;
+        this.ticking = false;
     }
 
     /**
@@ -65,10 +67,12 @@ export class Socket {
 
     startTick() {
         this.ticker = setInterval(this.tick.bind(this), 1000 / this.tickRate);
+        this.ticking = true;
     }
 
     stopTick() {
         clearInterval(this.ticker);
+        this.ticking = false;
     }
 
     tick() {
@@ -76,6 +80,7 @@ export class Socket {
         if (!this.connected) return;
 
         const data = this.game.pack();
+        data['actions'] = this.userActions.splice(0, this.userActions.length);
         data['type'] = 'State';
         this.ws.send(JSON.stringify(data));
     }

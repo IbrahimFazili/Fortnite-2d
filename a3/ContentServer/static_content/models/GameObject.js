@@ -1,4 +1,4 @@
-import { randint, Pair, clamp } from './utils';
+import { randint, Pair, clamp, AABC } from './utils';
 // import { Stage } from './Game';
 
 class GameObject {
@@ -32,7 +32,15 @@ class GameObject {
 	 * @param {Object} json JSON object containing properties about this object
 	 */
 	unpack(json) {
-		this.health = json['displayHealth'];
+		this.displayLabel = json['displayLabel'];
+		this.health = json['displayHealth'] !== null ? json['displayHealth'] : Infinity;
+		this.maxHealth = json['maxHealth'] !== null ? json['maxHealth'] : Infinity;
+		if (!this.ticking) this.position = new Pair(json['position']);
+		this.color = json['color'];
+		this.label = json['label'];
+		if (this.boundingVolume && this.boundingVolume instanceof AABC){
+			this.boundingVolume.update(this.position);
+		}
 	}
 
 	/**
@@ -98,6 +106,11 @@ export class DynamicObjects extends GameObject {
 		super(game, position, health, color, collison=true, name=name);
 		// initally, object is still
 		this.velocity = new Pair(0, 0);
+	}
+
+	unpack(json) {
+		super.unpack(json);
+		if (json['name'] !== 'Player' && json['name'] !== 'AI') this.velocity = new Pair(json['velocity']);
 	}
 
 	toString() {

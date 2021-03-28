@@ -1,4 +1,4 @@
-import { clamp, Pair, randint } from './utils';
+import { clamp, getAssetPath, Pair, randint } from './utils';
 import { Player, AI, Obstacles } from './CustomGameObjects';
 import { Bullet, Gun } from './Weapons';
 import { Map } from './Map';
@@ -28,8 +28,6 @@ export class Stage {
 		this.cols = this.worldWidth / this.squareSize;
 		this.rows = this.worldHeight / this.squareSize;
 
-		this.internal_map_grid = new Map(this, this.rows, this.cols, this.squareSize);
-
 		// the logical width and height of the stage (viewport/window)
 		this.width = window.innerWidth;
 		this.height = window.innerHeight;
@@ -38,95 +36,85 @@ export class Stage {
 
 		this.idCounter = 0;
 
-		// Add the player to the center of the stage
-		var health = 100.0;
-		var colour = 'rgba(0,0,0,1)';
 	}
 
 	unpack(json) {
+		let processed_ids = [];
 		Object.keys(json).forEach((prop) => {
 			if (prop === 'actors') {
 				// clear actors list to process update from server
 				// could do better than this?
-				this.actors = [];
-				json[prop].forEach(actor => {
+				json[prop].forEach((actor, i) => {
 					this.unpackActor(actor);
+					processed_ids.push(actor.id);
 				});
 			}
 			else this[prop] = json[prop];
 		});
+
+		this.actors = this.actors.filter((actor) => (processed_ids.findIndex((id) => id === actor.id)) !== -1);
 	}
 
 	unpackActor(prop) {
+		const actor = this.getActor(prop['id']);
+		const pos = new Pair(prop['position']);
+		const getResourceGenerator = (resName) => Resource[`generate${resName}`];
+		const getAmmoGenerator = (ammoType) => Resource[`generate${ammoType.split(' ').join('')}`];
 		switch (prop['name']) {
 			case 'Player':
-				var player = new Player(this,
-					new Pair(prop['position']['x'], prop['position']['y']),
-					prop['maxHealth'], prop['color'], prop['label'], true);
-				player.unpack(prop);
-				this.addPlayer(player);
+				if (!actor) {
+					const player = new Player(this, pos, 100, 'black', 'Player 1', true);
+					player.unpack(prop);
+					this.addPlayer(player);
+				}
+				else actor.unpack(prop);
 				break;
 
 			case 'AI':
-				var ai = new AI(this, 
-					new Pair(prop['position']['x'], prop['position']['y']),
-					prop['maxHealth'],
-					prop['color'],
-					prop['aimVarianceFactor']);
-				ai.unpack(prop);
-				this.addActor(ai);
+				if (!actor) {
+					var ai = new AI(this, pos, 100, 'green', 0);
+					ai.unpack(prop);
+					this.addActor(ai);
+				}
+				else actor.unpack(prop);
 				break;
 
 			case 'Resource':
-				var resource = new Resource(this,
-					new Pair(prop['position']['x'], prop['position']['y']),
-					prop['maxHealth'], prop['harvestCount'], prop['image'],
-					prop['label']);
-				resource.unpack(prop);
-				this.addActor(resource);
+				if (!actor) {
+					let gen = getResourceGenerator(prop['label']);
+					if (!gen) gen = getAmmoGenerator(prop['label']);
+					const resource = gen(this, pos);
+					resource.unpack(prop);
+					this.addActor(resource);
+				}
+				else actor.unpack(prop);
 				break;
 
 			case 'Gun':
-				if (prop['label'] === 'SMG') {
-					// make SMG
-
-					//another condition to check if it has an owner
-					var smg = Gun.generateSMG(this,
-						new Pair(prop['position']['x'], prop['position']['y']),
-						null);
-					smg.unpack(prop);
-					smg.owner = this.getActor(prop['owner']);
-					this.addActor(smg);
-					break;
+				if (!actor) {
+					const gun = prop['label'] === 'SMG' ? Gun.generateSMG(this, pos, null)
+						: Gun.generateAR(this, pos, null);
+					gun.unpack(prop);
+					this.addActor(gun);
 				}
-				else if (prop['label'] === 'AR') {
-					// make AR
-
-					//another condition to check if it has an owner
-					var ar = Gun.generateAR(this,
-						new Pair(prop['position']['x'], prop['position']['y']),
-						null)
-					ar.unpack(prop);
-					ar.owner = this.getActor(prop['owner']);
-					this.addActor(ar);
-					break;
-				}
+				else actor.unpack(prop);
+				break;
 
 			case 'Bullet':
-				const b = new Bullet(this,
-					new Pair(prop['position']['x'], prop['position']['y']),
-					prop['damage'],
-					prop['maxRange'],
-					new Pair(prop['dir']['x'], prop['dir']['y']));
-				
-				this.addActor(b);
+				if (!actor) {
+					const b = new Bullet(this, pos, 5, Infinity, new Pair(1, 0));
+					b.unpack(prop);
+					this.addActor(b);
+				}
+				else actor.unpack(prop);
 				break;
 			case 'Obstacles':
-				var obj = new Obstacles(this,
-					new Pair(prop['position']['x'], prop['position']['y']),
-					Infinity, prop['color'], prop['label']);
-				obj.unpack(prop);
-				this.addActor(obj);
+				if (!actor) {
+					var obj = new Obstacles(this, pos, prop['w'], prop['h'], Infinity, 'red', 'wall');
+					obj.unpack(prop);
+					this.addActor(obj);
+				}
+				else actor.unpack(prop);
 				return;
 		}
 	}
@@ -148,12 +136,14 @@ export class Stage {
 			y: this.ptrDirection.y
 		}
 
+		json['id'] = this.player.id;
+
 		return json;
 	}
 
 	resetGame() {
 		const enemiesKilled = this.spawner.totalEnemiesSpawned - this.activeAI;
-		this.reportScore(this.score, enemiesKilled, this.spawner.round - 1);
+		// this.reportScore(this.score, enemiesKilled, this.spawner.round - 1);
 		this.restartCallback();
 	}
 

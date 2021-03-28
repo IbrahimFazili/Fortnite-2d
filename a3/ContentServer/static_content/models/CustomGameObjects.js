@@ -1,8 +1,7 @@
 import { DynamicObjects, StaticObjects } from './GameObject';
-import { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint, clamp } from './utils';
+import { Pair, AABB, AABC, Inventory } from './utils';
 import { Stage } from './Game';
 import { Bullet, Gun, Weapon } from './Weapons';
-import { Resource } from './Resources';
 
 export class Player extends DynamicObjects {
 	/**
@@ -19,46 +18,9 @@ export class Player extends DynamicObjects {
 		this.boundingVolume = new AABC(this.center, Player.PLAYER_SIZE);
 		this.inventory = new Inventory(3, 100, 360);
 		this.displayLabel = true;
-		// disable regen on the client side
-		this.regenEnabled = false;
-		this.regenTimeout = -1;
-		this.regenInterval = -1;
 	}
- 
+
 	setCenter() { this.center = this.position; }
-
-	onDestroy() {
-		this.game.resetGame();
-	}
-
-	// 1 Wall = 10 bricks
-	deployItem() {
-		if (this.game.player.inventory.brick < 10) return;
-		this.game.player.inventory.brick -= 10;
-		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
-		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
-			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
-		
-		const wall = new Wall(this.game, newPos, 50, 'rgb(200, 1, 1)', orientation);
-		if (!this.game.spawner._check_collision_with_world(wall.boundingVolume))
-		{
-			this.game.addActor(wall);
-		}
-	}
-
-	// 1 Wall = 35 steel
-	deploySteelWall() {
-		if (this.game.player.inventory.steel < 35) return;
-		this.game.player.inventory.steel -= 35;
-		const orientation = getOrientation(getMouseAngle(this.game.ptrDirection));
-		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
-			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
-		const wall = new Wall(this.game, newPos, 100, 'rgb(67, 70, 75)', orientation);
-		if (!this.game.spawner._check_collision_with_world(wall.boundingVolume))
-		{
-			this.game.addActor(wall);
-		}
-	}
 
 	/**
 	 * Fire the weapon in hand
@@ -87,85 +49,7 @@ export class Player extends DynamicObjects {
 		weapon.reload(playSound);
 	}
 
-	pickupWeapon(weapon) {
-		weapon.position = this.position;
-		weapon.owner = this;
-		const dropped = this.inventory.addWeapon(weapon);
-		if (dropped) {
-			dropped.owner = null;
-			dropped.position = dropped.position.copy();
-			this.game.addActor(dropped)
-		};
-		this.game.removeActor(weapon);
-	}
-
-	pickupResource(item) {
-		switch (item.label) {
-			case 'Rock':
-				this.inventory.brick += item.harvest();
-				break;
-			case 'Steel':
-				this.inventory.steel += item.harvest();
-				break;
-			case 'AR Ammo':
-				const pickupAmount = clamp(item.harvestCount, 0, this.inventory.maxAmmoCount - this.inventory.ARammo);
-				this.inventory.ARammo += Math.min(pickupAmount, item.harvest());
-				break;
-			case 'SMG Ammo':
-				const pickSMGAmmo = clamp(item.harvestCount, 0, this.inventory.maxAmmoCount - this.inventory.SMGammo);
-				this.inventory.SMGammo += Math.min(pickSMGAmmo, item.harvest());
-				break;
-		}
-	}
-
-	/**
-	 * Try to pickup the nearest item we can find within a certain range
-	 */
-	pickupItem() {
-		let minIndex = -1;
-		let minDist = Infinity;
-		for (let index = 0; index < this.game.actors.length; index++) {
-			const item = this.game.actors[index];
-			if (!(item instanceof Weapon) && !(item instanceof Resource)) continue;
-
-			const dist = item.center.sub(this.position).norm();
-			if (dist < minDist && dist < 60) {
-				minDist = dist;
-				minIndex = index;
-			}
-		}
-
-		if (minIndex === -1) return;
-
-		const item = this.game.actors[minIndex];
-		if (item instanceof Weapon) this.pickupWeapon(item);
-		else this.pickupResource(item);
-	}
-
 	switchWeapon(i) { this.inventory.switchWeapon(i); }
-
-	notifyCollision(actor) {
-		if (!(actor instanceof Bullet)) return;
-
-		clearInterval(this.regenInterval);
-		clearTimeout(this.regenTimeout);
-
-		if (this.regenEnabled) {
-			this.regenTimeout = setTimeout(() => {
-				this.regenInterval = setInterval(() => {
-					this.updateHealth(10)
-				}, 250);
-			}, 4000);
-		}
-	}
-
-	step(delta) {
-		super.step(delta);
-		if (this.health >= this.maxHealth) {
-			clearTimeout(this.regenTimeout);
-			clearInterval(this.regenInterval);
-		}
-	}
 
 	draw(context) {
 		super.draw(context);
@@ -176,7 +60,7 @@ export class Player extends DynamicObjects {
 		context.fill();
 	}
 
-	unpack(json){
+	unpack(json) {
 		super.unpack(json);
 		this.inventory.unpack(json['inventory']);
 		this.inventory.weapons.forEach((id, i) => {
@@ -209,31 +93,13 @@ export class AI extends Player {
 
 	onDestroy() { }
 
-	unpack(json){
+	unpack(json) {
 		super.unpack(json);
 		// this.velocity = new Pair(json['velocity'].x, json['velocity'].y);
 	}
 
 	step(delta) {
 		this.timeSinceLastPath += delta;
-
-		// if (this.game.player) {
-		// 	let playerDir = this.game.player.position.sub(this.position);
-		// 	const dist = playerDir.norm();
-		// 	if (dist <= 400 && this.timeSinceLastPath >= 500) {
-		// 		const randDir = randint(2);
-		// 		let perpVec = null;
-		// 		if (randDir < 1) perpVec = new Pair(playerDir.y, -playerDir.x);
-		// 		else perpVec = new Pair(-playerDir.y, playerDir.x);
-		// 		playerDir = playerDir.add(perpVec.multiply(this.aimVarianceFactor / 100));
-		// 		playerDir.normalize();
-		// 		// playerdir + (perpVec * (factor / 100))
-		// 		super.fire(false, playerDir, false);
-		// 		this.timeSinceLastPath = 0;
-		// 	} else super.reload(false);
-		// }
-
-
 		super.step(delta);
 	}
 }
@@ -256,23 +122,22 @@ export class Wall extends StaticObjects {
 
 export class Obstacles extends StaticObjects {
 
-	constructor(game, position, health, color, name='Obstacle'){
-		super(game, position, health, color, true, name=name);
-		this.w = Math.floor(Math.random() * (400 - 201)) + 201;
-		this.h = Math.floor(Math.random() * (400 - 201)) + 201;
+	constructor(game, position, w, h, health, color, name = 'Obstacle') {
+		super(game, position, health, color, true, name = name);
+		this.w = w;
+		this.h = h;
 		this.boundingVolume = new AABB(this.position, this.position.add(new Pair(this.w, this.h)));
 		this.image = new Image(300, 300);
 		this.image.src = '../assets/wall.png';
 		this.displayHealth = false;
 	}
 
-	draw(context){
+	draw(context) {
 		super.draw(context);
 		context.drawImage(this.image, this.position.x, this.position.y, this.w, this.h);
 	}
 
-	unpack(json){
-		this.w = json['w'];
-		this.h = json['h'];
+	unpack(json) {
+		super.unpack(json);
 	}
 }

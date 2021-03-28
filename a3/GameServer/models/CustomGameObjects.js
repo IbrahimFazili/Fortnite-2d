@@ -171,6 +171,18 @@ class Player extends DynamicObjects {
 		}
 	}
 
+	// props of json, position, velocity, direction
+	update(json){
+		this.position.x = json['position'].x;
+		this.position.y = json['position'].y;
+
+		this.velocity.x = json['velocity'].x;
+		this.velocity.y = json['velocity'].y;
+
+		this.dir.x = json['dir'].x;
+		this.dir.y = json['dir'].y;
+	}
+
 	draw(context) {
 		super.draw(context);
 		context.beginPath();

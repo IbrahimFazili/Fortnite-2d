@@ -67,6 +67,9 @@ export class Bullet extends DynamicObjects {
     unpack(json) {
         super.unpack(json);
         this.distanceTravelled = json['distanceTravelled'];
+        this.damage = json['damage'];
+        this.maxRange = json['maxRange'];
+        this.dir = new Pair(json['dir']);
     }
 }
 
@@ -158,15 +161,19 @@ export class Gun extends Weapon {
         }
     }
 
-    unpack(json){
+    /*
+    (damage, clipSize, fireRate, maxRange,
+        reloadTime, image = undefined, reloadSound = null, name = "Gun"
+     */
+    unpack(json) {
+        super.unpack(json)
         this.w = json['w'];
         this.h = json['h'];
         this.currentAmmo = json['currentAmmo'];
         this.displayHealth = false;
-        this.maxHealth = Infinity
-        this.displayLabel = json['displayLabel'];
         this.image.src = json['image'];
         this.reloading = json['reloading'];
+        this.owner = this.game.getActor(json['owner']);
     }
 }
 

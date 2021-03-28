@@ -89,27 +89,18 @@ function startGame() {
 function pauseGame() { stage.togglePause(); } // @tpdp
 
 function enqueueAction(action) {
-	actionQueue.push(action);
-}
-
-function clearActions() {
-	actionQueue = [];
+	socket.userActions.push(action);
 }
 
 function moveByKey(event, released) {
 	var key = event.key;
 	// @todo
-	if (key === 'x' && !released && !pauseStatus) {
-		enqueueAction('deploy_brick_wall');
-		stage.player.deployItem();
-	}
-	if (key === 'c' && !released && !pauseStatus) {
-		enqueueAction('deploy_steel_wall');
-		stage.player.deploySteelWall();
-	}
-	if (key === 'f' && !released && !pauseStatus) {
-		enqueueAction('pick')
-		stage.player.pickupItem();
+	if (key === 'x' && !released && !pauseStatus) enqueueAction('deploy_brick_wall');
+	if (key === 'c' && !released && !pauseStatus) enqueueAction('deploy_steel_wall');
+	if (key === 'f' && !released && !pauseStatus) enqueueAction('pick');
+	if (Number(key) && !released) {
+		enqueueAction(`switch_weapon_${Number(key) - 1}`);
+		stage.player.switchWeapon(Number(key) - 1);
 	}
 	if (key === 'r' && !released && !pauseStatus) {
 		enqueueAction('reload');
@@ -118,7 +109,11 @@ function moveByKey(event, released) {
 	if (key === 'Escape' && !released) togglePause();
 	// for debugging
 	if (key === ';' && !released) DEBUG_MODE = !DEBUG_MODE;
-	if (Number(key) && !released) stage.player.switchWeapon(Number(key) - 1);
+	if (key === 't' && !released) {
+		if (socket.ticking) socket.stopTick();
+		else socket.startTick();
+		stage.player.ticking = socket.ticking;
+	}
 
 	var moveMap = {
 		'a': new Pair(-100, 0),
@@ -182,8 +177,9 @@ $(function () {
 			$("#ui_play").show();
 			$("#overlay").hide();
 			setupGame();
-			socket = new Socket(stage, 1);
+			socket = new Socket(stage, 45);
 			socket.connect(username);
+			// socket.startTick();
             startGame();
 		} catch (err) {
 			return;

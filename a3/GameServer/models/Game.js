@@ -53,7 +53,7 @@ class Stage {
 	 */
 	pack() {
 		const json = {};
-		json['player'] = this.player.pack();
+		// json['player'] = this.player.pack();
 		json['worldWidth'] = this.worldWidth;
 		json['worldHeight'] = this.worldHeight;
 		json['squareSize'] = this.squareSize;
