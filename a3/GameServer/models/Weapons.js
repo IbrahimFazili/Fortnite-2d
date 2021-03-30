@@ -19,11 +19,6 @@ class Weapon extends StaticObjects {
     setCenter() {
         this.center = this.position.add((new Pair(this.w / 2, this.h / 2)));
     }
-
-    draw(context) {
-        this.setCenter();
-        super.draw(context);
-    }
 }
 
 class Bullet extends DynamicObjects {
@@ -65,15 +60,8 @@ class Bullet extends DynamicObjects {
         json['maxRange'] = this.maxRange;
         json['dir'] = this.dir.pack();
         json['distanceTravelled'] = this.distanceTravelled;
+        json['displayHealth'] = false;
         return json;
-    }
-
-    draw(context) {
-        super.draw(context);
-        context.beginPath();
-        context.fillStyle = this.color;
-        context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-        context.fill();
     }
 }
 
@@ -147,16 +135,6 @@ class Gun extends Weapon {
     static generateSMG(game, position, owner) {
         return new Gun(game, owner, position, 'rgb(0, 0, 0)', 6, 32, 420, 1100, 1000, '../assets/SMG.png',
             'smg-reload.mp3', 'SMG');
-    }
-
-    draw(context) {
-        super.draw(context);
-        if (this.image) {
-            context.drawImage(this.image, this.position.x, this.position.y, this.w, this.h);
-        } else {
-            context.fillStyle = "purple";
-            context.fillRect(this.position.x, this.position.y, this.w, this.h);
-        }
     }
 
     pack(obj = null) {

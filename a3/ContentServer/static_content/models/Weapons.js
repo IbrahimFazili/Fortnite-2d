@@ -174,6 +174,7 @@ export class Gun extends Weapon {
         this.image.src = json['image'];
         this.reloading = json['reloading'];
         this.owner = this.game.getActor(json['owner']);
+        this.label = json['label'];
     }
 }
 

@@ -11,9 +11,10 @@ class Player extends DynamicObjects {
 	 * @param health {Number}
 	 * @param color {string}
 	 * @param radius {Number}
+	 * @param username {String}
 	 */
-	constructor(game, position, health, color, regenEnabled = true) {
-		super(game, position, health, color, false, "Player 1");
+	constructor(game, position, health, color, username, regenEnabled = true) {
+		super(game, position, health, color, false, username);
 		this.radius = Player.PLAYER_SIZE;
 		this.center = this.position;
 		this.boundingVolume = new AABC(this.center, Player.PLAYER_SIZE);
@@ -29,13 +30,12 @@ class Player extends DynamicObjects {
 	setCenter() { this.center = this.position; }
 
 	onDestroy() {
-		this.game.resetGame();
+		// this.game.resetGame();
 	}
 
 	// 1 Wall = 10 bricks
 	deployItem() {
-		if (this.game.player.inventory.brick < 10) return;
-		this.game.player.inventory.brick -= 10;
+		if (this.inventory.brick < 10) return;
 		const orientation = getOrientation(getMouseAngle(this.dir));
 		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
 			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
@@ -43,20 +43,21 @@ class Player extends DynamicObjects {
 		const wall = new Wall(this.game, newPos, 50, 'rgb(200, 1, 1)', orientation);
 		if (!this.game.spawner._check_collision_with_world(wall.boundingVolume))
 		{
+			this.inventory.brick -= 10;
 			this.game.addActor(wall);
 		}
 	}
 
 	// 1 Wall = 35 steel
 	deploySteelWall() {
-		if (this.game.player.inventory.steel < 35) return;
-		this.game.player.inventory.steel -= 35;
+		if (this.inventory.steel < 35) return;
 		const orientation = getOrientation(getMouseAngle(this.dir));
 		const newPos = new Pair(this.position.x + (50 * orientation.x) + (Math.abs(orientation.y) * -50),
 			this.position.y + (50 * orientation.y) + (Math.abs(orientation.x) * -50));
 		const wall = new Wall(this.game, newPos, 100, 'rgb(67, 70, 75)', orientation);
 		if (!this.game.spawner._check_collision_with_world(wall.boundingVolume))
 		{
+			this.inventory.steel -= 35;
 			this.game.addActor(wall);
 		}
 	}
@@ -183,14 +184,6 @@ class Player extends DynamicObjects {
 		this.dir.y = json['dir'].y;
 	}
 
-	draw(context) {
-		super.draw(context);
-		context.beginPath();
-		context.fillStyle = this.color;
-		context.arc(this.position.x, this.position.y, Player.PLAYER_SIZE, 0, 2 * Math.PI);
-		context.fill();
-	}
-
 	pack(obj = null) {
 		
 		if (!obj) obj = {};
@@ -286,12 +279,6 @@ class Wall extends StaticObjects {
 		json['color'] = this.color;
 		return json;
 	}
-
-	draw(context) {
-		super.draw(context);
-		context.fillStyle = this.color;
-		context.fillRect(this.position.x, this.position.y, this.w, this.h);
-	}
 }
 
 class Obstacles extends StaticObjects {
@@ -313,11 +300,6 @@ class Obstacles extends StaticObjects {
 		json['color'] = this.color;
 
 		return json;
-	}
-
-	draw(context){
-		super.draw(context);
-		context.drawImage(this.image, this.position.x, this.position.y, this.w, this.h);
 	}
 }
 

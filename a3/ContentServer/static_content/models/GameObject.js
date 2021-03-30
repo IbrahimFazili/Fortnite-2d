@@ -11,7 +11,8 @@ class GameObject {
 	 */
 	constructor(game, position, health, color = undefined, collison = true, name = "") {
 		this.game = game;
-		this.id = this.game.idCounter++;
+		// this.id = this.game.idCounter++;
+		this.id = randint(10000);
 		this.position = position;
 		this.health = health;
 		this.maxHealth = health;
@@ -35,9 +36,10 @@ class GameObject {
 		this.displayLabel = json['displayLabel'];
 		this.health = json['displayHealth'] !== null ? json['displayHealth'] : Infinity;
 		this.maxHealth = json['maxHealth'] !== null ? json['maxHealth'] : Infinity;
-		if (!this.ticking) this.position = new Pair(json['position']);
+		if (this.label !== this.game.username) this.position = new Pair(json['position']);
 		this.color = json['color'];
 		this.label = json['label'];
+		this.id = json['id'];
 		if (this.boundingVolume && this.boundingVolume instanceof AABC){
 			this.boundingVolume.update(this.position);
 		}
@@ -200,5 +202,9 @@ export class StaticObjects extends GameObject {
 	 */
 	constructor(game, position, health, color = undefined, collison = true, name = "") {
 		super(game, position, health, color, collison, name=name);
+	}
+
+	unpack(json){
+		super.unpack(json);
 	}
 }

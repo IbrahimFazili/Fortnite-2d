@@ -26,16 +26,6 @@ class Resource extends StaticObjects {
         return this.harvestCount;
     }
 
-    draw(context) {
-        super.draw(context);
-        if (this.image) {
-            context.drawImage(this.image, this.position.x, this.position.y, this.w, this.h);
-        } else {
-            context.fillStyle = "purple";
-            context.fillRect(this.position.x, this.position.y, this.w, this.h);
-        }
-    }
-
     pack(obj = null){
         const json = {};
         super.pack(json);

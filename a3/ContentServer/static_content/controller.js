@@ -23,10 +23,7 @@ var actionQueue = new Array();
 var socket = null;
 
 function initGame() {
-	stage = new Stage(document.getElementById('stage'), (() => { // @todo
-		showOverlay('Game Over');
-		pauseGame();
-	}), reportScore);
+	stage = new Stage(document.getElementById('stage'), username);
 	// if (username) stage.player.label = username; // @todo
 	pauseStatus = false;
 }
@@ -38,12 +35,14 @@ function setupGame() {
 	document.addEventListener('keydown', () => moveByKey(event, false));
 	document.addEventListener('keyup', () => moveByKey(event, true));
 	document.addEventListener('click', (event) => {
+		if (!stage.player) return;
 		if (!pauseStatus){
 			stage.player.fire(); // @todo
 			enqueueAction('fire');
 		}
 	});
 	document.addEventListener('mousedown', (event) => {
+		if (!stage.player) return;
 		if (!pauseStatus){
 			interval = stage.player.fire(true); // @todo
 			enqueueAction('fire_auto');
@@ -51,11 +50,13 @@ function setupGame() {
 	});
 
 	document.addEventListener('mouseup', (event) => {
+		if (!stage.player) return;
 		interval !== null && clearInterval(interval);
 		enqueueAction('fire_stop');
 	});
 
 	stage.canvas.addEventListener('mousemove', function (evt) {
+		if (!stage.player) return;
 		mousePos = getMousePos(stage.canvas, evt);
 		mousePos.x += stage.ptrOffset.x; // @todo
 		mousePos.y += stage.ptrOffset.y; // @todo
@@ -109,11 +110,6 @@ function moveByKey(event, released) {
 	if (key === 'Escape' && !released) togglePause();
 	// for debugging
 	if (key === ';' && !released) DEBUG_MODE = !DEBUG_MODE;
-	if (key === 't' && !released) {
-		if (socket.ticking) socket.stopTick();
-		else socket.startTick();
-		stage.player.ticking = socket.ticking;
-	}
 
 	var moveMap = {
 		'a': new Pair(-100, 0),
@@ -170,7 +166,6 @@ $(function () {
 	$("#overlay").hide();
 	$("#loginSubmit").on('click', async () => {
 		try {
-			// @todo
 			const _username = await login();
 			username = _username;
 			$("#landing").hide();
@@ -179,7 +174,6 @@ $(function () {
 			setupGame();
 			socket = new Socket(stage, 45);
 			socket.connect(username);
-			// socket.startTick();
             startGame();
 		} catch (err) {
 			return;

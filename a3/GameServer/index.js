@@ -37,6 +37,7 @@ wss.on('connection', (ws) => {
                 mapSent: false
             };
             ws.username = data.username;
+            game.createNewPlayer(data.username);
         }
     });
 

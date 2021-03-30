@@ -63,9 +63,24 @@ export class Player extends DynamicObjects {
 	unpack(json) {
 		super.unpack(json);
 		this.inventory.unpack(json['inventory']);
-		this.inventory.weapons.forEach((id, i) => {
-			this.inventory.weapons[i] = this.game.getActor(id);
+
+		const getWeapon = (id) => {
+			return this.inventory.weapons.find((w) => w.id === id);
+		}
+
+		const weapons = [];
+		json.inventory.weapons.forEach((w, i) => {
+			let oldWeapon = getWeapon(w.id);
+			if (oldWeapon) oldWeapon.unpack(w);
+			else {
+				oldWeapon = Gun.generateAR(this.game, new Pair(w.position), null);
+				oldWeapon.unpack(w);
+			}
+
+			weapons.push(oldWeapon);
 		});
+
+		this.inventory.weapons = weapons;
 	}
 }
 
@@ -117,6 +132,14 @@ export class Wall extends StaticObjects {
 		super.draw(context);
 		context.fillStyle = this.color;
 		context.fillRect(this.position.x, this.position.y, this.w, this.h);
+	}
+
+	unpack(json){
+		super.unpack(json);
+		this.w = json['w'];
+		this.h = json['h'];
+		this.color = json['color'];
+		this.isCollidable = true;
 	}
 }
 

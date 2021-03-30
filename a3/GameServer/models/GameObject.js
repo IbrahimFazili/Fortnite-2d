@@ -73,17 +73,6 @@ class GameObject {
 		context.fillText(this.label, this.position.x - 20, this.position.y - 35);
 	}
 
-	draw(context) {
-		if (this.displayLabel) this.drawLabel(context);
-		if (this.displayHealth && this.maxHealth < Infinity) {
-			context.strokeStyle = "white";
-			context.strokeRect(this.position.x - 24, this.position.y - 30, 52, 7);
-
-			context.fillStyle = "red";
-			context.fillRect(this.position.x - 23, this.position.y - 28, 50 * (this.health / this.maxHealth), 5);
-		}
-	}
-
 	/**
 	 * JSONify this object to be sent over network
 	 * 

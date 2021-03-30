@@ -1,6 +1,7 @@
-const { AI, Player } = require("./CustomGameObjects");
+const { AI, Player, Obstacles } = require("./CustomGameObjects");
 const { Resource } = require("./Resources");
 const { AABC, clamp, Pair, randint } = require("./utils");
+const { Gun } = require("./Weapons");
 
 class Spawner {
 
@@ -18,6 +19,7 @@ class Spawner {
         this.maxAmmoToSpawn = this.round * 80;
         this.maxResourcesToSpawn = this.round * 2;
 
+        // this.generateObstacles();
         this.spawnAmmo();
         this.spawnResources();
     }
@@ -45,6 +47,34 @@ class Spawner {
         return false;
     }
 
+    spawnPlayer(username) {
+        let col = true;
+        let newUser = null;
+        while (col) {
+            let newPos = new Pair(randint(this.game.worldWidth), randint(this.game.worldHeight));
+
+            newUser = new Player(this.game, newPos, 100, this.getRandomColor(), username, true);
+            if (!this._check_collision_with_world(newUser.boundingVolume)) {
+                col = false;
+                this.game.addActor(newUser);
+                this.game.addActor(Gun.generateAR(this.game, newPos.add(new Pair(100, 100)), null));
+                this.game.addActor(Gun.generateSMG(this.game, newPos.add(new Pair(-100, -100)), null))
+            }
+        }
+    }
+
+    generateObstacles() {
+        var i = 0;
+        while (i < 8) {
+            var position = new Pair(randint(this.game.worldWidth), randint(this.game.worldHeight));
+            var obj = new Obstacles(this.game, position, Infinity, 'rgb(0,0,0)', 'Obstacle');
+            if (!this._check_collision_with_world(obj.boundingVolume)) {
+                i++;
+                this.game.addActor(obj);
+            }
+        }
+    }
+
     spawnAmmo() {
         const splitFactor = Math.random();
         const split1 = Math.round(splitFactor * this.maxAmmoToSpawn);
@@ -55,7 +85,7 @@ class Spawner {
             pos1 = new Pair(randint(this.game.worldWidth), randint(this.game.worldHeight));
             if (!this._check_collision_with_world(new AABC(pos1, 30))) break;
         }
-        
+
         let ammo = Resource.generateARAmmo(this.game, pos1, split1);
         ammo.displayHealth = false;
         this.game.addActor(ammo);
@@ -104,7 +134,7 @@ class Spawner {
                         break;
                     }
                 }
-    
+
             }
         }
 

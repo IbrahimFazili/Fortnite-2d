@@ -15,7 +15,6 @@ export class Socket {
         this.connected = false;
         // number for the setInterval that sends data over fixed intervals
         this.ticker = -1;
-        this.ticking = false;
     }
 
     /**
@@ -50,7 +49,10 @@ export class Socket {
             // TODO: handle error
             else if (data.type === 'Error') console.log(data);
             else if (data.type === 'Auth') {
-                if (data.success) this.connected = true;
+                if (data.success) {
+                    this.connected = true;
+                    this.startTick();
+                }
                 else {
                     // auth failed, handle appropriately
                 }
@@ -67,12 +69,10 @@ export class Socket {
 
     startTick() {
         this.ticker = setInterval(this.tick.bind(this), 1000 / this.tickRate);
-        this.ticking = true;
     }
 
     stopTick() {
         clearInterval(this.ticker);
-        this.ticking = false;
     }
 
     tick() {
@@ -80,6 +80,7 @@ export class Socket {
         if (!this.connected) return;
 
         const data = this.game.pack();
+        if (!data) return;
         data['actions'] = this.userActions.splice(0, this.userActions.length);
         data['type'] = 'State';
         this.ws.send(JSON.stringify(data));

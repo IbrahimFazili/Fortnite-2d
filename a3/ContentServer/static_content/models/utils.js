@@ -248,6 +248,7 @@ export class Inventory {
 
 	unpack(json) {
 		Object.keys(json).forEach(prop => {
+			if (prop === 'weapons') return;
 			this[prop] = json[prop];
 		});
 	}

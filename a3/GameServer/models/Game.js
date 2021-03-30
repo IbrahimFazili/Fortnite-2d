@@ -1,14 +1,12 @@
-const { clamp, Pair, randint } =  require('./utils');
+const { clamp, Pair, randint } = require('./utils');
 const { Player, AI, Obstacles } = require('./CustomGameObjects');
 const { Gun } = require('./Weapons');
 const { Map } = require('./Map');
 const { Spawner } = require('./Spawner');
 
 class Stage {
-	constructor(canvas, restartGame, reportScore) {
+	constructor(canvas) {
 		this.canvas = canvas;
-		this.restartCallback = restartGame;
-		this.reportScore = reportScore;
 
 		this.actors = []; // all actors on this stage (monsters, player, boxes, ...)
 		this.player = null; // a special actor, the player
@@ -28,24 +26,10 @@ class Stage {
 		this.cols = this.worldWidth / this.squareSize;
 		this.rows = this.worldHeight / this.squareSize;
 		this.generateMap(this.squareSize, this.rows, this.cols);
-
-		this.internal_map_grid = new Map(this, this.rows, this.cols, this.squareSize);
-
-		// the logical width and height of the stage (viewport/window)
-		// this.width = window.innerWidth;
-		// this.height = window.innerHeight;
+		// this.internal_map_grid = new Map(this, this.rows, this.cols, this.squareSize);
 
 		this.idCounter = 0;
-
-		// Add the player to the center of the stage
-		var health = 100.0;
-		var colour = 'rgba(0,0,0,1)';
-		var position = new Pair(Math.floor(this.worldWidth / 2), Math.floor(this.worldHeight / 2));
-		this.addPlayer(new Player(this, position, health, colour));
-		this.addActor(Gun.generateSMG(this, (new Pair(randint(750), randint(600))).add(this.player.position), null));
-		this.addActor(Gun.generateAR(this, (new Pair(randint(750), randint(600))).add(this.player.position), null));
-		this.spawner = new Spawner(this, 1, 4);
-		this.generateObstacles();
+		this.spawner = new Spawner(this, 1, 0);
 	}
 
 	/**
@@ -67,7 +51,7 @@ class Stage {
 		json['actors'] = actors;
 		json['time'] = Date.now();
 		json['map'] = this.map;
-		
+
 		return json;
 	}
 
@@ -80,15 +64,19 @@ class Stage {
 		// process actions actor has done
 		if (!json['actions']) return;
 
+		// console.log(json['actions']);
 		json['actions'].forEach(action => {
 			switch (action) {
-				case 'fire_auto': actor.fire(hold=true); break;
+				case 'fire_auto': actor.fire(true); break;
 				case 'fire': actor.fire(); break;
 				case 'fire_stop': actor.stopFire(); break;
 				case 'reload': actor.reload(); break;
 				case 'pick': actor.pickupItem(); break;
 				case 'deploy_steel_wall': actor.deploySteelWall(); break;
 				case 'deploy_brick_wall': actor.deployItem(); break;
+				case 'switch_weapon_0': actor.switchWeapon(0); break;
+				case 'switch_weapon_1': actor.switchWeapon(1); break;
+				case 'switch_weapon_2': actor.switchWeapon(2); break;
 			}
 		});
 	}
@@ -99,36 +87,18 @@ class Stage {
 		this.restartCallback();
 	}
 
-	generateObstacles(){
-		var  i = 0;
-		while (i < 8){
-			var position = new Pair(randint(this.worldWidth), randint(this.worldHeight));
-			var obj = new Obstacles(this, position, Infinity, 'rgb(0,0,0)', 'Obstacle');
-			if (!obj.intersects()){
-				i++;
-				this.addActor(obj);
-			}
-		}
-	}
-
-	addPlayer(player) {
-		this.addActor(player);
-		this.player = player;
-	}
-
-	removePlayer() {
-		this.removeActor(this.player);
-		this.player = null;
+	createNewPlayer(username) {
+		this.spawner.spawnPlayer(username);
 	}
 
 	addActor(actor) {
 		this.actors.push(actor);
 	}
 
-	countAI(){
+	countAI() {
 		var c = 0;
-		for (var i = 0; i < this.actors.length; i++){
-			if (this.actors[i] instanceof AI){
+		for (var i = 0; i < this.actors.length; i++) {
+			if (this.actors[i] instanceof AI) {
 				c++;
 			}
 		}
@@ -166,8 +136,8 @@ class Stage {
 			this.actors[i].step(delta);
 		}
 
-		this.internal_map_grid.clearGrid();
-		this.internal_map_grid.updateGrid();
+		// this.internal_map_grid.clearGrid();
+		// this.internal_map_grid.updateGrid();
 		this.spawner.step(delta);
 
 		this.countAI();

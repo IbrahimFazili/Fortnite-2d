@@ -236,7 +236,7 @@ class Inventory {
 			else {
 				let arr = [];
 				this[prop].forEach((w) => {
-					arr.push(w.id)
+					arr.push(w.pack());
 				});
 				json[prop] = arr;
 			}

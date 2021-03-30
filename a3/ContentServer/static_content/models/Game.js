@@ -1,14 +1,12 @@
 import { clamp, getAssetPath, Pair, randint } from './utils';
-import { Player, AI, Obstacles } from './CustomGameObjects';
+import { Player, AI, Obstacles, Wall } from './CustomGameObjects';
 import { Bullet, Gun } from './Weapons';
-import { Map } from './Map';
 import { Resource } from './Resources';
 
 export class Stage {
-	constructor(canvas, restartGame, reportScore) {
+	constructor(canvas, username) {
 		this.canvas = canvas;
-		this.restartCallback = restartGame;
-		this.reportScore = reportScore;
+		this.username = username;
 
 		this.actors = []; // all actors on this stage (monsters, player, boxes, ...)
 		this.player = null; // a special actor, the player
@@ -33,9 +31,6 @@ export class Stage {
 		this.height = window.innerHeight;
 		this.ptrOffset = new Pair(0, 0);
 		this.ptrDirection = new Pair(1, 0);
-
-		this.idCounter = 0;
-
 	}
 
 	unpack(json) {
@@ -65,7 +60,8 @@ export class Stage {
 				if (!actor) {
 					const player = new Player(this, pos, 100, 'black', 'Player 1', true);
 					player.unpack(prop);
-					this.addPlayer(player);
+					if (player.label === this.username) this.addPlayer(player);
+					else this.addActor(player);
 				}
 				else actor.unpack(prop);
 				break;
@@ -86,6 +82,18 @@ export class Stage {
 					const resource = gen(this, pos);
 					resource.unpack(prop);
 					this.addActor(resource);
+				}
+				else actor.unpack(prop);
+				break;
+
+			case 'Wall':
+				if (!actor) {
+					let orient;
+					if (prop['w'] > prop['h']) orient = new Pair(0, 1);
+					else orient = new Pair(1, 0);
+					const wall = new Wall(this, pos, 50, prop['color'], orient);
+					wall.unpack(prop);
+					this.addActor(wall);
 				}
 				else actor.unpack(prop);
 				break;
@@ -121,6 +129,7 @@ export class Stage {
 
 	pack() {
 		const json = {};
+		if (!this.player) return null;
 		json['position'] = {
 			x: this.player.position.x,
 			y: this.player.position.y
@@ -188,18 +197,6 @@ export class Stage {
 		if (index != -1) {
 			const destroyed = this.actors.splice(index, 1)[0];
 			destroyed.onDestroy();
-
-			if (destroyed instanceof AI) {
-				this.score += this.spawner.getScorePerKill();
-				if (this.actors.findIndex((actor) => actor instanceof AI) === -1) {
-					// queue next round with a delay to allow player to get ready
-					setTimeout(() => {
-						this.spawner.startNextRound();
-						console.log(this.spawner.toString());
-					}, 5000);
-					this.score += this.spawner.round * 100;
-				}
-			}
 		}
 	}
 
@@ -207,10 +204,11 @@ export class Stage {
 		this.isPaused = !this.isPaused;
 	}
 
-	// Take one step in the animation of the game.  Do this by asking each of the actors to take a single step. 
+	// Take one step in the animation of the game. Do this by asking each of the actors to take a single step. 
 	step(delta) {
 		if (this.isPaused) return;
 		for (var i = 0; i < this.actors.length; i++) {
+			if (this.actors[i] instanceof Bullet) continue;
 			this.actors[i].step(delta);
 		}
 
