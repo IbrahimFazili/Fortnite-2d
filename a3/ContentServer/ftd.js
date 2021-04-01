@@ -10,6 +10,7 @@ const bcrypt = require('bcrypt');
 const { Validator } = require('node-input-validator');
 const { randomBytes } = require('crypto');
 const { generateAccessToken, authenticateToken, tokenExpiryTime } = require('./authorization');
+const cors = require('cors');
 
 const { Pool } = require('pg')
 const pool = new Pool({
@@ -44,6 +45,7 @@ const VALIDATE_GENDER = (g) => {
 }
 
 // app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
 app.use(bodyParser.json());
 // app.use(bodyParser.raw()); // support raw bodies
 
@@ -76,7 +78,10 @@ app.post('/api/register', async (req, res) => {
 		(err, pgRes) => {
 		if (err && err.code == 23505) { // pg duplicate key error
 			res.status(409);
-			res.json({ "error": `${credentials.username} is already in database` });
+			res.json({
+				"error": `${credentials.username} is already in database`,
+				'info': 'Given Username already exists'
+			});
 			return;
 		}
 		if (err) {

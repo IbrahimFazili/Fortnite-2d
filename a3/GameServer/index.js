@@ -8,7 +8,7 @@ const { Inventory } = require('./models/utils');
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const TICK_RATE = 45;
+const TICK_RATE = 60;
 const SIMULATION_RATE = 60;
 const clients = {};
 const game = new Stage();

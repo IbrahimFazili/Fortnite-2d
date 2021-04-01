@@ -1,23 +1,19 @@
-import logo from './logo.svg';
+import { useState } from 'react';
 import './App.css';
+import { initSocketConnection } from './controllers/main';
+import GameView from './Containers/Game/GameView';
+import Home from './Containers/Home/Home';
 
 function App() {
+
+  const [showGame, setShowGame] = useState(false);
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {!showGame && <Home onLogin={(username) => {
+        setShowGame(true);
+        initSocketConnection(username)
+      }} />}
+      {showGame && <GameView />}
     </div>
   );
 }

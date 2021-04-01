@@ -25,12 +25,13 @@ class Player extends DynamicObjects {
 		this._regenInterval = -1;
 		this.dir = new Pair(0, 0);
 		this._fireInterval = -1;
+		this.score = 0;
 	}
 
 	setCenter() { this.center = this.position; }
 
 	onDestroy() {
-		// this.game.resetGame();
+		// report this player's score to the API
 	}
 
 	// 1 Wall = 10 bricks

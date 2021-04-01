@@ -1,0 +1,21 @@
+#left {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	background-color: #49BFB3;
+	text-transform: uppercase;
+	letter-spacing: 0.12cm;
+	padding: 2em;
+}
+
+#left-text {
+	font-size: 1.5em;
+	font-weight: 300;
+}
+
+#logo-container{
+	display: flex;
+	justify-content: center;
+}

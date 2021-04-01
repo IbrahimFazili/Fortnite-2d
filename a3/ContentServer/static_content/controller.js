@@ -19,7 +19,6 @@ var delta = 0;
 var pauseStatus = false;
 var username = null;
 var backgroundSound = new Audio('../assets/background_music.mp3');
-var actionQueue = new Array();
 var socket = null;
 
 function initGame() {
@@ -78,7 +77,7 @@ function gameLoop(t) {
 	}
 	else {
 		inventoryUIDiv.empty();
-		showDebugInfo(debugDiv, stage, mousePos, delta);
+		showDebugInfo(debugDiv, stage, mousePos, delta, socket.ping);
 	}
 }
 
@@ -172,7 +171,7 @@ $(function () {
 			$("#ui_play").show();
 			$("#overlay").hide();
 			setupGame();
-			socket = new Socket(stage, 45);
+			socket = new Socket(stage, 60);
 			socket.connect(username);
             startGame();
 		} catch (err) {
