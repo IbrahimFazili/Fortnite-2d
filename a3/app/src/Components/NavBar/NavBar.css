@@ -1,0 +1,27 @@
+
+#navbar{
+	display: flex;
+	justify-content: center;
+	width: 100%;
+}
+
+
+#leaderboard-btn, #logout-btn,
+#control-btn, #profile-btn {
+	border: 1px solid #c2b5b5;
+	background-color: transparent;
+	color: #c2b5b5;
+	padding: 5px;
+	height: 2.5em;
+	margin-top: 1em;
+	text-transform: uppercase;
+	font-size: 1em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#logout-btn {
+	justify-self: flex-end;
+	margin-left: auto;
+}

@@ -1,0 +1,10 @@
+.weapon-img {
+	position: relative;
+	height: 3.5em;
+	width: 6.5em;
+	border: #261D20 2px solid;
+}
+
+.weapon-selected {
+	border: #F24141 2px solid !important;
+}

@@ -1,17 +1,13 @@
 import { Stage } from '../models/Game';  
 import { Pair } from '../models/utils'; 
 // import { login, register, reportScore, getLeaderboard, fetchUserData, updateInfo, deleteProfile } from './APICallers'; 
-// import { showOverlay, showDebugInfo, renderUI, populateLeaderboard, renderProfile } from './renderer'; 
+// import { showOverlay, showDebugInfo, renderUI, populateLeaderboard, renderProfile } from './renderer';
 import { Socket } from './socket';
 
 var stage = null;
 var interval = null;
 var lastKey = [];
 var mousePos = null;
-var debugDiv = null;
-var inventoryUIDiv = null;
-var leaderboardDiv = null;
-var profileDiv = null;
 var DEBUG_MODE = false;
 var lastRenderTime = 0;
 var delta = 0;
@@ -19,10 +15,11 @@ var pauseStatus = false;
 var username = null;
 var backgroundSound = new Audio('../assets/background_music.mp3');
 var socket = null;
+var uiPauseCallback = null;
+var inventoryUpdateCallback = null;
 
 function initGame() {
 	stage = new Stage(document.getElementById('stage'), username);
-	// if (username) stage.player.label = username; // @todo
 	pauseStatus = false;
 }
 
@@ -68,12 +65,9 @@ function gameLoop(t) {
 	requestAnimationFrame(gameLoop);
 	delta = t - lastRenderTime;
 	lastRenderTime = t;
-	stage.step(delta); // @todo
-	stage.draw(); // @todo
-	// if (!DEBUG_MODE) {
-	// 	debugDiv.empty();
-	// 	renderUI(inventoryUIDiv, stage);
-	// }
+	stage.step(delta);
+	stage.draw();
+	stage.player && inventoryUpdateCallback(stage.player.inventory);
 	// else {
 	// 	inventoryUIDiv.empty();
 	// 	showDebugInfo(debugDiv, stage, mousePos, delta, socket.ping);
@@ -85,7 +79,7 @@ function startGame() {
 	backgroundSound.play();
 	backgroundSound.loop = true;
 }
-function pauseGame() { stage.togglePause(); } // @tpdp
+function pauseGame() { stage.togglePause(); }
 
 function enqueueAction(action) {
 	socket.userActions.push(action);
@@ -138,17 +132,14 @@ function moveByKey(event, released) {
 	}
 }
 
-function togglePause() {
-	// if (!pauseStatus) {
-	// 	showOverlay("Paused");
-	// }
-	// else {
-	// 	$("#overlay").hide();
-	// 	$("#navbar").hide();
-	// }
+export function setPauseCallback(callback) {
+	uiPauseCallback = callback;
+}
 
-	// pauseGame();
-	// pauseStatus = !pauseStatus;
+function togglePause() {
+	pauseGame();
+	pauseStatus = !pauseStatus;
+	uiPauseCallback(pauseStatus);
 }
 
 function getMousePos(canvas, evt) {
@@ -165,5 +156,9 @@ export function initSocketConnection(_username) {
     socket = new Socket(stage, 60);
     socket.connect(username);
     startGame();
+}
+
+export function setInvetoryCallback(callback) {
+	inventoryUpdateCallback = callback;
 }
 

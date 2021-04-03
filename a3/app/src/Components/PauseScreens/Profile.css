@@ -1,0 +1,17 @@
+
+
+#profile {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	width: 40%;
+}
+
+#overlay-text, #profile-err {
+	color: antiquewhite;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 90%;
+}
+
