@@ -3,7 +3,7 @@ import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import './RightHome.css';
 
-const RightHome = ({ setLeftText, onLogin }) => {
+const RightHome = ({ setLeftText, onLogin, onRegister }) => {
     const [showRegister, setShowRegister] = useState(false);
 
     return (
@@ -18,7 +18,9 @@ const RightHome = ({ setLeftText, onLogin }) => {
                 setShowRegister(false);
                 setLeftText('Login');
             }
-            } />}
+            }
+            onRegister={onRegister}
+            />}
         </section>
     );
 }

@@ -17,6 +17,7 @@ var backgroundSound = new Audio('../assets/background_music.mp3');
 var socket = null;
 var uiPauseCallback = null;
 var inventoryUpdateCallback = null;
+var accumTime = 0;
 
 function initGame() {
 	stage = new Stage(document.getElementById('stage'), username);
@@ -64,10 +65,14 @@ function setupGame() {
 function gameLoop(t) {
 	requestAnimationFrame(gameLoop);
 	delta = t - lastRenderTime;
+	accumTime += delta;
 	lastRenderTime = t;
 	stage.step(delta);
 	stage.draw();
-	stage.player && inventoryUpdateCallback(stage.player.inventory);
+	if (accumTime >= 250) {
+		stage.player && inventoryUpdateCallback(stage.player.inventory);
+		accumTime = 0;
+	}
 	// else {
 	// 	inventoryUIDiv.empty();
 	// 	showDebugInfo(debugDiv, stage, mousePos, delta, socket.ping);
@@ -158,7 +163,7 @@ export function initSocketConnection(_username) {
     startGame();
 }
 
-export function setInvetoryCallback(callback) {
+export function setInventoryCallback(callback) {
 	inventoryUpdateCallback = callback;
 }
 

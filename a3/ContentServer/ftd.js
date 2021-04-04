@@ -282,7 +282,7 @@ app.get('/api/auth/leaderboard', (req, res)=>{
 				});
 			}
 			else{
-				res.status(201).send(pgRes.rows);
+				res.status(200).send(pgRes.rows);
 			}
 		});
 	}

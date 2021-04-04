@@ -44,6 +44,7 @@ wss.on('connection', (ws) => {
     ws.on('close', function (code, reason) {
         console.log(`client (${this.username}) left with code: ${code} | ${reason}`);
         // delete from client list here
+        game.removePlayer(this.username);
         delete clients[this.username];
     });
 

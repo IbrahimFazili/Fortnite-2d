@@ -3,6 +3,9 @@ import './PauseOverlay.css';
 import NavBar from '../../Components/NavBar/NavBar';
 import TransparentButton from '../../Components/TransparentButton/TransparentButton';
 import Profile from '../../Components/PauseScreens/Profile';
+import Controls from '../../Components/PauseScreens/Controls';
+import LeaderBoard from '../../Components/PauseScreens/LeaderBoard';
+
 
 const PauseOverlay = ({ text }) => {
     const [profileView, setProfileView] = useState(false);
@@ -18,8 +21,10 @@ const PauseOverlay = ({ text }) => {
                 controlsClick={setControlsView}
                 leaderBoardClick={setLeaderBoardView}
             />
-            {!profileView && (<span id='pause-text'>Paused</span>)}
+            {(!profileView && !controlsView && !leaderBoardView) && (<span id='pause-text'>Paused</span>)}
             {profileView && (<Profile />)}
+            {controlsView && (<Controls />)}
+            {leaderBoardView && (<LeaderBoard />)}
             <div id='restart-div'>
                 <TransparentButton
                     color='#c2b5b5'

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import InfoPopup from '../InfoPopup/InfoPopup';
 import TransparentButton from '../TransparentButton/TransparentButton';
 import TransparentInput from '../TransparentInput/TransparentInput';
 import './RightHome.css';
@@ -37,9 +38,15 @@ const LoginForm = ({ onRegisterClick, onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [err, setErr] = useState('');
+    const [showErr, setShowErr] = useState(false);
     const labelStyle = {
         fontWeight: 300,
         fontSize: '1.5em'
+    }
+
+    const onErr = (err) => {
+        setErr(err);
+        setShowErr(true);
     }
 
     return (
@@ -47,36 +54,34 @@ const LoginForm = ({ onRegisterClick, onLogin }) => {
             <div>
                 <div>
                     <TransparentInput
-                    label="username"
-                    color="white"
-                    type="text"
-                    labelStyle={labelStyle}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required={true}
+                        label="username"
+                        color="white"
+                        type="text"
+                        labelStyle={labelStyle}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required={true}
                     />
                     <br /><br />
                     <div>
-                    <TransparentInput
-                    label="password"
-                    color="white"
-                    type="password"
-                    labelStyle={labelStyle}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required={true}
-                    />
+                        <TransparentInput
+                            label="password"
+                            color="white"
+                            type="password"
+                            labelStyle={labelStyle}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required={true}
+                        />
                     </div>
                     <br /><br />
                     <span id="err"
-                    style={{
-                        color: "#261D20",
-                        overflowWrap: "anywhere",
-                    }}>
+                        style={{
+                            color: "#261D20",
+                            overflowWrap: "anywhere",
+                        }}>
                     </span>
                     <br /><br />
                 </div>
 
-                <br /><br />
-                <span>{err}</span>
                 <br /><br />
 
                 <TransparentButton
@@ -84,7 +89,7 @@ const LoginForm = ({ onRegisterClick, onLogin }) => {
                     hoverColor='#F24141'
                     type='submit'
                     value='LOGIN'
-                    onClick={() => login(username, password, setErr, onLogin)}
+                    onClick={() => login(username, password, onErr, onLogin)}
                 />
                 <br />
 
@@ -94,6 +99,14 @@ const LoginForm = ({ onRegisterClick, onLogin }) => {
                     type='submit'
                     value='REGISTER'
                     onClick={onRegisterClick}
+                />
+
+                <InfoPopup
+                    msg={err}
+                    severity={'error'}
+                    open={showErr}
+                    onClose={() => setShowErr(false)}
+                    autoHideDuration={null}
                 />
             </div>
         </div>

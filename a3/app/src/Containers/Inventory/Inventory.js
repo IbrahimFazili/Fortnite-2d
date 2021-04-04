@@ -11,18 +11,19 @@ function buildWeaponViewList(_inventory) {
         const selected = i === _inventory.equippedWeapon;
         weapons.push((
             <WeaponView
-            selected={selected}
-            weapon={w.label}
-            key={id}
+                selected={selected}
+                weapon={w.label}
+                key={id}
             />
         ));
 
         id++;
     });
 
-    for (let i = 0; i < _inventory.weapons.maxWeaponSlots - _inventory.weapons.length; i++) {
-        weapons.push((<EmptyWeaponView key={id}/>));
-        id++;        
+
+    for (let i = 0; i < _inventory.maxWeaponSlots - _inventory.weapons.length; i++) {
+        weapons.push((<EmptyWeaponView key={id} />));
+        id++;
     }
 
     return weapons;
@@ -36,11 +37,11 @@ const Inventory = ({ inventory }) => {
     }, [inventory]);
 
     return (
-    <div id='inventory'>
-        <div style={{ alignSelf: 'flex-end' }}>
-            {buildWeaponViewList(_inventory)}
-        </div>
-    </div>);
+        <div id='inventory'>
+            <div style={{ alignSelf: 'flex-end', display: 'flex' }}>
+                {buildWeaponViewList(_inventory)}
+            </div>
+        </div>);
 }
 
 export default Inventory;

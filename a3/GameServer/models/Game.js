@@ -125,6 +125,11 @@ class Stage {
 		}
 	}
 
+	removePlayer(username) {
+		const player = this.actors.findIndex((a) => a.label === username);
+		if (player !== -1) this.removeActor(this.actors[player]);
+	}
+
 	togglePause() {
 		this.isPaused = !this.isPaused;
 	}

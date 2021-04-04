@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './RightHome.css';
 import TransparentButton from '../TransparentButton/TransparentButton';
 import TransparentInput from '../TransparentInput/TransparentInput';
+import InfoPopup from '../InfoPopup/InfoPopup';
 
 async function register(
 	username,
@@ -10,7 +11,7 @@ async function register(
 	email,
 	gender,
 	setErr,
-	onLoginClick) {
+	onSuccess) {
 
 	try {
 		const res = await fetch('http://localhost:8000/api/register', {
@@ -30,17 +31,17 @@ async function register(
 			// registration successful
 			setErr('');
 			localStorage.setItem('auth', resJson.authorization);
-			onLoginClick();
+			onSuccess();
 		}
 
 	} catch (error) {
-		console.log('error');
+		console.log({ error });
 		setErr(error.toString());
 		console.log(error);
 	}
 }
 
-const RegisterForm = ({ onLoginClick }) => {
+const RegisterForm = ({ onLoginClick, onRegister }) => {
 
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
@@ -48,6 +49,7 @@ const RegisterForm = ({ onLoginClick }) => {
 	const [email, setEmail] = useState('');
 	const [gender, setGender] = useState('');
 	const [err, setErr] = useState('');
+	const [showErrorPopup, setShowErrorPopup] = useState(false);
 
 	const labelStyle = {
 		fontSize: '1.25em',
@@ -57,6 +59,16 @@ const RegisterForm = ({ onLoginClick }) => {
 		marginLeft: '5px',
 		color: '#261D20'
 	};
+
+	const onSuccess = () => {
+		onRegister();
+		onLoginClick();
+	}
+
+	const onErr = (_err) => {
+		setErr(_err);
+		setShowErrorPopup(true);
+	}
 
 	return (
 		<div id="ui_register">
@@ -131,15 +143,13 @@ const RegisterForm = ({ onLoginClick }) => {
 			</div>
 
 			<br /><br />
-			<span>{err}</span>
-			<br /><br />
 
 			<TransparentButton
 				color='#261D20'
 				hoverColor='#F24141'
 				type='submit'
 				value='REGISTER'
-				onClick={() => register(username, password, confirmPassword, email, gender, setErr, onLoginClick)}
+				onClick={() => register(username, password, confirmPassword, email, gender, onErr, onSuccess)}
 			/>
 			<br /><br />
 			<TransparentButton
@@ -148,6 +158,14 @@ const RegisterForm = ({ onLoginClick }) => {
 				type='submit'
 				value='LOGIN'
 				onClick={onLoginClick}
+			/>
+
+			<InfoPopup
+				msg={err}
+				open={showErrorPopup}
+				severity={'error'}
+				autoHideDuration={null}
+				onClose={() => setShowErrorPopup(false)}
 			/>
 		</div>
 	);

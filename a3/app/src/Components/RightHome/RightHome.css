@@ -47,3 +47,7 @@ label {
 #ui_login {
 	display: true;
 }
+
+.MuiAlert-filledError {
+	flex-direction: row !important;
+}
