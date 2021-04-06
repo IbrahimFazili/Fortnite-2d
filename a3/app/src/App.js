@@ -13,6 +13,8 @@ function App() {
   const [paused, setPaused] = useState(false);
   const [inventory, setInventory] = useState(null);
   const [successPopup, setSuccessOpen] = useState(false);
+  // random number to force component to re-render. React doesn't detect changed props
+  // for complex objects
   const [inventoryUpdater, setInventoryUpdater] = useState(1);
   setPauseCallback(_paused => setPaused(_paused));
   setInventoryCallback((_inventory) => {

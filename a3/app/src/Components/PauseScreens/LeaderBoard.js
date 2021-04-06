@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
 
 async function fetchInfo(setData) {
     try {
@@ -27,7 +32,6 @@ async function fetchInfo(setData) {
     }
 }
 
-
 const useStyles = makeStyles((theme) => ({
     paper: {
         padding: theme.spacing(2),
@@ -35,25 +39,27 @@ const useStyles = makeStyles((theme) => ({
         color: 'white',
         backgroundColor: 'transparent'
     },
+    table: {
+        minWidth: 600,
+    },
 }));
 
-const parseLeaderboardData = (data, classes) => {
+const parseLeaderboardData = (data) => {
     let leaderboard = [];
+
+    let dummy = [];
+    for (let i = 0; i < 10; i++) {
+        dummy.push({ username: 'nigga', highscore: 42069 });
+    }
     
     data && data.forEach(e => {
         leaderboard.push(
-            <div>
-                <Grid item xs={6}>
-                    <Paper className={classes.paper}>
-                        {e['username']}
-                    </Paper>
-                </Grid>
-                <Grid item xs={6}>
-                    <Paper className={classes.paper}>
-                        {e['highscore']}
-                    </Paper>
-                </Grid>
-            </div>
+            <TableRow key={e.username} style={{ backgroundColor: '#F24141' }}>
+                <TableCell align="center">
+                    {e.username}
+                </TableCell>
+                <TableCell>{e.highscore}</TableCell>
+            </TableRow>
         )
     });
 
@@ -65,14 +71,24 @@ const LeaderBoard = () => {
     const classes = useStyles();
     useEffect(() => !leaderBoardData && fetchInfo(setData), []);
 
+    const headerStyle = { backgroundColor: '#49BFB3' };
+
     return (
         <div>
-            <Grid container spacing={3}>
-                <Grid item xs={12}>
-                    <Paper className={useStyles().paper}>LeaderBoard</Paper>
-                </Grid>
-                {parseLeaderboardData(leaderBoardData, classes)}
-            </Grid>
+
+            <TableContainer component={Paper}>
+                <Table className={classes.table} aria-label="simple table">
+                    <TableHead>
+                        <TableRow style={headerStyle}>
+                            <TableCell align="center">User</TableCell>
+                            <TableCell>Score</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {parseLeaderboardData(leaderBoardData)}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </div>
     );
 }

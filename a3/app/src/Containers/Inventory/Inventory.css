@@ -1,7 +1,19 @@
+.inventory-top-items {
+	display: flex;
+	flex-direction: column;
+	align-self: flex-start;
+}
+
+.inventory-weapons {
+	display: flex;
+	justify-self: flex-end;
+}
 
 #inventory {
 	position: absolute;
 	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 	width: 100%;
     height: 100%;
 	pointer-events: none;

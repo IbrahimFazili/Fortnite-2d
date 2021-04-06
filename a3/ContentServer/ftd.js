@@ -113,6 +113,8 @@ app.post('/api/login', function (req, res) {
 			error: "Authorization error",
 			info: "Missing credentials"
 		});
+
+		return;
 	}
 	try {
 		const { username, password } = req.body;
