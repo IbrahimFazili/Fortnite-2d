@@ -3,6 +3,14 @@ import './RightHome.css';
 import TransparentButton from '../TransparentButton/TransparentButton';
 import TransparentInput from '../TransparentInput/TransparentInput';
 import InfoPopup from '../InfoPopup/InfoPopup';
+import Typography from '@material-ui/core/Typography';
+
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+
 
 async function register(
 	username,
@@ -70,6 +78,10 @@ const RegisterForm = ({ onLoginClick, onRegister }) => {
 		setShowErrorPopup(true);
 	}
 
+	const handleChange = (event) => {
+		setGender(event.target.value);
+	};
+
 	return (
 		<div id="ui_register">
 			<div>
@@ -93,29 +105,14 @@ const RegisterForm = ({ onLoginClick, onRegister }) => {
 				/>
 				<br /><br />
 
-				<div>
-					<span>Gender</span><br />
-					<div style={{
-						display: 'flex',
-						justifyContent: 'space-evenly'
-					}}>
-						<label for="male">Male</label>
-						<input id="male" className="input" type="radio" name="gender" autocomplete="off" required
-							value="M"
-							onChange={(e) => setGender('M')}
-							autofocus />
-						<label for="female">Female</label>
-						<input id="female" className="input" type="radio" name="gender" autocomplete="off" required
-							value="F"
-							onChange={(e) => setGender('F')}
-							autofocus />
-						<label for="other">Other</label>
-						<input id="other" className="input" type="radio" name="gender" autocomplete="off" required
-							value="O"
-							onChange={(e) => setGender('O')}
-							autofocus />
-					</div>
-				</div>
+				<FormControl component="fieldset">
+					<FormLabel component="legend">Gender</FormLabel>
+					<RadioGroup aria-label="gender" row name="gender1" value={gender} onChange={handleChange}>
+						<FormControlLabel labelPlacement='top' value="F" control={<Radio color='white'/>} label={<Typography style={{color: '#261D20'}}>Female</Typography>}/>
+						<FormControlLabel labelPlacement='top' value="M" control={<Radio color='white'/>} label={<Typography style={{color: '#261D20'}}>Male</Typography>} />
+						<FormControlLabel labelPlacement='top' value="O" control={<Radio color='white'/>} label={<Typography style={{color: '#261D20'}}>Other</Typography>} />
+					</RadioGroup>
+				</FormControl>
 				<br /><br />
 
 				<TransparentInput

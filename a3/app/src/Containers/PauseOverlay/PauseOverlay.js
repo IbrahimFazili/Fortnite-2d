@@ -7,21 +7,21 @@ import Controls from '../../Components/PauseScreens/Controls';
 import LeaderBoard from '../../Components/PauseScreens/LeaderBoard';
 
 
-const PauseOverlay = ({ text }) => {
+const PauseOverlay = ({ text, logoutClick, restartClick}) => {
     const [profileView, setProfileView] = useState(false);
     const [controlsView, setControlsView] = useState(false);
     const [leaderBoardView, setLeaderBoardView] = useState(false);
-    // const [profileView, setProfileView] = useState(null);
 
-    // @TODO MAKE LOGOUT BADDIE
+    
     return (
         <div id='pause-overlay'>
             <NavBar
                 profileClick={setProfileView}
                 controlsClick={setControlsView}
                 leaderBoardClick={setLeaderBoardView}
+                logoutClick={logoutClick}
             />
-            {(!profileView && !controlsView && !leaderBoardView) && (<span id='pause-text'>Paused</span>)}
+            {(!profileView && !controlsView && !leaderBoardView) && (<span id='pause-text'>{text}</span>)}
             {profileView && (<Profile />)}
             {controlsView && (<Controls />)}
             {leaderBoardView && (<LeaderBoard />)}
@@ -31,7 +31,7 @@ const PauseOverlay = ({ text }) => {
                     hoverColor='#261D20'
                     type='button'
                     value='Restart'
-                    onClick={() => console.log('clicked Restart')}
+                    onClick={() => restartClick()}
                 />
             </div>
         </div>

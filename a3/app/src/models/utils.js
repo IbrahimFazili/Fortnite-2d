@@ -244,6 +244,7 @@ export class Inventory {
 		this.steel = 0;
 		this.ARammo = 0;
 		this.SMGammo = 0;
+		this.score = 0;
 	}
 
 	unpack(json) {

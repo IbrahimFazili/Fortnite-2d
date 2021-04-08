@@ -47,13 +47,13 @@ class Spawner {
         return false;
     }
 
-    spawnPlayer(username) {
+    spawnPlayer(username, token) {
         let col = true;
         let newUser = null;
         while (col) {
             let newPos = new Pair(randint(this.game.worldWidth), randint(this.game.worldHeight));
 
-            newUser = new Player(this.game, newPos, 100, this.getRandomColor(), username, true);
+            newUser = new Player(this.game, newPos, 100, this.getRandomColor(), username, true, token);
             if (!this._check_collision_with_world(newUser.boundingVolume)) {
                 col = false;
                 this.game.addActor(newUser);

@@ -5,8 +5,9 @@ export class Socket {
      * 
      * @param {Stage} game reference to the main game object
      * @param {Number} tickRate (Optional) rate at which to send updates to the server (default 60)
+     * @param {function(string):void} errCallback function to call on error
      */
-    constructor(game, tickRate=60) {
+    constructor(game, tickRate=60, errCallback=undefined) {
         this.game = game;
         this.userActions = [];
         this.tickRate = tickRate;
@@ -14,6 +15,7 @@ export class Socket {
         this.ws = null;
         this.ping = 0;
         this.connected = false;
+        this.errCallback = errCallback;
         // number for the setInterval that sends data over fixed intervals
         this.ticker = -1;
     }
@@ -34,6 +36,7 @@ export class Socket {
 
         this.ws.onerror = (ev) => {
             console.log(ev);
+            this.errCallback(ev);
             this.connected = false;
         }
 
@@ -59,6 +62,8 @@ export class Socket {
                 }
                 else {
                     // auth failed, handle appropriately
+                    this.errCallback(data.reason);
+                    return;
                 }
 
                 console.log(`Connection status ${this.connected}`);

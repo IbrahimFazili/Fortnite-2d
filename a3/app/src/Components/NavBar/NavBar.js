@@ -44,7 +44,9 @@ const NavBar = ({profileClick, controlsClick, leaderBoardClick, logoutClick}) =>
             hoverColor='#261D20'
             type='button'
             value='Logout'
-            onClick={() => console.log('clicked Logout')}
+            onClick={() => {
+                logoutClick();
+            }}
             />
         </div>
     );

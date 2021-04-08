@@ -14,13 +14,18 @@ var delta = 0;
 var pauseStatus = false;
 var username = null;
 var backgroundSound = new Audio('../assets/background_music.mp3');
+/** @type {Socket} */
 var socket = null;
+/** @type {function():void} */
+var onPlayerDeath = null;
+/** @type {function(boolean):void} */
 var uiPauseCallback = null;
+/** @type {function(Object):void} */
 var inventoryUpdateCallback = null;
 var accumTime = 0;
 
 function initGame() {
-	stage = new Stage(document.getElementById('stage'), username);
+	stage = new Stage(document.getElementById('stage'), username, onPlayerDeath);
 	pauseStatus = false;
 }
 
@@ -73,10 +78,6 @@ function gameLoop(t) {
 		stage.player && inventoryUpdateCallback(stage.player.inventory);
 		accumTime = 0;
 	}
-	// else {
-	// 	inventoryUIDiv.empty();
-	// 	showDebugInfo(debugDiv, stage, mousePos, delta, socket.ping);
-	// }
 }
 
 function startGame() { 
@@ -155,12 +156,17 @@ function getMousePos(canvas, evt) {
 	};
 }
 
-export function initSocketConnection(_username) {
+export function initSocketConnection(_username, _onPlayerDeath, errCallback) {
     username = _username;
+	onPlayerDeath = _onPlayerDeath;
     setupGame();
-    socket = new Socket(stage, 60);
+    socket = new Socket(stage, 60, errCallback);
     socket.connect(username);
     startGame();
+}
+
+export function disconnectSocket() {
+	socket.disconnect();
 }
 
 export function setInventoryCallback(callback) {

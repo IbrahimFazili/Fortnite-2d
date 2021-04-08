@@ -11,12 +11,13 @@ CREATE TABLE ftduser (
 );
 
 CREATE TABLE gameStats(
-	gameId VARCHAR PRIMARY KEY,
+	gameId VARCHAR,
 	username VARCHAR(20),
 	score INT,
 	enemiesKilled INT,
-	rounds INT,
-	FOREIGN KEY (username) REFERENCES ftduser(username) ON DELETE CASCADE ON UPDATE CASCADE
+	win BOOLEAN,
+	FOREIGN KEY (username) REFERENCES ftduser(username) ON DELETE CASCADE ON UPDATE CASCADE,
+	PRIMARY KEY (username, gameID)
 );
 --- Could have also stored as 128 character hex encoded values
 --- select char_length(encode(sha512('abc'), 'hex')); --- returns 128

@@ -204,12 +204,16 @@ app.patch('/api/auth/profile/update', async (req, res)=> {
 });
 
 app.post('/api/auth/reportGame', (req, res) => {
-	const {score, kills, round} = req.body;
+	const {score, kills, win, gameID} = req.body;
 	const v = (field) => {
 		return (typeof field === "number");
 	}
 
-	if (!v(score) || !v(kills) || !v(round)) {
+	const id_v = (id) => {
+		return (typeof id === 'string') && id.length === 16;
+	}
+
+	if (!v(score) || !v(kills) || !id_v(gameID)) {
 		res.status(406).send({
 			error: 'Payload validation error',
 			info: 'Payload is missing one of the required parameters'
@@ -218,9 +222,8 @@ app.post('/api/auth/reportGame', (req, res) => {
 	}
 
 	try {
-		const gameID = randomBytes(8).toString('hex');
 		let sql = 'INSERT INTO gameStats Values($1, $2, $3, $4, $5)';
-		const args = [gameID, req.username, score, kills, round];
+		const args = [gameID, req.username, score, kills, false];
 		pool.query(sql, args, (err, pgRes) => {
 			if (err) {
 				res.status(401).json({

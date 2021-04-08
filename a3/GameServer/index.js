@@ -4,6 +4,7 @@ const http = require('http');
 const app = require('express')();
 const WebSocket = require('ws');
 const { Inventory } = require('./models/utils');
+const { verifyUserToken } = require('./APIHandler');
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
@@ -18,7 +19,7 @@ app.get('/', (req, res) => {
 });
 
 wss.on('connection', (ws) => {
-    ws.on('message', (data) => {
+    ws.on('message', async (data) => {
         data = JSON.parse(data);
         // console.log(data);
         // invalid packet -> drop
@@ -26,7 +27,18 @@ wss.on('connection', (ws) => {
         // update client's state
         else if (data.type === 'State') game.updateActor(data);
         else if (data.type === 'Auth') {
-            // TODO: call API to verify this user is valid by verifying data.token
+            // verify if the user's token is valid
+            if (!data.token) {
+                sendErrAndClose(ws, 'Authentication failed, missing auth token');
+                return;
+            }
+
+            const username = await verifyUserToken(data.token);
+            if (!username) {
+                sendErrAndClose(ws, 'Authentication failed, invalid auth token');
+                return;
+            }
+
             ws.send(JSON.stringify({
                 type: 'Auth',
                 success: true
@@ -37,7 +49,7 @@ wss.on('connection', (ws) => {
                 mapSent: false
             };
             ws.username = data.username;
-            game.createNewPlayer(data.username);
+            game.createNewPlayer(data.username, data.token);
         }
     });
 
@@ -49,6 +61,21 @@ wss.on('connection', (ws) => {
     });
 
 });
+
+/**
+ * Send the error message to the client and terminate the connection
+ * @param {WebSocket} ws websocket connection over which to send the error
+ * @param {*} err error raised
+ */
+function sendErrAndClose(ws, err) {
+    ws.send(JSON.stringify({
+        type: 'Auth',
+        success: false,
+        reason: err.toString()
+    }));
+
+    ws.close(1000);
+}
 
 function simulateGame() {
     game.step(1000 / SIMULATION_RATE);

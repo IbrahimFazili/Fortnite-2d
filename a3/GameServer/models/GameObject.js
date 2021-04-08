@@ -21,6 +21,7 @@ class GameObject {
 		this.label = name;
 		this.displayLabel = false;
 		this.displayHealth = true;
+		this.lastDamage = null;
 	}
 
 	toString() {
@@ -45,6 +46,7 @@ class GameObject {
 	step(delta) {
 		if (this.health === 0) {
 			this.game.removeActor(this);
+			// this.lastDamage
 		}
 	}
 
@@ -214,5 +216,5 @@ class StaticObjects extends GameObject {
 
 module.exports = {
 	DynamicObjects,
-	StaticObjects
+	StaticObjects,
 }

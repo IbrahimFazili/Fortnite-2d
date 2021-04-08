@@ -1,5 +1,4 @@
 const { StaticObjects, DynamicObjects } = require('./GameObject');
-const { Player } = require('./CustomGameObjects');
 const { Pair, AABB, AABC, clamp } = require('./utils');
 
 const GUN_IMG_SIZE_MAP = {
@@ -21,8 +20,30 @@ class Weapon extends StaticObjects {
     }
 }
 
+class DamageAgent {
+    /**
+     * 
+     * @param {Object} inflictor 
+     * @param {number} d 
+     */
+    constructor(inflictor, d) {
+        this.inflictor = inflictor;
+        this._damage = d;
+    }
+
+    damage(hitObject) {
+        hitObject.updateHealth(-this._damage);
+        if (hitObject.health === 0) {
+            if (hitObject.constructor.name === 'Player') {
+                // update inflictor's score
+                this.inflictor.scoreTracker.registerKill();
+            }
+        }
+    }
+}
+
 class Bullet extends DynamicObjects {
-    constructor(game, position, damage, maxRange, dir) {
+    constructor(game, position, damage, maxRange, dir, owner) {
         super(game, position, Infinity, 'rgb(255, 255, 255)');
         this.damage = damage;
         this.radius = 2.5;
@@ -30,11 +51,12 @@ class Bullet extends DynamicObjects {
         this.dir = dir.copy();
         this.boundingVolume = new AABC(this.position, this.radius);
         this.distanceTravelled = 0;
-        // this
+        this.owner = owner;
+        this.damageAgent = new DamageAgent(owner, this.damage);
     }
 
     _onCollision(object) {
-        object.updateHealth(-this.damage);
+        this.damageAgent.damage(object);
     }
 
     toString() {
@@ -97,7 +119,7 @@ class Gun extends Weapon {
         if (this.currentAmmo > 0) {
             this.currentAmmo -= 1;
             const newPos = this.position.add(dir.multiply(this.owner.radius + 0.1));
-            let bullet = new Bullet(this.game, newPos.copy(), this.damage, this.maxRange, dir);
+            let bullet = new Bullet(this.game, newPos.copy(), this.damage, this.maxRange, dir, this.owner);
             bullet.velocity = bullet.dir.multiply(this.velocity);
             this.game.addActor(bullet);
             this.currentAmmo === 0 && this.reload(playReloadSound);

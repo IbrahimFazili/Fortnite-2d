@@ -19,6 +19,8 @@ export class Player extends DynamicObjects {
 		this.boundingVolume = new AABC(this.center, Player.PLAYER_SIZE);
 		this.inventory = new Inventory(3, 100, 360);
 		this.displayLabel = true;
+		this.score = 0;
+		this.kills = 0;
 	}
 
 	setCenter() { this.center = this.position; }
@@ -63,6 +65,8 @@ export class Player extends DynamicObjects {
 
 	unpack(json) {
 		super.unpack(json);
+		// this.score = json['score'];
+		this.kills = json['kills'];
 		this.inventory.unpack(json['inventory']);
 
 		const getWeapon = (id) => {
@@ -82,6 +86,7 @@ export class Player extends DynamicObjects {
 		});
 
 		this.inventory.weapons = weapons;
+		this.inventory.score = json['score'];
 	}
 }
 

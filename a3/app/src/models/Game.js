@@ -4,12 +4,14 @@ import { Bullet, Gun } from './Weapons';
 import { Resource } from './Resources';
 
 export class Stage {
-	constructor(canvas, username) {
+	constructor(canvas, username, deathCallback) {
 		this.canvas = canvas;
 		this.username = username;
+		this.deathCallback = deathCallback;
 
 		this.actors = []; // all actors on this stage (monsters, player, boxes, ...)
 		this.player = null; // a special actor, the player
+		this.playerIsAlive = true; // player is alive or not
 
 		this.isPaused = false;
 		this.squareSize = 20;
@@ -48,6 +50,7 @@ export class Stage {
 		});
 
 		this.actors = this.actors.filter((actor) => (processed_ids.findIndex((id) => id === actor.id)) !== -1);
+		this.checkPlayerisAlive();
 	}
 
 	unpackActor(prop) {
@@ -151,9 +154,16 @@ export class Stage {
 	}
 
 	resetGame() {
-		const enemiesKilled = this.spawner.totalEnemiesSpawned - this.activeAI;
-		// this.reportScore(this.score, enemiesKilled, this.spawner.round - 1);
-		this.restartCallback();
+		this.actors = [];
+		this.map = [];
+	}
+
+	checkPlayerisAlive() {
+		const isAlive = this.actors.findIndex((a) => a.label === this.username);
+		if (isAlive === -1) {
+			this.playerIsAlive = false;
+			this.deathCallback();
+		}
 	}
 
 	generateObstacles() {
@@ -206,7 +216,7 @@ export class Stage {
 
 	// Take one step in the animation of the game. Do this by asking each of the actors to take a single step. 
 	step(delta) {
-		if (this.isPaused) return;
+		if (this.isPaused || !this.playerIsAlive) return;
 		for (var i = 0; i < this.actors.length; i++) {
 			if (this.actors[i] instanceof Bullet) continue;
 			this.actors[i].step(delta);

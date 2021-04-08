@@ -3,6 +3,7 @@ const { Pair, getOrientation, getMouseAngle, AABB, AABC, Inventory, randint, cla
 const { Stage } = require('./Game');
 const { Bullet, Gun, Weapon } = require('./Weapons');
 const { Resource } = require('./Resources');
+const { ScoreTracker } = require('./ScoreTracker');
 
 class Player extends DynamicObjects {
 	/**
@@ -13,7 +14,7 @@ class Player extends DynamicObjects {
 	 * @param radius {Number}
 	 * @param username {String}
 	 */
-	constructor(game, position, health, color, username, regenEnabled = true) {
+	constructor(game, position, health, color, username, regenEnabled = true, token = null) {
 		super(game, position, health, color, false, username);
 		this.radius = Player.PLAYER_SIZE;
 		this.center = this.position;
@@ -25,13 +26,16 @@ class Player extends DynamicObjects {
 		this._regenInterval = -1;
 		this.dir = new Pair(0, 0);
 		this._fireInterval = -1;
-		this.score = 0;
+		this.scoreTracker = new ScoreTracker(this.label, token, this.game.gameID);
+		// player's jwt token to submit scores
+		this.token = token;
 	}
 
 	setCenter() { this.center = this.position; }
 
 	onDestroy() {
 		// report this player's score to the API
+		this.scoreTracker.reportScore();
 	}
 
 	// 1 Wall = 10 bricks
@@ -192,6 +196,8 @@ class Player extends DynamicObjects {
 		obj['color'] = this.color;
 		obj['size'] = Player.PLAYER_SIZE;
 		obj['inventory'] = this.inventory.pack();
+		obj['score'] = this.scoreTracker.score;
+		obj['kills'] = this.scoreTracker.kills;
 		return obj;
 	}
 	

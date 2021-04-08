@@ -3,13 +3,15 @@ const { Player, AI, Obstacles } = require('./CustomGameObjects');
 const { Gun } = require('./Weapons');
 const { Map } = require('./Map');
 const { Spawner } = require('./Spawner');
+const { randomBytes } = require('crypto');
 
 class Stage {
 	constructor(canvas) {
 		this.canvas = canvas;
+		this.gameID = randomBytes(8).toString('hex');
 
 		this.actors = []; // all actors on this stage (monsters, player, boxes, ...)
-		this.player = null; // a special actor, the player
+		this.winEnabled = false;
 
 		this.isPaused = false;
 		this.squareSize = 20;
@@ -30,6 +32,9 @@ class Stage {
 
 		this.idCounter = 0;
 		this.spawner = new Spawner(this, 1, 0);
+		this.killed = []; // players (usernames) that have died
+
+		this.waitingQueue = []; // players waiting for next round
 	}
 
 	/**
@@ -37,7 +42,6 @@ class Stage {
 	 */
 	pack() {
 		const json = {};
-		// json['player'] = this.player.pack();
 		json['worldWidth'] = this.worldWidth;
 		json['worldHeight'] = this.worldHeight;
 		json['squareSize'] = this.squareSize;
@@ -87,8 +91,21 @@ class Stage {
 		this.restartCallback();
 	}
 
-	createNewPlayer(username) {
-		this.spawner.spawnPlayer(username);
+	createNewPlayer(username, token) {
+		if (this.killed.findIndex(element => element === username) === - 1) {
+			this.spawner.spawnPlayer(username, token);
+			return {
+				success: true,
+				status: 'playing'
+			}
+		}
+		else {
+			this.waitingQueue.push(username);
+			return {
+				success: true,
+				status: 'waiting'
+			}
+		}
 	}
 
 	addActor(actor) {
@@ -103,6 +120,15 @@ class Stage {
 			}
 		}
 		this.activeAI = c;
+	}
+
+	getPlayerCount() {
+		let count = 0;
+		this.actors.forEach((a) => {
+			if (a instanceof Player) count++;
+		});
+
+		return count;
 	}
 
 	removeActor(actor) {
@@ -127,7 +153,12 @@ class Stage {
 
 	removePlayer(username) {
 		const player = this.actors.findIndex((a) => a.label === username);
-		if (player !== -1) this.removeActor(this.actors[player]);
+		if (player !== -1) {
+			const win = this.getPlayerCount() === 1 && this.winEnabled;
+			this.actors[player].scoreTracker.reportScore(win);
+			this.removeActor(this.actors[player]);
+			// this.killed.push(username); // stop people from spawning once dead
+		}
 	}
 
 	togglePause() {
@@ -141,8 +172,7 @@ class Stage {
 			this.actors[i].step(delta);
 		}
 
-		// this.internal_map_grid.clearGrid();
-		// this.internal_map_grid.updateGrid();
+		if (this.getPlayerCount() > 1 && !this.winEnabled) this.winEnabled = true;
 		this.spawner.step(delta);
 
 		this.countAI();
