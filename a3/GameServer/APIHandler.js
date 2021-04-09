@@ -19,7 +19,7 @@ const verifyUserToken = async (token) => {
 
 const reportScore = async (score, kills, win, gameID, token) => {
     try {
-        const stats = { score, kills, gameID, win }
+        const stats = { score, kills, gameID, win };
         const res = await fetch(`${API_URL}/api/auth/reportGame`, {
             method: 'POST',
             headers: {

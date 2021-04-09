@@ -1,5 +1,5 @@
-import { Stage } from '../models/Game';  
-import { Pair } from '../models/utils'; 
+import { Stage } from '../models/Game';
+import { Pair } from '../models/utils';
 // import { login, register, reportScore, getLeaderboard, fetchUserData, updateInfo, deleteProfile } from './APICallers'; 
 // import { showOverlay, showDebugInfo, renderUI, populateLeaderboard, renderProfile } from './renderer';
 import { Socket } from './socket';
@@ -23,6 +23,7 @@ var uiPauseCallback = null;
 /** @type {function(Object):void} */
 var inventoryUpdateCallback = null;
 var accumTime = 0;
+var keysPressed = [];
 
 function initGame() {
 	stage = new Stage(document.getElementById('stage'), username, onPlayerDeath);
@@ -35,16 +36,22 @@ function setupGame() {
 	// https://javascript.info/keyboard-events
 	document.addEventListener('keydown', (event) => moveByKey(event, false));
 	document.addEventListener('keyup', (event) => moveByKey(event, true));
+	window.onblur = function () {
+		keysPressed.forEach(key => {
+			console.log({key});
+			moveByKey({ key }, true)
+		});
+	}
 	document.addEventListener('click', (event) => {
 		if (!stage.player) return;
-		if (!pauseStatus){
+		if (!pauseStatus) {
 			stage.player.fire(); // @todo
 			enqueueAction('fire');
 		}
 	});
 	document.addEventListener('mousedown', (event) => {
 		if (!stage.player) return;
-		if (!pauseStatus){
+		if (!pauseStatus) {
 			interval = stage.player.fire(true); // @todo
 			enqueueAction('fire_auto');
 		}
@@ -80,8 +87,8 @@ function gameLoop(t) {
 	}
 }
 
-function startGame() { 
-	requestAnimationFrame(gameLoop); 
+function startGame() {
+	requestAnimationFrame(gameLoop);
 	backgroundSound.play();
 	backgroundSound.loop = true;
 }
@@ -93,6 +100,8 @@ function enqueueAction(action) {
 
 function moveByKey(event, released) {
 	var key = event.key;
+	if (!released) keysPressed.push(key);
+	if (released) keysPressed.splice(keysPressed.findIndex((v) => v === key), 1);
 	// @todo
 	if (key === 'x' && !released && !pauseStatus) enqueueAction('deploy_brick_wall');
 	if (key === 'c' && !released && !pauseStatus) enqueueAction('deploy_steel_wall');
@@ -157,12 +166,12 @@ function getMousePos(canvas, evt) {
 }
 
 export function initSocketConnection(_username, _onPlayerDeath, errCallback, showWaitingScreen) {
-    username = _username;
+	username = _username;
 	onPlayerDeath = _onPlayerDeath;
-    setupGame();
-    socket = new Socket(stage, 60, errCallback, showWaitingScreen);
-    socket.connect(username);
-    startGame();
+	setupGame();
+	socket = new Socket(stage, 60, errCallback, showWaitingScreen);
+	socket.connect(username);
+	startGame();
 }
 
 export function disconnectSocket() {

@@ -35,7 +35,7 @@ class Player extends DynamicObjects {
 
 	onDestroy() {
 		// report this player's score to the API
-		this.scoreTracker.reportScore();
+		this.scoreTracker.reportScore(false);
 	}
 
 	// 1 Wall = 10 bricks

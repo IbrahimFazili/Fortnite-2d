@@ -160,17 +160,16 @@ class Stage {
 			const destroyed = this.actors.splice(index, 1)[0];
 			destroyed.onDestroy();
 
-			if (destroyed instanceof AI) {
-				this.score += this.spawner.getScorePerKill();
-				if (this.actors.findIndex((actor) => actor instanceof AI) === -1) {
-					// queue next round with a delay to allow player to get ready
-					setTimeout(() => {
-						this.spawner.startNextRound();
-						console.log(this.spawner.toString());
-					}, 5000);
-					this.score += this.spawner.round * 100;
-				}
-			}
+			// if (destroyed instanceof AI) {
+			// 	if (this.actors.findIndex((actor) => actor instanceof AI) === -1) {
+			// 		// queue next round with a delay to allow player to get ready
+			// 		setTimeout(() => {
+			// 			this.spawner.startNextRound();
+			// 			console.log(this.spawner.toString());
+			// 		}, 5000);
+			// 		this.score += this.spawner.round * 100;
+			// 	}
+			// }
 		}
 	}
 
