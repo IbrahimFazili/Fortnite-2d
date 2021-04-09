@@ -156,11 +156,11 @@ function getMousePos(canvas, evt) {
 	};
 }
 
-export function initSocketConnection(_username, _onPlayerDeath, errCallback) {
+export function initSocketConnection(_username, _onPlayerDeath, errCallback, showWaitingScreen) {
     username = _username;
 	onPlayerDeath = _onPlayerDeath;
     setupGame();
-    socket = new Socket(stage, 60, errCallback);
+    socket = new Socket(stage, 60, errCallback, showWaitingScreen);
     socket.connect(username);
     startGame();
 }

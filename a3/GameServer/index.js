@@ -12,7 +12,7 @@ const wss = new WebSocket.Server({ server });
 const TICK_RATE = 60;
 const SIMULATION_RATE = 60;
 const clients = {};
-const game = new Stage();
+const game = new Stage(onGameStart);
 
 app.get('/', (req, res) => {
     res.status(200).sendFile(__dirname + '/client.html');
@@ -25,7 +25,13 @@ wss.on('connection', (ws) => {
         // invalid packet -> drop
         if (!data.type) return;
         // update client's state
-        else if (data.type === 'State') game.updateActor(data);
+        else if (data.type === 'State') {
+            const actor = game.actors.find((a) => a.label === ws.username);
+            if (!actor) return;
+            // make sure client is controlling itself
+            data['id'] = actor.id;
+            game.updateActor(data);
+        }
         else if (data.type === 'Auth') {
             // verify if the user's token is valid
             if (!data.token) {
@@ -49,7 +55,13 @@ wss.on('connection', (ws) => {
                 mapSent: false
             };
             ws.username = data.username;
-            game.createNewPlayer(data.username, data.token);
+            const status = game.createNewPlayer(data.username, data.token);
+            if (status.status === 'waiting') {
+                ws.send(JSON.stringify({
+                    type: 'PlayerState',
+                    status: 'waiting'
+                }));
+            }
         }
     });
 
@@ -75,6 +87,16 @@ function sendErrAndClose(ws, err) {
     }));
 
     ws.close(1000);
+}
+
+function onGameStart() {
+    for (const username in clients) {
+        const client = clients[username];
+        client.ws.send(JSON.stringify({
+            type: 'PlayerState',
+            status: 'playing'
+        }));
+    }
 }
 
 function simulateGame() {

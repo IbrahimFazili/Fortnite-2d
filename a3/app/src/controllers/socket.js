@@ -6,8 +6,9 @@ export class Socket {
      * @param {Stage} game reference to the main game object
      * @param {Number} tickRate (Optional) rate at which to send updates to the server (default 60)
      * @param {function(string):void} errCallback function to call on error
+     * @param {function(string):void} showWaitingScreen callback to show waiting screen if server tells us to
      */
-    constructor(game, tickRate=60, errCallback=undefined) {
+    constructor(game, tickRate = 60, errCallback = undefined, showWaitingScreen=undefined) {
         this.game = game;
         this.userActions = [];
         this.tickRate = tickRate;
@@ -16,6 +17,7 @@ export class Socket {
         this.ping = 0;
         this.connected = false;
         this.errCallback = errCallback;
+        this.showWaitingScreen = showWaitingScreen;
         // number for the setInterval that sends data over fixed intervals
         this.ticker = -1;
     }
@@ -36,7 +38,7 @@ export class Socket {
 
         this.ws.onerror = (ev) => {
             console.log(ev);
-            this.errCallback(ev);
+            this.errCallback && this.errCallback(ev);
             this.connected = false;
         }
 
@@ -49,6 +51,16 @@ export class Socket {
             const data = JSON.parse(ev.data);
             // invalid packet -> drop
             if (!data.type) return;
+            else if (data.type === 'PlayerState') {
+                if (data.status === 'waiting') {
+                    // show wait screen
+                    this.showWaitingScreen && this.showWaitingScreen(true);
+                }
+                else {
+                    // actually playing
+                    this.showWaitingScreen && this.showWaitingScreen(false);
+                }
+            }
             else if (data.type === 'GameState') {
                 this.ping = Date.now() - data['time'];
                 this.game.unpack(data);
@@ -62,7 +74,7 @@ export class Socket {
                 }
                 else {
                     // auth failed, handle appropriately
-                    this.errCallback(data.reason);
+                    this.errCallback && this.errCallback(data.reason);
                     return;
                 }
 

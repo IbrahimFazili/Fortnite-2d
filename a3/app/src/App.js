@@ -8,7 +8,6 @@ import PauseOverlay from './Containers/PauseOverlay/PauseOverlay';
 import { randint } from './models/utils';
 
 function App() {
-
   const [userName, setUserName] = useState(null);
   const [showGame, setShowGame] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -16,6 +15,7 @@ function App() {
   const [successPopup, setSuccessOpen] = useState(false);
   const [err, setErr] = useState('');
   const [showErr, setShowErr] = useState(false);
+  const [waitingScreen, setWaitingScreen] = useState(false);
   // random number to force component to re-render. React doesn't detect changed props
   // for complex objects
   const [inventoryUpdater, setInventoryUpdater] = useState(1);
@@ -26,6 +26,16 @@ function App() {
     setInventoryUpdater(1 + randint(1000));
   });
 
+  function showWaitingScreen(e) {
+    if (e) {
+      setPlayerAlive(false);
+      setWaitingScreen(true);
+    } else {
+      setPlayerAlive(true);
+      setWaitingScreen(false);
+    }
+  }
+
   function logoutClick() {
     setShowGame(false);
     setPaused(false);
@@ -35,7 +45,7 @@ function App() {
 
   function restartClick() {
     disconnectSocket();
-    initSocketConnection(userName, () => setPlayerAlive(false), handleError);
+    initSocketConnection(userName, () => setPlayerAlive(false), handleError, showWaitingScreen);
     setPlayerAlive(true);
   }
 
@@ -51,17 +61,17 @@ function App() {
           onLogin={(username) => {
             setShowGame(true);
             setUserName(username);
-            initSocketConnection(username, () => setPlayerAlive(false), handleError)
+            initSocketConnection(username, () => setPlayerAlive(false), handleError, showWaitingScreen)
           }}
           onRegister={() => setSuccessOpen(true)}
         />}
       {showGame && inventoryUpdater && <GameView inventory={inventory} />}
-      {showGame && (paused || !playerAlive) &&
-      (<PauseOverlay
-      text={playerAlive ? 'Paused' : 'Game Over'}
-      logoutClick={logoutClick}
-      restartClick={restartClick}
-      />)}
+      {showGame && (paused || !playerAlive || waitingScreen) &&
+        (<PauseOverlay
+          text={playerAlive ? 'Paused' : (waitingScreen ? 'Waiting For Next Game' : 'Game Over')}
+          logoutClick={logoutClick}
+          restartClick={restartClick}
+        />)}
       <InfoPopup
         msg={'Registration Success!'}
         severity='success'

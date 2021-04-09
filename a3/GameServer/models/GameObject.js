@@ -45,7 +45,8 @@ class GameObject {
 
 	step(delta) {
 		if (this.health === 0) {
-			this.game.removeActor(this);
+			if (this.constructor.name === 'Player') this.game.removePlayer(this.label);
+			else this.game.removeActor(this);
 			// this.lastDamage
 		}
 	}

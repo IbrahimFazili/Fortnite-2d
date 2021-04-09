@@ -6,12 +6,17 @@ const { Spawner } = require('./Spawner');
 const { randomBytes } = require('crypto');
 
 class Stage {
-	constructor(canvas) {
-		this.canvas = canvas;
-		this.gameID = randomBytes(8).toString('hex');
+	/**
+	 * 
+	 * @param {function():void} onStart 
+	 * @param {function(string):void} onDeath
+	 */
+	constructor(onStart) {
+		this.gameID = this.genGameId();
+		this.onStart = onStart;
+		this.gameEnded = false;
 
 		this.actors = []; // all actors on this stage (monsters, player, boxes, ...)
-		this.winEnabled = false;
 
 		this.isPaused = false;
 		this.squareSize = 20;
@@ -35,6 +40,10 @@ class Stage {
 		this.killed = []; // players (usernames) that have died
 
 		this.waitingQueue = []; // players waiting for next round
+	}
+
+	genGameId() {
+		return randomBytes(8).toString('hex');
 	}
 
 	/**
@@ -85,27 +94,41 @@ class Stage {
 		});
 	}
 
-	resetGame() {
-		const enemiesKilled = this.spawner.totalEnemiesSpawned - this.activeAI;
-		this.reportScore(this.score, enemiesKilled, this.spawner.round - 1);
-		this.restartCallback();
+	/**
+	 * Restart the game
+	 * @param {Player} lastPlayer 
+	 */
+	resetGame(lastPlayer) {
+		console.log('restarting game');
+		this.actors = [];
+		this.killed = [];
+		this.gameID = this.genGameId();
+		this.spawner = new Spawner(this, 1, 0);
+		this.waitingQueue.forEach((user) => {
+			console.log(`spawning ${user.username}`);
+			this.createNewPlayer(user.username, user.token);
+		});
+		this.waitingQueue = [];
+		this.createNewPlayer(lastPlayer.label, lastPlayer.token);
+
+		this.onStart();
 	}
 
 	createNewPlayer(username, token) {
 		if (this.killed.findIndex(element => element === username) === - 1) {
 			this.spawner.spawnPlayer(username, token);
+
 			return {
 				success: true,
 				status: 'playing'
 			}
 		}
-		else {
-			this.waitingQueue.push(username);
-			return {
-				success: true,
-				status: 'waiting'
-			}
-		}
+
+		this.waitingQueue.push({ 'username': username, 'token': token });
+		return {
+			success: true,
+			status: 'waiting'
+		};
 	}
 
 	addActor(actor) {
@@ -154,10 +177,8 @@ class Stage {
 	removePlayer(username) {
 		const player = this.actors.findIndex((a) => a.label === username);
 		if (player !== -1) {
-			const win = this.getPlayerCount() === 1 && this.winEnabled;
-			this.actors[player].scoreTracker.reportScore(win);
+			this.killed.push(username); // stop people from spawning once dead
 			this.removeActor(this.actors[player]);
-			// this.killed.push(username); // stop people from spawning once dead
 		}
 	}
 
@@ -167,12 +188,19 @@ class Stage {
 
 	// Take one step in the animation of the game.  Do this by asking each of the actors to take a single step. 
 	step(delta) {
-		if (this.isPaused) return;
+		if (this.gameEnded) return;
+		if (this.getPlayerCount() === 1 && this.killed.length > 0) {
+			// game's done
+			const player = this.actors.find((a) => a instanceof Player);
+			player.scoreTracker.reportScore(true);
+			this.resetGame(player);
+			return;
+		}
+
 		for (var i = 0; i < this.actors.length; i++) {
 			this.actors[i].step(delta);
 		}
 
-		if (this.getPlayerCount() > 1 && !this.winEnabled) this.winEnabled = true;
 		this.spawner.step(delta);
 
 		this.countAI();

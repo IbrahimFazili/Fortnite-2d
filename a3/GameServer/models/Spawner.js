@@ -157,10 +157,13 @@ class Spawner {
     }
 
     step(delta) {
+        const playerCount = this.game.getPlayerCount();
+        if (playerCount === 0) return;
         this.time += delta;
-        if (this.time >= 5000 / this.spawnRate) {
+        if (this.time >= 60 * 1000 / playerCount) {
             this.time = 0;
-            this.spawnEnemy();
+            this.spawnAmmo();
+            this.spawnResources();
         }
     }
 }
