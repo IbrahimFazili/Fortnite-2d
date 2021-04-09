@@ -65,11 +65,10 @@ export class Socket {
                 this.ping = Date.now() - data['time'];
                 this.game.unpack(data);
             }
-            // TODO: handle error
-            else if (data.type === 'Error') console.log(data);
             else if (data.type === 'Auth') {
                 if (data.success) {
                     this.connected = true;
+                    // initiate voice connection to peers
                     this.startTick();
                 }
                 else {

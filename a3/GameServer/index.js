@@ -3,8 +3,8 @@ const { Stage } = require('./models/Game');
 const http = require('http');
 const app = require('express')();
 const WebSocket = require('ws');
-const { Inventory } = require('./models/utils');
 const { verifyUserToken } = require('./APIHandler');
+const { handleVoiceChatConnectionAttempt } = require('./VoiceChatWSRoutes');
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
@@ -14,11 +14,8 @@ const SIMULATION_RATE = 60;
 const clients = {};
 const game = new Stage(onGameStart);
 
-app.get('/', (req, res) => {
-    res.status(200).sendFile(__dirname + '/client.html');
-});
-
 wss.on('connection', (ws) => {
+
     ws.on('message', async (data) => {
         data = JSON.parse(data);
         // console.log(data);
@@ -62,6 +59,9 @@ wss.on('connection', (ws) => {
                     status: 'waiting'
                 }));
             }
+        }
+        else if (data.type === 'Voice') {
+            handleVoiceChatConnectionAttempt(ws, clients, data);
         }
     });
 
