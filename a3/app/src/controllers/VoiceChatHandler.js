@@ -66,16 +66,22 @@ class RTCPeer {
      * @param {JSON} desc Session description init dict
      */
     async handleSessionDescription(desc) {
-        const sessionDescription = new RTCSessionDescription(desc);
-        await this.rtcConn.setRemoteDescription(sessionDescription);
-        if (sessionDescription.type === 'offer') {
-            const rtcSdpInit = await this.rtcConn.createAnswer();
-            await this.rtcConn.setLocalDescription(rtcSdpInit);
-            this.rtcConnHandler.sendSessionDescription(
-                this.rtcConn.localDescription.toJSON(),
-                this.username
-            );
+        try {
+            const sessionDescription = new RTCSessionDescription(desc);
+            await this.rtcConn.setRemoteDescription(sessionDescription);
+            if (sessionDescription.type === 'offer') {
+                const rtcSdpInit = await this.rtcConn.createAnswer();
+                await this.rtcConn.setLocalDescription(rtcSdpInit);
+                this.rtcConnHandler.sendSessionDescription(
+                    this.rtcConn.localDescription.toJSON(),
+                    this.username
+                );
+            }
+        } catch (error) {
+            console.log(error);
+            return;
         }
+
     }
 
     handleIceCandidate(iceCandidate) {
@@ -146,7 +152,7 @@ export class RTCConnectionHandler {
             peerConn.closeConnection();
         }
 
-        this.userMedia.getTracks().forEach((v) => v.stop());
+        this.userMedia && this.userMedia.getTracks().forEach((v) => v.stop());
 
         this.peerConnections = {};
     }

@@ -3,6 +3,8 @@ import { Player } from './CustomGameObjects';
 import { Pair, AABB, AABC, clamp } from './utils';
 import ARImage from '../assets/AR.png';
 import SMGImage from '../assets/SMG.png';
+import ARreload from '../assets/ar-reload.mp3';
+import SMGreload from '../assets/smg-reload.mp3'
 
 const GUN_IMG_SIZE_MAP = {
     'AR': new Pair(75, 45),
@@ -145,12 +147,12 @@ export class Gun extends Weapon {
 
     static generateAR(game, position, owner) {
         return new Gun(game, owner, position, 'rgb(0, 0, 0)', 11, 25, 280, 1500, 1500, ARImage,
-            new Audio('../assets/ar-reload.mp3'), 'AR');
+            new Audio(ARreload), 'AR');
     }
 
     static generateSMG(game, position, owner) {
         return new Gun(game, owner, position, 'rgb(0, 0, 0)', 6, 32, 420, 1100, 1000, SMGImage,
-            new Audio('../assets/smg-reload.mp3'), 'SMG');
+            new Audio(SMGreload), 'SMG');
     }
 
     draw(context) {

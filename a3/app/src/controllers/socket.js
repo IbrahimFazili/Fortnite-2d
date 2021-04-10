@@ -70,9 +70,11 @@ export class Socket {
                     // show wait screen
                     this.showWaitingScreen && this.showWaitingScreen(true);
                 }
-                else {
+                else if (data.status === 'playing'){
                     // actually playing
                     this.showWaitingScreen && this.showWaitingScreen(false);
+                } else if (data.status === 'won') {
+                    this.showWaitingScreen && this.showWaitingScreen(true);
                 }
             }
             else if (data.type === 'Voice') this.voiceHandler.handleConnectionData(data);

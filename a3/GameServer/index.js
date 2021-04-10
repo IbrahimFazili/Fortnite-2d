@@ -12,14 +12,13 @@ const wss = new WebSocket.Server({ server });
 const TICK_RATE = 60;
 const SIMULATION_RATE = 60;
 const clients = {};
-const game = new Stage(onGameStart);
+const game = new Stage(onGameStart, onGameRestart);
 APIHandler.setClientsMap(clients);
 
 wss.on('connection', (ws) => {
 
     ws.on('message', async (data) => {
         data = JSON.parse(data);
-        // console.log(data);
         // invalid packet -> drop
         if (!data.type) return;
         // update client's state
@@ -64,7 +63,11 @@ wss.on('connection', (ws) => {
             }
         }
         else if (data.type === 'Voice') {
-            handleVoiceChatConnectionAttempt(ws, clients, data);
+            try {
+                handleVoiceChatConnectionAttempt(ws, clients, data);
+            } catch (error) {
+                return;
+            }
         }
     });
 
@@ -100,6 +103,15 @@ function onGameStart() {
             status: 'playing'
         }));
     }
+}
+
+function onGameRestart(winner) {
+    const client = clients[winner];
+    if (!client) return;
+    client.ws.send(JSON.stringify({
+        type: 'PLayerState',
+        status: 'won'
+    }));
 }
 
 function simulateGame() {

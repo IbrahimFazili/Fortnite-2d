@@ -51,39 +51,27 @@ const LoginForm = ({ onRegisterClick, onLogin }) => {
 
     return (
         <div id="ui_login">
-            <div>
-                <div>
-                    <TransparentInput
-                        label="username"
-                        color="white"
-                        type="text"
-                        labelStyle={labelStyle}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required={true}
-                    />
-                    <br /><br />
-                    <div>
-                        <TransparentInput
-                            label="password"
-                            color="white"
-                            type="password"
-                            labelStyle={labelStyle}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required={true}
-                        />
-                    </div>
-                    <br /><br />
-                    <span id="err"
-                        style={{
-                            color: "#261D20",
-                            overflowWrap: "anywhere",
-                        }}>
-                    </span>
-                    <br /><br />
-                </div>
+            <div className='form' style={{ height: '50%' }}>
+                <TransparentInput
+                    label="username"
+                    color="white"
+                    type="text"
+                    labelStyle={labelStyle}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required={true}
+                />
+                <TransparentInput
+                    label="password"
+                    color="white"
+                    type="password"
+                    labelStyle={labelStyle}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required={true}
+                />
+            </div>
 
-                <br /><br />
 
+            <div className='twoBtnDiv'>
                 <TransparentButton
                     color='#261D20'
                     hoverColor='#F24141'
@@ -91,7 +79,6 @@ const LoginForm = ({ onRegisterClick, onLogin }) => {
                     value='LOGIN'
                     onClick={() => login(username, password, onErr, onLogin)}
                 />
-                <br />
 
                 <TransparentButton
                     color='#261D20'
@@ -100,15 +87,15 @@ const LoginForm = ({ onRegisterClick, onLogin }) => {
                     value='REGISTER'
                     onClick={onRegisterClick}
                 />
-
-                <InfoPopup
-                    msg={err}
-                    severity={'error'}
-                    open={showErr}
-                    onClose={() => setShowErr(false)}
-                    autoHideDuration={null}
-                />
             </div>
+
+            <InfoPopup
+                msg={err}
+                severity={'error'}
+                open={showErr}
+                onClose={() => setShowErr(false)}
+                autoHideDuration={null}
+            />
         </div>
     );
 }

@@ -45,7 +45,7 @@ const VALIDATE_GENDER = (g) => {
 }
 
 // app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+// app.use(cors());
 app.use(bodyParser.json());
 // app.use(bodyParser.raw()); // support raw bodies
 
@@ -96,7 +96,7 @@ app.post('/api/register', async (req, res) => {
 });
 
 
-app.use('/', express.static('static_content'));
+app.use('/', express.static('build'));
 
 app.get('/models/:model', (req, res) => {
 	res.status(200).sendFile(`${__dirname}/static_content/models/${req.params.model}.js`);

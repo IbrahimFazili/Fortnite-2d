@@ -8,12 +8,13 @@ const { randomBytes } = require('crypto');
 class Stage {
 	/**
 	 * 
-	 * @param {function():void} onStart 
-	 * @param {function(string):void} onDeath
+	 * @param {function():void} onStart
+	 * @param {function(string):void} onRestart
 	 */
-	constructor(onStart) {
+	constructor(onStart, onRestart) {
 		this.gameID = this.genGameId();
 		this.onStart = onStart;
+		this.onRestart = onRestart;
 		this.gameEnded = false;
 
 		this.actors = []; // all actors on this stage (monsters, player, boxes, ...)
@@ -96,7 +97,7 @@ class Stage {
 
 	/**
 	 * Restart the game
-	 * @param {Player} lastPlayer 
+	 * @param {Player} lastPlayer
 	 */
 	resetGame(lastPlayer) {
 		console.log('restarting game');
@@ -105,13 +106,12 @@ class Stage {
 		this.gameID = this.genGameId();
 		this.spawner = new Spawner(this, 1, 0);
 		this.waitingQueue.forEach((user) => {
-			console.log(`spawning ${user}`);
 			this.createNewPlayer(user);
 		});
 		this.waitingQueue = [];
-		this.createNewPlayer(lastPlayer.label);
 
 		this.onStart();
+		this.onRestart(lastPlayer.label);
 	}
 
 	createNewPlayer(username) {

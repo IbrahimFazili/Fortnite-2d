@@ -16,6 +16,7 @@ function App() {
   const [err, setErr] = useState('');
   const [showErr, setShowErr] = useState(false);
   const [waitingScreen, setWaitingScreen] = useState(false);
+  const [waitText, setWaitText] = useState('');
   // random number to force component to re-render. React doesn't detect changed props
   // for complex objects
   const [inventoryUpdater, setInventoryUpdater] = useState(1);
@@ -26,13 +27,15 @@ function App() {
     setInventoryUpdater(1 + randint(1000));
   });
 
-  function showWaitingScreen(e) {
+  function showWaitingScreen(e, msg) {
     if (e) {
       setPlayerAlive(false);
       setWaitingScreen(true);
+      setWaitText(msg);
     } else {
       setPlayerAlive(true);
       setWaitingScreen(false);
+      setWaitText('');
     }
   }
 

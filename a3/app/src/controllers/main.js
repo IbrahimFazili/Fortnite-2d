@@ -3,6 +3,7 @@ import { Pair } from '../models/utils';
 // import { login, register, reportScore, getLeaderboard, fetchUserData, updateInfo, deleteProfile } from './APICallers'; 
 // import { showOverlay, showDebugInfo, renderUI, populateLeaderboard, renderProfile } from './renderer';
 import { Socket } from './socket';
+import BackgroundMusic from '../assets/background_music.mp3';
 
 var stage = null;
 var interval = null;
@@ -13,7 +14,7 @@ var lastRenderTime = 0;
 var delta = 0;
 var pauseStatus = false;
 var username = null;
-var backgroundSound = new Audio('../assets/background_music.mp3');
+var backgroundSound = new Audio(BackgroundMusic);
 /** @type {Socket} */
 var socket = null;
 /** @type {function():void} */
@@ -90,6 +91,7 @@ function startGame() {
 	requestAnimationFrame(gameLoop);
 	backgroundSound.play();
 	backgroundSound.loop = true;
+	backgroundSound.volume = 0.25;
 }
 function pauseGame() { stage.togglePause(); }
 

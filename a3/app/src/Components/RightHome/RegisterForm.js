@@ -84,7 +84,7 @@ const RegisterForm = ({ onLoginClick, onRegister }) => {
 
 	return (
 		<div id="ui_register">
-			<div>
+			<div className='form'>
 				<TransparentInput
 					label='Username'
 					labelStyle={labelStyle}
@@ -94,8 +94,6 @@ const RegisterForm = ({ onLoginClick, onRegister }) => {
 					autofocus={true}
 				/>
 
-				<br /><br />
-
 				<TransparentInput
 					label='Email'
 					labelStyle={labelStyle}
@@ -103,17 +101,15 @@ const RegisterForm = ({ onLoginClick, onRegister }) => {
 					type='email'
 					onChange={(e) => setEmail(e.target.value)}
 				/>
-				<br /><br />
 
 				<FormControl component="fieldset">
-					<FormLabel component="legend">Gender</FormLabel>
+					<FormLabel component="legend">{<Typography style={{ color: '#261D20', display: 'flex', justifyContent: 'center' }}>Gender</Typography>}</FormLabel>
 					<RadioGroup aria-label="gender" row name="gender1" value={gender} onChange={handleChange}>
-						<FormControlLabel labelPlacement='top' value="F" control={<Radio color='white'/>} label={<Typography style={{color: '#261D20'}}>Female</Typography>}/>
-						<FormControlLabel labelPlacement='top' value="M" control={<Radio color='white'/>} label={<Typography style={{color: '#261D20'}}>Male</Typography>} />
-						<FormControlLabel labelPlacement='top' value="O" control={<Radio color='white'/>} label={<Typography style={{color: '#261D20'}}>Other</Typography>} />
+						<FormControlLabel labelPlacement='top' value="F" control={<Radio color='white' />} label={<Typography style={{ color: '#261D20' }}>Female</Typography>} />
+						<FormControlLabel labelPlacement='top' value="M" control={<Radio color='white' />} label={<Typography style={{ color: '#261D20' }}>Male</Typography>} />
+						<FormControlLabel labelPlacement='top' value="O" control={<Radio color='white' />} label={<Typography style={{ color: '#261D20' }}>Other</Typography>} />
 					</RadioGroup>
 				</FormControl>
-				<br /><br />
 
 				<TransparentInput
 					label='Password'
@@ -122,7 +118,6 @@ const RegisterForm = ({ onLoginClick, onRegister }) => {
 					type='password'
 					onChange={(e) => setPassword(e.target.value)}
 				/>
-				<br /><br />
 
 				<TransparentInput
 					label='Confirm Password'
@@ -131,31 +126,24 @@ const RegisterForm = ({ onLoginClick, onRegister }) => {
 					type='password'
 					onChange={(e) => setConfirmPassword(e.target.value)}
 				/>
-				<br /><br />
-				<span id="register-err" style={{
-					display: 'flex',
-					justifyContent: 'space-evenly'
-				}}>
-				</span>
 			</div>
 
-			<br /><br />
-
-			<TransparentButton
-				color='#261D20'
-				hoverColor='#F24141'
-				type='submit'
-				value='REGISTER'
-				onClick={() => register(username, password, confirmPassword, email, gender, onErr, onSuccess)}
-			/>
-			<br /><br />
-			<TransparentButton
-				color='#261D20'
-				hoverColor='#F24141'
-				type='submit'
-				value='LOGIN'
-				onClick={onLoginClick}
-			/>
+			<div className='twoBtnDiv'>
+				<TransparentButton
+					color='#261D20'
+					hoverColor='#F24141'
+					type='submit'
+					value='REGISTER'
+					onClick={() => register(username, password, confirmPassword, email, gender, onErr, onSuccess)}
+				/>
+				<TransparentButton
+					color='#261D20'
+					hoverColor='#F24141'
+					type='submit'
+					value='LOGIN'
+					onClick={onLoginClick}
+				/>
+			</div>
 
 			<InfoPopup
 				msg={err}

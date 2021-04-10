@@ -17,7 +17,14 @@ async function update(
     setShowErr,
     setErr) {
 	try {
-        console.log(username, email, gender)
+        if (!email){
+            setShowErr(true);
+            setErr('Email cannot be empty');
+        }
+        else if (!gender){
+            setShowErr(true);
+            setErr('Gender cannot be empty');
+        }
         const token = localStorage.getItem('auth');
 		const res = await fetch('http://localhost:8000/api/auth/profile/update', {
 			method: 'PATCH',
