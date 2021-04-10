@@ -38,7 +38,6 @@ function setupGame() {
 	document.addEventListener('keyup', (event) => moveByKey(event, true));
 	window.onblur = function () {
 		keysPressed.forEach(key => {
-			console.log({key});
 			moveByKey({ key }, true)
 		});
 	}

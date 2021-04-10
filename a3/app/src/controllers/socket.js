@@ -1,3 +1,5 @@
+import { RTCConnectionHandler } from "./VoiceChatHandler";
+
 
 export class Socket {
 
@@ -8,18 +10,30 @@ export class Socket {
      * @param {function(string):void} errCallback function to call on error
      * @param {function(string):void} showWaitingScreen callback to show waiting screen if server tells us to
      */
-    constructor(game, tickRate = 60, errCallback = undefined, showWaitingScreen=undefined) {
+    constructor(game, tickRate = 60, errCallback = undefined, showWaitingScreen = undefined) {
         this.game = game;
         this.userActions = [];
         this.tickRate = tickRate;
         this.url = 'ws://localhost:8100';
         this.ws = null;
+        this.voiceHandler = null;
         this.ping = 0;
         this.connected = false;
         this.errCallback = errCallback;
         this.showWaitingScreen = showWaitingScreen;
         // number for the setInterval that sends data over fixed intervals
         this.ticker = -1;
+    }
+
+    onConnected() {
+        // initiate voice connection to peers
+        this.startTick();
+        this.voiceHandler = new RTCConnectionHandler(this.ws, () => {
+            this.ws.send(JSON.stringify({
+                type: 'Voice',
+                action: 'Join'
+            }));
+        });
     }
 
     /**
@@ -61,6 +75,7 @@ export class Socket {
                     this.showWaitingScreen && this.showWaitingScreen(false);
                 }
             }
+            else if (data.type === 'Voice') this.voiceHandler.handleConnectionData(data);
             else if (data.type === 'GameState') {
                 this.ping = Date.now() - data['time'];
                 this.game.unpack(data);
@@ -68,8 +83,7 @@ export class Socket {
             else if (data.type === 'Auth') {
                 if (data.success) {
                     this.connected = true;
-                    // initiate voice connection to peers
-                    this.startTick();
+                    this.onConnected();
                 }
                 else {
                     // auth failed, handle appropriately
@@ -84,6 +98,7 @@ export class Socket {
 
     disconnect() {
         this.stopTick();
+        this.voiceHandler.terminateConnections();
         this.ws.close(1000, 'User closed the app');
     }
 

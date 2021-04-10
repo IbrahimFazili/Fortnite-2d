@@ -105,18 +105,18 @@ class Stage {
 		this.gameID = this.genGameId();
 		this.spawner = new Spawner(this, 1, 0);
 		this.waitingQueue.forEach((user) => {
-			console.log(`spawning ${user.username}`);
-			this.createNewPlayer(user.username, user.token);
+			console.log(`spawning ${user}`);
+			this.createNewPlayer(user);
 		});
 		this.waitingQueue = [];
-		this.createNewPlayer(lastPlayer.label, lastPlayer.token);
+		this.createNewPlayer(lastPlayer.label);
 
 		this.onStart();
 	}
 
-	createNewPlayer(username, token) {
+	createNewPlayer(username) {
 		if (this.killed.findIndex(element => element === username) === - 1) {
-			this.spawner.spawnPlayer(username, token);
+			this.spawner.spawnPlayer(username);
 
 			return {
 				success: true,
@@ -124,7 +124,7 @@ class Stage {
 			}
 		}
 
-		this.waitingQueue.push({ 'username': username, 'token': token });
+		this.waitingQueue.push(username);
 		return {
 			success: true,
 			status: 'waiting'

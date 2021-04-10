@@ -14,7 +14,7 @@ class Player extends DynamicObjects {
 	 * @param radius {Number}
 	 * @param username {String}
 	 */
-	constructor(game, position, health, color, username, regenEnabled = true, token = null) {
+	constructor(game, position, health, color, username, regenEnabled = true) {
 		super(game, position, health, color, false, username);
 		this.radius = Player.PLAYER_SIZE;
 		this.center = this.position;
@@ -26,9 +26,7 @@ class Player extends DynamicObjects {
 		this._regenInterval = -1;
 		this.dir = new Pair(0, 0);
 		this._fireInterval = -1;
-		this.scoreTracker = new ScoreTracker(this.label, token, this.game.gameID);
-		// player's jwt token to submit scores
-		this.token = token;
+		this.scoreTracker = new ScoreTracker(this.label, this.game.gameID);
 	}
 
 	setCenter() { this.center = this.position; }

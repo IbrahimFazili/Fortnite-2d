@@ -1,11 +1,10 @@
-const { reportScore } = require("../APIHandler");
+const { APIHandler } = require("../APIHandler");
 
 class ScoreTracker {
-    constructor(username, token, gameID) {
+    constructor(username, gameID) {
         this.kills = 0;
         this.score = 0;
         this.username = username;
-        this.token = token;
         this.gameID = gameID;
     }
 
@@ -20,7 +19,7 @@ class ScoreTracker {
 
     reportScore(win) {
         // report score to API (score, kills, win, gameID)
-        reportScore(this.score, this.kills, win, this.gameID, this.token);
+        APIHandler.reportScore(this.score, this.kills, win, this.gameID, this.username);
     }
 }
 

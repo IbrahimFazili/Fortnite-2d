@@ -47,15 +47,13 @@ function _handleJoinAction(ws, clients) {
  */
 function _handleICEcandidates(ws, clients, data) {
     const peerName = data.peerName;
-    const iceCandidates = data.ice_candidate;
-
-    console.log("relaying ICE candidate to [" + peerName + "] ", iceCandidates);
+    const iceCandidate = data.iceCandidate;
 
     clients[peerName].ws.send(JSON.stringify({
         type: 'Voice',
         action: 'ICEcandidates',
         peerName: ws.username,
-        iceCandidates,
+        iceCandidate,
     }));
 }
 
@@ -71,7 +69,6 @@ function _handleSDPAction(ws, clients, data) {
     const sessionDescription = data.sessionDescription;
     const clientWS = clients[peerName].ws;
 
-    console.log(`sending session description from ${ws.username} to ${peerName}`);
     clientWS.send(JSON.stringify({
         type: 'Voice',
         action: 'SessionDescription',

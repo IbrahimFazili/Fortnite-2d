@@ -3,7 +3,7 @@ const { Stage } = require('./models/Game');
 const http = require('http');
 const app = require('express')();
 const WebSocket = require('ws');
-const { verifyUserToken } = require('./APIHandler');
+const { APIHandler } = require('./APIHandler');
 const { handleVoiceChatConnectionAttempt } = require('./VoiceChatWSRoutes');
 
 const server = http.createServer(app);
@@ -13,6 +13,7 @@ const TICK_RATE = 60;
 const SIMULATION_RATE = 60;
 const clients = {};
 const game = new Stage(onGameStart);
+APIHandler.setClientsMap(clients);
 
 wss.on('connection', (ws) => {
 
@@ -30,13 +31,14 @@ wss.on('connection', (ws) => {
             game.updateActor(data);
         }
         else if (data.type === 'Auth') {
+            if (data.username in clients) return;
             // verify if the user's token is valid
             if (!data.token) {
                 sendErrAndClose(ws, 'Authentication failed, missing auth token');
                 return;
             }
 
-            const username = await verifyUserToken(data.token);
+            const username = await APIHandler.verifyUserToken(data.token);
             if (!username) {
                 sendErrAndClose(ws, 'Authentication failed, invalid auth token');
                 return;
@@ -49,10 +51,11 @@ wss.on('connection', (ws) => {
 
             clients[data.username] = {
                 ws,
+                token: data.token,
                 mapSent: false
             };
             ws.username = data.username;
-            const status = game.createNewPlayer(data.username, data.token);
+            const status = game.createNewPlayer(data.username);
             if (status.status === 'waiting') {
                 ws.send(JSON.stringify({
                     type: 'PlayerState',
